@@ -5,6 +5,7 @@ import { useSettings } from '../store/settings'
 import { useQueue, useToast, useIslandPrefs } from '../store/ui'
 import { useAllSummaries, useIndex } from '../data/useData'
 import { useLibrary } from '../store/library'
+import { useAuth, setLoginOpen } from '../store/auth'
 import Segmented from './Segmented'
 import { IPlus, IExpand, ICollapse, ISearch, ISystem, ISun, IMoon, ITrash } from './Icons'
 
@@ -34,6 +35,7 @@ export default function Island({ open, setOpen }) {
   const nav = useNavigate()
   const say = useToast((s) => s.say)
   const { items, sync, add, remove, setSync } = useQueue()
+  const session = useAuth((s) => s.session)
   const { wide, square, toggle } = useIslandPrefs()
   const { theme, lang, setTheme, setLang } = useSettings()
   const [url, setUrl] = useState('')
@@ -76,7 +78,8 @@ export default function Island({ open, setOpen }) {
       return
     }
     if (dup) { say(t(dup)); box.current.animate([{ translate: '0' }, { translate: '-6px' }, { translate: '6px' }, { translate: '0' }], { duration: 280 }); return }
-    add(url.trim(), 'add', { title: prev.title, channel: prev.channel, vid: prev.id }); setUrl(''); say(t('isl.queued'))
+    add(url.trim(), 'add', { title: prev.title, channel: prev.channel, vid: prev.id }); setUrl('')
+    if (!session) { say(t('isl.needLogin')); setLoginOpen(true) } else say(t('isl.queued'))
   }
 
   const lq = q.trim().toLowerCase()
@@ -105,12 +108,13 @@ export default function Island({ open, setOpen }) {
           </div></div>
 
           <div className="isl-h">{t('isl.queue')}</div>
+          {!session && <div className="isl-warn"><span>{t('isl.nologin')}</span><button className="tap" onClick={(e) => { e.stopPropagation(); setLoginOpen(true) }}>{t('login.go')}</button></div>}
           {items.length ? items.map((it) => (
             <div key={it.id} className={`isl-q ${confirm === it.id ? 'conf' : ''}`}>
               <div className="rc">
                 {it.vid ? <img src={`https://i.ytimg.com/vi/${it.vid}/default.jpg`} alt="" /> : <span className={`sync ${it.status === 'processing' ? 'busy' : it.status === 'done' ? 'ok' : 'off'}`} />}
                 <div className="qt"><b>{it.kind && it.kind !== 'add' ? `${t(`q.${it.kind}`)} · ` : ''}{it.title || shortUrl(it.url)}</b><small>{shortUrl(it.url)}</small></div>
-                <span className="st">{t(`st.${it.status}`)}</span>
+                <span className="st">{it.pending ? t('st.local') : it.status === 'processing' && it.stage ? t(`stage.${it.stage}`) : t(`st.${it.status}`)}</span>
                 {it.status === 'queued' && <button className="trash" title={t('m.delete')} onClick={() => setConfirm(confirm === it.id ? null : it.id)}><ITrash /></button>}
               </div>
               <button className="del" onClick={() => { remove(it.id); setConfirm(null) }}>{t('isl.confirm')}</button>
@@ -133,7 +137,7 @@ export default function Island({ open, setOpen }) {
 
         <div className="isl-bar">
           <button className="isl-main" onClick={(e) => { e.stopPropagation(); setOpen(!open) }}><IPlus />{t('addVideo')}</button>
-          <span className={`sync ${sync}`} title={t(`sync.${sync}`)} />
+          <span className={`sync ${sync}`} title={t(`sync.${sync}`)} role={sync === 'nologin' ? 'button' : undefined} onClick={sync === 'nologin' ? (e) => { e.stopPropagation(); setLoginOpen(true) } : undefined} />
           <button className={`isl-btn ${square ? 'on' : ''}`} title={t('isl.corners')} onClick={(e) => { e.stopPropagation(); toggle('square') }}>
             <span className={`shape sq ${square ? 'off' : ''}`} /><span className={`shape round ${square ? '' : 'off'}`} />
           </button>

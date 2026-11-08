@@ -5,6 +5,16 @@ const idx = { uk: 0, ru: 1, en: 2 }
 
 // key: [украинский, русский, английский]
 const K = {
+  version: ['версія', 'версия', 'version'],
+  'login.none': ['не увійшли', 'не вошли', 'not signed in'],
+  'stage.published': ['публікується', 'публикуется', 'publishing'],
+  'stage.summary': ['пишеться конспект', 'пишется конспект', 'writing notes'],
+  'stage.waiting-summary': ['чекає конспект', 'ждёт конспект', 'waiting for notes'],
+  'stage.download': ['завантажується', 'скачивается', 'downloading'],
+  'st.local': ['не відправлено', 'не отправлено', 'not sent'],
+  'isl.needLogin': ['Увійдіть, щоб відправити посилання', 'Войдите, чтобы отправить ссылку', 'Sign in to send the link'],
+  'isl.nologin': ['Ви не увійшли: посилання не дійдуть до ноутбука', 'Вы не вошли: ссылки не дойдут до ноутбука', 'Not signed in: links won’t reach the laptop'],
+  'sync.nologin': ['Ви не увійшли — дані лише на цьому пристрої', 'Вы не вошли — данные только на этом устройстве', 'Not signed in — data stays on this device'],
   return: ['Повернутися на сторінку', 'Вернуться на страницу', 'Back to the page'],
   'pend.text': ['Субтитри й кадри вже завантажено. Коли Claude напише конспект, тут з’являться головне, інструкції та терміни.', 'Субтитры и кадры уже загружены. Когда Claude напишет конспект, здесь появятся главное, инструкции и термины.', 'Subtitles and frames are downloaded. Once Claude writes the notes, the summary, guides and terms will appear here.'],
   'pend.title': ['Конспект ще готується', 'Конспект ещё готовится', 'Notes are on the way'],

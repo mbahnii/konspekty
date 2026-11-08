@@ -57,12 +57,13 @@ async function syncQueue() {
   const mine = cur.items.filter((x) => x.pending && !pending.some((p) => p.id === x.id))   // добавлено, пока шёл запрос
   useQueue.setState({
     removed: cur.removed.filter((id) => !q.removed.includes(id)),
-    items: [...data.map((r) => { let n = {}; try { n = JSON.parse(r.note) ?? {} } catch { /* ignore */ } return { id: r.id, url: r.url, kind: r.kind, status: r.status, at: Date.parse(r.created_at), title: n.title, channel: n.channel, vid: n.vid } }), ...mine],
+    items: [...data.map((r) => { let n = {}; try { n = JSON.parse(r.note) ?? {} } catch { /* ignore */ } return { id: r.id, url: r.url, kind: r.kind, status: r.status, stage: n.stage, at: Date.parse(r.created_at), title: n.title, channel: n.channel, vid: n.vid } }), ...mine],
   })
 }
 
 export async function syncNow() {
-  if (!user() || !navigator.onLine) { if (!navigator.onLine) setSync('off'); return }
+  if (!user()) { setSync('nologin'); return }            // без входа данные остаются только на этом устройстве
+  if (!navigator.onLine) { setSync('off'); return }
   if (running) { again = true; return }
   running = true; setSync('busy')
   try { await syncKv(); await syncQueue(); setSync('ok') }
@@ -76,7 +77,8 @@ export function initSync() {
     spec.store.subscribe(() => { if (applying) return; (meta[key] ??= {}).dirty = true; saveMeta(); schedule() })
   }
   useQueue.subscribe((s, prev) => { if (s.items !== prev.items || s.removed !== prev.removed) { if (s.items.some((x) => x.pending) || s.removed.length) schedule() } })
-  useAuth.subscribe((s, prev) => { if (s.session?.user?.id !== prev.session?.user?.id) { if (s.session) schedule(100); else setSync('ok') } })
+  useAuth.subscribe((s, prev) => { if (s.session?.user?.id !== prev.session?.user?.id) { if (s.session) schedule(100); else setSync('nologin') } })
+  useAuth.subscribe((s, prev) => { if (s.ready && !prev.ready && !s.session) setSync('nologin') })
   addEventListener('online', () => schedule(100))
   addEventListener('focus', () => schedule(200))
   document.addEventListener('visibilitychange', () => { if (!document.hidden) schedule(200) })

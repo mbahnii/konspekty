@@ -5,8 +5,12 @@ import { VitePWA } from 'vite-plugin-pwa'
 // На GitHub Pages сайт живёт по адресу /konspekty/
 const base = process.env.GITHUB_ACTIONS ? '/konspekty/' : '/'
 
+// Время сборки — видно в меню настроек, чтобы сравнить версию на телефоне и ноутбуке
+const BUILD = new Date().toLocaleString('uk-UA', { timeZone: 'Europe/Berlin', day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })
+
 export default defineConfig({
   base,
+  define: { __BUILD__: JSON.stringify(BUILD) },
   plugins: [
     react(),
     VitePWA({

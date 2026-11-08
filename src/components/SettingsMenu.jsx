@@ -18,5 +18,6 @@ export function useSettingsMenu() {
     ...Object.entries(LANGS).map(([k, v]) => ({ tick: lang === k, label: v, onSelect: () => setLang(k) })),
     '-',
     { icon: <ICloud />, label: session ? t('login.menuOn') : t('login.menuOff'), onSelect: () => setLoginOpen(true) },
+    { header: (session ? session.user.email : t('login.none')) + ' · ' + t('version') + ' ' + __BUILD__ },
   ], { alignRight: true }) }
 }

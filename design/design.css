@@ -561,3 +561,9 @@ a.tcard:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(0,0,0,.
   .isl-scroll { max-height: 55vh; }
   main { padding-bottom: 80px; }
 }
+
+/* Не вошли: серая точка (нажимается — открывает вход) и плашка в очереди */
+.sync.nologin { background: var(--text-3); box-shadow: 0 0 0 2px color-mix(in srgb, var(--warning) 70%, transparent); cursor: pointer; }
+.isl-warn { display: flex; align-items: center; gap: var(--s3); padding: 8px 10px; margin-bottom: 6px; border-radius: 10px; background: color-mix(in srgb, var(--warning) 22%, transparent); font-size: var(--fs-cap); line-height: 1.35; }
+.isl-warn span { flex: 1; }
+.isl-warn button { flex: none; height: 28px; padding: 0 12px; border-radius: 8px; background: var(--accent); color: #fff; font-weight: 600; font-size: var(--fs-cap); }
