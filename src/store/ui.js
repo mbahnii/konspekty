@@ -21,13 +21,13 @@ export const useIslandPrefs = create(persist((set) => ({ wide: false, square: fa
 export const useQueue = create(
   persist(
     (set, get) => ({
-      items: [],              // { url, kind: add | reprocess | delete, status: queued | processing | done, at }
+      items: [],              // { id, url, kind: add | reprocess | delete, status: queued | processing | done | error, at, pending }
+      removed: [],            // id, которые надо удалить в облаке
       sync: 'ok',             // ok | busy | off
-      add: (url, kind = 'add') => { set({ items: [...get().items, { url, kind, status: 'queued', at: Date.now() }] }); get().flash() },
-      remove: (i) => { set({ items: get().items.filter((_, j) => j !== i) }); get().flash() },
-      flash: () => { set({ sync: 'busy' }); setTimeout(() => set({ sync: navigator.onLine ? 'ok' : 'off' }), 1600) },
+      add: (url, kind = 'add') => set({ items: [...get().items, { id: crypto.randomUUID(), url, kind, status: 'queued', at: Date.now(), pending: true }] }),
+      remove: (id) => set({ items: get().items.filter((x) => x.id !== id), removed: [...get().removed, id] }),
       setSync: (sync) => set({ sync }),
     }),
-    { name: 'konspekty-queue', storage, partialize: (s) => ({ items: s.items }) },
+    { name: 'konspekty-queue', version: 2, migrate: () => ({ items: [], removed: [] }), storage, partialize: (s) => ({ items: s.items, removed: s.removed }) },
   ),
 )

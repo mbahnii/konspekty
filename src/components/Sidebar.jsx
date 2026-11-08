@@ -2,10 +2,11 @@ import { NavLink } from 'react-router-dom'
 import { useSettings } from '../store/settings'
 import { useT, LANGS } from '../i18n'
 import { useMenu } from './Menu'
+import { useAuth, setLoginOpen } from '../store/auth'
 import { useVideoMenu } from './VideoMenu'
 import { useVideos, tint } from '../lib/videos'
 import { useTopicsCount, useLaterCount } from '../data/aggregate'
-import { IMore, ISidebar, IGear, IBook, IBookmark, ICheckSm, IPlaySm, IHourglass, IStack, IPlus, IPin } from './Icons'
+import { ICloud, IMore, ISidebar, IGear, IBook, IBookmark, ICheckSm, IPlaySm, IHourglass, IStack, IPlus, IPin } from './Icons'
 
 const Tile = ({ color, children, lg }) => <span className={`tile ${lg ? 'lg' : ''}`} style={{ '--tile': color }}>{children}</span>
 
@@ -17,6 +18,7 @@ export default function Sidebar({ onAdd, onPick }) {
   const topics = useTopicsCount()
   const later = useLaterCount()
   const { theme, lang, setTheme, setLang, toggleSidebar, sidebarCollapsed } = useSettings()
+  const session = useAuth((s) => s.session)
   const learned = videos.filter((v) => v.learned).length
 
   const settings = (e) => { e.stopPropagation(); menu.open(e.currentTarget, [
@@ -25,6 +27,8 @@ export default function Sidebar({ onAdd, onPick }) {
     '-',
     { header: t('language') },
     ...Object.entries(LANGS).map(([k, v]) => ({ tick: lang === k, label: v, onSelect: () => setLang(k) })),
+    '-',
+    { icon: <ICloud />, label: session ? t('login.menuOn') : t('login.menuOff'), onSelect: () => setLoginOpen(true) },
   ]) }
   const link = ({ isActive }) => `row tap ${isActive ? 'active' : ''}`
 

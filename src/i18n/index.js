@@ -5,6 +5,17 @@ const idx = { uk: 0, ru: 1, en: 2 }
 
 // key: [украинский, русский, английский]
 const K = {
+  'login.signout': ['Вийти', 'Выйти', 'Sign out'],
+  'login.out': ['Ви вийшли', 'Вы вышли', 'Signed out'],
+  'login.ok': ['Синхронізація ввімкнена', 'Синхронизация включена', 'Sync enabled'],
+  'login.bad': ['Невірний email або пароль', 'Неверный email или пароль', 'Wrong email or password'],
+  'login.go': ['Увійти', 'Войти', 'Sign in'],
+  'login.pass': ['Пароль', 'Пароль', 'Password'],
+  'login.as': ['Ви увійшли як {email}', 'Вы вошли как {email}', 'Signed in as {email}'],
+  'login.sub': ['Увійдіть, щоб відмітки й черга були однакові на телефоні й ноутбуці.', 'Войдите, чтобы отметки и очередь были одинаковые на телефоне и ноутбуке.', 'Sign in to share progress and queue between your phone and laptop.'],
+  'login.title': ['Синхронізація', 'Синхронизация', 'Sync'],
+  'login.menuOn': ['Синхронізація ввімкнена', 'Синхронизация включена', 'Sync is on'],
+  'login.menuOff': ['Увійти для синхронізації', 'Войти для синхронизации', 'Sign in to sync'],
   'later.empty': ['Тут з’являться теми, відкладені «на потім».', 'Здесь появятся темы, отложенные «на потом».', 'Postponed topics will show up here.'],
   'later.sub': ['Те, що варто вивчити пізніше, з усіх відео.', 'То, что стоит изучить позже, из всех видео.', 'Things to learn later, from all videos.'],
   'learned.progress': ['У процесі', 'В процессе', 'In progress'],

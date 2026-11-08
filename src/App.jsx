@@ -10,7 +10,10 @@ import Video from './pages/Video'
 import Topics from './pages/Topics'
 import Learned from './pages/Learned'
 import Later from './pages/Later'
+import LoginModal from './components/LoginModal'
 import { useHoverHighlight } from './lib/useHoverHighlight'
+import { initAuth } from './store/auth'
+import { initSync } from './lib/sync'
 
 export default function App() {
   const { theme, lang, sidebarCollapsed } = useSettings()
@@ -18,6 +21,7 @@ export default function App() {
   const [sideOpen, setSideOpen] = useState(false)
   const loc = useLocation()
   useHoverHighlight()
+  useEffect(() => { initAuth(); initSync() }, [])
 
   useEffect(() => {
     const el = document.documentElement
@@ -43,6 +47,7 @@ export default function App() {
         </Routes>
       </div>
       <Island open={island} setOpen={setIsland} />
+      <LoginModal />
       <Toast />
     </MenuProvider>
   )

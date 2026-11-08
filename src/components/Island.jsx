@@ -60,12 +60,12 @@ export default function Island({ open, setOpen }) {
             <button className="go tap" onClick={submit}>{t('isl.go')}</button>
           </div>
           <div className="isl-h">{t('isl.queue')}</div>
-          {items.length ? items.map((it, i) => (
-            <div key={i} className="isl-row">
+          {items.length ? items.map((it) => (
+            <div key={it.id} className="isl-row">
               <span className={`sync ${it.status === 'processing' ? 'busy' : it.status === 'done' ? 'ok' : 'off'}`} />
               <span className="nm">{it.kind && it.kind !== 'add' ? `${t(`q.${it.kind}`)} · ` : ''}{it.url}</span>
               <span className="st">{t(`st.${it.status}`)}</span>
-              {it.status === 'queued' && <button className="isl-btn" style={{ width: 28, height: 28, background: 'none' }} title={t('m.delete')} onClick={() => remove(i)}><ITrash /></button>}
+              {it.status === 'queued' && <button className="isl-btn" style={{ width: 28, height: 28, background: 'none' }} title={t('m.delete')} onClick={() => remove(it.id)}><ITrash /></button>}
             </div>
           )) : <div className="isl-row"><span className="st" style={{ margin: 0 }}>{t('isl.empty')}</span></div>}
           <div className="isl-h">{t('isl.search')}</div>
