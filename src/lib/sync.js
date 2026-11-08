@@ -3,6 +3,7 @@ import { useAuth } from '../store/auth'
 import { useProgress } from '../store/progress'
 import { useLibrary } from '../store/library'
 import { useQueue } from '../store/ui'
+import { refreshData } from '../data/useData'
 
 // Синхронизация с облаком (Supabase). Работает только если вы вошли; без входа всё хранится на устройстве.
 // Правило для отметок: если на этом устройстве есть неотправленные изменения — побеждают они,
@@ -54,11 +55,14 @@ async function syncQueue() {
   const { data, error } = await supabase.from('queue').select('id,url,kind,status,note,created_at').order('created_at')
   if (error) throw error
   const cur = useQueue.getState()
+  const wasDone = new Set(cur.items.filter((x) => x.status === 'done').map((x) => x.id))
+  const newlyDone = data.some((r) => r.status === 'done' && !wasDone.has(r.id))
   const mine = cur.items.filter((x) => x.pending && !pending.some((p) => p.id === x.id))   // добавлено, пока шёл запрос
   useQueue.setState({
     removed: cur.removed.filter((id) => !q.removed.includes(id)),
     items: [...data.map((r) => { let n = {}; try { n = JSON.parse(r.note) ?? {} } catch { /* ignore */ } return { id: r.id, url: r.url, kind: r.kind, status: r.status, stage: n.stage, at: Date.parse(r.created_at), title: n.title, channel: n.channel, vid: n.vid } }), ...mine],
   })
+  if (newlyDone) refreshData()          // видео опубликовано — показать его в списке сразу
 }
 
 export async function syncNow() {
