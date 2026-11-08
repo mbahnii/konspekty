@@ -1,6 +1,9 @@
 // Человеческие названия тем (slug из summary.json → uk / ru / en)
 const N = {
   setup: ['Встановлення і старт', 'Установка и старт', 'Setup'],
+  psychology: ['Психологія', 'Психология', 'Psychology'],
+  communication: ['Комунікація', 'Коммуникация', 'Communication'],
+  boundaries: ['Особисті межі', 'Личные границы', 'Boundaries'],
   'claude-code': ['Claude Code', 'Claude Code', 'Claude Code'],
   automation: ['Автоматизація', 'Автоматизация', 'Automation'],
   career: ['Кар’єра в IT', 'Карьера в IT', 'Career in IT'],
