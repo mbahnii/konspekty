@@ -1,0 +1,136 @@
+/* ==========================================================================
+   Дизайн-система «Конспекты»
+   Основа: ваш проект todo-main + Apple HIG + Telegram.
+   Все цвета, размеры и анимации задаются здесь как переменные (токены),
+   компоненты используют только их — так светлая/тёмная тема и правки
+   стиля делаются в одном месте.
+   ========================================================================== */
+
+:root {
+  /* ---------- Цвета: светлая тема ---------- */
+  --bg: #f5f4f6;              /* фон приложения (ваш $gray1) */
+  --surface: #ffffff;         /* карточки, панели */
+  --surface-2: #f5f4f6;       /* строки-кнопки внутри карточек */
+  --surface-hover: #efeef1;
+  --text: #010001;            /* основной текст (ваш $black1) */
+  --text-2: #6e6e73;          /* второстепенный */
+  --text-3: #a1a1a6;          /* подсказки, неактивное */
+  --separator: rgba(0, 0, 0, 0.06);
+  --accent: #0760fb;          /* ваш $blue1 */
+  --accent-soft: #f0f4ff;     /* ваш $blue2 */
+  --accent-text: #0760fb;
+  --success: #34c759;         /* «изучено» */
+  --warning: #ff9f0a;
+  --danger: #ff3b30;
+  --material: rgba(255, 255, 255, 0.6);    /* «матовое стекло» всплывающих меню */
+  --hover-ring: rgba(7, 96, 251, 0.35);
+  --island: #010001;          /* чёрная «пилюля» */
+  --island-text: #ffffff;
+  --island-key: rgba(255, 255, 255, 0.14);
+  --skip: repeating-linear-gradient(135deg, #e6e5e9 0 4px, #f0eff2 4px 8px);
+  --shadow-island: 0 10px 50px rgba(0, 0, 0, 0.24);
+  --shadow-pop: 0 12px 40px rgba(0, 0, 0, 0.12), 0 0 0 1px rgba(0, 0, 0, 0.04);
+  --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.03);
+  color-scheme: light;
+
+  /* ---------- Шрифт ---------- */
+  --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", "Segoe UI", Roboto, sans-serif;
+  --font-display: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", "Segoe UI", Roboto, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+
+  /* Шкала текста (по Apple HIG) */
+  --fs-large: 28px;   /* заголовок страницы */
+  --fs-title: 20px;   /* заголовок раздела */
+  --fs-head: 16px;    /* заголовок карточки */
+  --fs-body: 15px;    /* основной текст */
+  --fs-sub: 13px;     /* подписи, чипы */
+  --fs-cap: 11px;     /* мелкие метки */
+
+  /* ---------- Отступы (сетка 4px) ---------- */
+  --s1: 4px; --s2: 6px; --s3: 8px; --s4: 12px; --s5: 16px; --s6: 24px; --s7: 32px; --s8: 48px;
+
+  /* ---------- Скругления ---------- */
+  --r-sm: 9px;     /* строки, чипы (ваш border-mini1) */
+  --r-md: 12px;    /* кнопки, поля */
+  --r-lg: 16px;    /* карточки */
+  --r-xl: 22px;    /* панели */
+  --r-pill: 999px; /* пилюли */
+
+  /* ---------- Размеры ---------- */
+  --row: 44px;       /* минимальная высота нажимаемой строки (HIG) */
+  --sidebar: 268px;
+  --sidebar-mini: 72px; /* свёрнутая панель: только иконки */
+  --rail: 248px;        /* правая колонка «Содержание» на широких экранах */
+  --content: 760px;     /* ширина колонки текста */
+  --shell: 1400px;      /* максимальная ширина всего приложения */
+
+  /* ---------- Движение ---------- */
+  --ease-out: cubic-bezier(0.32, 0.72, 0, 1);        /* мягкая iOS-кривая — переходы */
+  --ease-spring: cubic-bezier(0.34, 1.12, 0.64, 1);  /* очень лёгкий перелёт */
+  --ease-island: cubic-bezier(0.32, 0.72, 0, 1);      /* пилюля: плавно, без дёрганья */
+  --blur: saturate(180%) blur(30px);   /* «матовое стекло» меню, шапки, пилюли */
+  --ease-pop: cubic-bezier(0.34, 1.56, 0.64, 1);   /* пружинка: всплывающие меню и подсказки */
+  --island-glass: rgba(1, 0, 1, 0.86);
+  --t-fast: 140ms;  /* нажатие, наведение */
+  --t-mid: 260ms;   /* вкладки, панели */
+  --t-slow: 420ms;  /* смена экранов */
+}
+
+/* ---------- Тёмная тема ---------- */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #000000;
+    --surface: #1c1c1e;
+    --surface-2: #2c2c2e;
+    --surface-hover: #323236;
+    --text: #f5f5f7;
+    --text-2: #98989f;
+    --text-3: #636366;
+    --separator: rgba(255, 255, 255, 0.08);
+    --accent: #2f7bff;
+    --accent-soft: rgba(47, 123, 255, 0.16);
+    --accent-text: #6ea2ff;
+    --success: #30d158;
+    --island: #2c2c2e;
+    --island-glass: rgba(72, 72, 76, 0.6);
+    --island-text: #f5f5f7;
+    --island-key: rgba(255, 255, 255, 0.12);
+    --skip: repeating-linear-gradient(135deg, #2a2a2d 0 4px, #222225 4px 8px);
+    --shadow-island: 0 10px 50px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.08);
+    --shadow-pop: 0 12px 40px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.08);
+    --shadow-card: none;
+    --material: rgba(44, 44, 46, 0.6);
+    --danger: #ff453a;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #000000;
+  --surface: #1c1c1e;
+  --surface-2: #2c2c2e;
+  --surface-hover: #323236;
+  --text: #f5f5f7;
+  --text-2: #98989f;
+  --text-3: #636366;
+  --separator: rgba(255, 255, 255, 0.08);
+  --accent: #2f7bff;
+  --accent-soft: rgba(47, 123, 255, 0.16);
+  --accent-text: #6ea2ff;
+  --success: #30d158;
+  --island: #2c2c2e;
+  --island-glass: rgba(72, 72, 76, 0.6);
+  --island-text: #f5f5f7;
+  --island-key: rgba(255, 255, 255, 0.12);
+  --skip: repeating-linear-gradient(135deg, #2a2a2d 0 4px, #222225 4px 8px);
+  --shadow-island: 0 10px 50px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.08);
+  --shadow-pop: 0 12px 40px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.08);
+  --shadow-card: none;
+  --material: rgba(44, 44, 46, 0.6);
+  --danger: #ff453a;
+  color-scheme: dark;
+}
+
+/* Если в системе включено «Уменьшить движение» — анимации почти мгновенные */
+@media (prefers-reduced-motion: reduce) {
+  :root { --t-fast: 1ms; --t-mid: 1ms; --t-slow: 1ms; }
+}

@@ -1,0 +1,3 @@
+/* Только то, чего нет в design.css */
+.li.flash { background: var(--accent-soft); }
+a.row { color: inherit; }
