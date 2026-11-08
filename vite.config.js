@@ -33,7 +33,7 @@ export default defineConfig({
         navigateFallback: null,
         runtimeCaching: [
           // конспекты: сначала свежие данные из сети (офлайн — сохранённые)
-          { urlPattern: /\/data\/.*\.json(\?.*)?$/, handler: 'NetworkFirst', options: { cacheName: 'data', networkTimeoutSeconds: 4, matchOptions: { ignoreSearch: true } } },   // свежее из сети, из кэша — только офлайн
+          { urlPattern: /\/data\/.*\.json(\?.*)?$/, handler: 'NetworkFirst', options: { cacheName: 'data', networkTimeoutSeconds: 15, matchOptions: { ignoreSearch: true } } },   // свежее из сети, из кэша — только офлайн
           // кадры не меняются — берём из кэша
           { urlPattern: /\/data\/.*\.(webp|jpg)$/, handler: 'CacheFirst', options: { cacheName: 'frames', expiration: { maxEntries: 5000 } } },
           { urlPattern: /^https:\/\/i\.ytimg\.com\//, handler: 'CacheFirst', options: { cacheName: 'covers', expiration: { maxEntries: 300 } } },

@@ -56,14 +56,36 @@ async function syncQueue() {
   if (error) throw error
   const cur = useQueue.getState()
   const wasDone = new Set(cur.items.filter((x) => x.status === 'done').map((x) => x.id))
-  const newlyDone = data.some((r) => r.status === 'done' && !wasDone.has(r.id))
+  const doneNow = data.filter((r) => r.status === 'done' && !wasDone.has(r.id))
+  const newlyDone = doneNow.length > 0
   const mine = cur.items.filter((x) => x.pending && !pending.some((p) => p.id === x.id))   // добавлено, пока шёл запрос
   useQueue.setState({
     removed: cur.removed.filter((id) => !q.removed.includes(id)),
     items: [...data.map((r) => { let n = {}; try { n = JSON.parse(r.note) ?? {} } catch { /* ignore */ } return { id: r.id, url: r.url, kind: r.kind, status: r.status, stage: n.stage, at: Date.parse(r.created_at), title: n.title, channel: n.channel, vid: n.vid } }), ...mine],
   })
-  if (newlyDone) refreshData()          // видео опубликовано — показать его в списке сразу
+  if (newlyDone) {                      // видео опубликовано — показать его в списке сразу
+    refreshData()
+    showWhenLive(doneNow.map((r) => { try { return JSON.parse(r.note)?.vid } catch { return null } }).filter(Boolean))
+  }
 }
+
+// GitHub может ещё пару секунд отдавать старый список. Проверяем, пока новые видео не появятся
+// (до ~1 минуты), и тогда ещё раз обновляем данные — без перезагрузки страницы.
+async function showWhenLive(vids) {
+  if (!vids.length) return
+  for (let i = 0; i < 12; i++) {
+    try {
+      const r = await fetch(`./data/index.json?t=${Date.now()}`, { cache: 'no-store' })
+      const ready = new Set((await r.json()).filter((v) => v.ready).map((v) => v.id))
+      if (vids.every((id) => ready.has(id))) { refreshData(); return }
+    } catch { /* сеть пропала — попробуем ещё */ }
+    await new Promise((res) => setTimeout(res, 5000))
+  }
+  refreshData()
+}
+
+// Пока что-то в работе — проверяем очередь часто, чтобы «готово» и новое видео появлялись сразу
+const busy = () => useQueue.getState().items.some((x) => x.status === 'queued' || x.status === 'processing')
 
 export async function syncNow() {
   if (!user()) { setSync('nologin'); return }            // без входа данные остаются только на этом устройстве
@@ -86,6 +108,7 @@ export function initSync() {
   addEventListener('online', () => schedule(100))
   addEventListener('focus', () => schedule(200))
   document.addEventListener('visibilitychange', () => { if (!document.hidden) schedule(200) })
-  setInterval(() => { if (!document.hidden) syncNow() }, 30000)
+  let tick = 0
+  setInterval(() => { tick++; if (!document.hidden && (busy() || tick % 6 === 0)) syncNow() }, 5000)   // в работе — раз в 5 с, иначе раз в 30 с
   if (user()) schedule(300)
 }
