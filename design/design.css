@@ -382,7 +382,7 @@ a.chip:hover, button.chip:hover { background: var(--surface-hover); color: var(-
   .island-dock { bottom: max(14px, env(safe-area-inset-bottom)); padding: 0 12px; }
   .island, .island.wide { --w: 196px; --r: 22px; }
   .island.square { --r: 12px; }
-  .island.open { --w: min(90vw, 400px); --r: 20px; }
+  .island.open { --w: clamp(260px, calc((100vw - 32px) * .8), 400px); --r: 20px; }   /* 80% ширины контента */
   .isl-bar { height: 44px; padding: 5px; gap: 4px; }
   .isl-main { height: 34px; padding: 0 8px; font-size: 13px; }
   .isl-btn { width: 34px; height: 34px; }
@@ -553,7 +553,7 @@ a.tcard:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(0,0,0,.
   .island-dock { bottom: 10px; }
   .island, .island.wide { --w: 196px; --r: 22px; }
   .island.square { --r: 12px; }
-  .island.open { --w: min(90vw, 400px); --r: 20px; }
+  .island.open { --w: clamp(260px, calc((100vw - 32px) * .8), 400px); --r: 20px; }   /* 80% ширины контента */
   .isl-bar { height: 44px; padding: 5px; gap: 4px; }
   .isl-main { height: 34px; padding: 0 8px; font-size: 13px; }
   .isl-btn { width: 34px; height: 34px; }
