@@ -10,6 +10,7 @@ import Segmented from '../components/Segmented'
 import Timeline from '../components/Timeline'
 import Rail from '../components/Rail'
 import Pending from './Pending'
+import BackButton from '../components/BackButton'
 import { useVideoMenu } from '../components/VideoMenu'
 import { useIndex } from '../data/useData'
 import { IChevDown, IMore, IPlay, IClock, IYt, ILink, IPrint, ICopy, IOk, ICheck, ISearch, IBack } from '../components/Icons'
@@ -98,7 +99,7 @@ export default function Video({ onBack }) {
         <div className="wrap">
           <div className="head">
             <div className="titles">
-              <div className="hello"><button className="back tap" onClick={onBack} aria-label={t('back')}><IBack /></button><span>{hello(t)} 👋</span></div>
+              <div className="hello"><BackButton onClick={onBack} /><span>{hello(t)} 👋</span></div>
               <h1>{meta.title}</h1>
             </div>
             <div className="head-actions">

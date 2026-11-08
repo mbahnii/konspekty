@@ -8,12 +8,13 @@ import { useSettingsMenu } from '../components/SettingsMenu'
 import VideoRow, { coverOf } from '../components/VideoRow'
 import { IBack, IBook, IBookmark, ICheckSm, IGear, IForward } from '../components/Icons'
 import { useNav } from '../store/nav'
+import BackButton from '../components/BackButton'
 
 export const PageHead = ({ title, sub, onBack }) => {
   const t = useT()
   return (
     <div className="head"><div className="titles">
-      <div className="hello"><button className="back tap" onClick={onBack} aria-label={t('back')}><IBack /></button><span>{hello(t)} 👋</span></div>
+      <div className="hello"><BackButton onClick={onBack} /><span>{hello(t)} 👋</span></div>
       <h1>{title}</h1>
       {sub && <p className="page-sub">{sub}</p>}
     </div></div>
