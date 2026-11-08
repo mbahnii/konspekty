@@ -41,6 +41,7 @@ const N = {
   'ai-basics': ['Основи ШІ', 'Основы ИИ', 'AI basics'],
   llm: ['Мовні моделі (LLM)', 'Языковые модели (LLM)', 'Language models (LLM)'],
   transformers: ['Трансформери', 'Трансформеры', 'Transformers'],
+  'landscape-design': ['Ландшафтний дизайн', 'Ландшафтный дизайн', 'Landscape design'],
   german: ['Німецька мова', 'Немецкий язык', 'German'],
   pronunciation: ['Вимова', 'Произношение', 'Pronunciation'],
   'language-learning': ['Вивчення мов', 'Изучение языков', 'Language learning'],
