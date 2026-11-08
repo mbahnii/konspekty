@@ -366,11 +366,12 @@ a.chip:hover, button.chip:hover { background: var(--surface-hover); color: var(-
   .shell, .shell.mini { grid-template-columns: minmax(0, 1fr); padding: 0 var(--s5); gap: 0; }
   .sidebar, .rail { display: none; }
   .head { flex-direction: column-reverse; gap: var(--s2); }
-  .head-actions { align-self: stretch; justify-content: flex-end; margin-bottom: -40px; position: relative; z-index: 2; }
-  .head .hello { padding-right: 120px; }
+  .head-actions { align-self: flex-end; margin-bottom: -40px; position: relative; z-index: 2; }   /* только по размеру кнопки — не накрывает «назад» */
+  .head .hello { padding-left: 46px; padding-right: 56px; }
   .sticky .seg button { padding: 0 var(--s3); }
   .seg .badge-n { display: none; }
-  .back { display: grid !important; }
+  /* «назад» плавает над страницей: под часами iPhone, всегда на виду и нажимается */
+  .back { display: grid !important; position: fixed; top: calc(env(safe-area-inset-top, 0px) + 10px); left: 16px; z-index: 70; }
   h1 { font-size: 24px; }
   .card { padding: var(--s5); }
   main { padding-bottom: 96px; }
