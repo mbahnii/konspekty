@@ -382,7 +382,7 @@ a.chip:hover, button.chip:hover { background: var(--surface-hover); color: var(-
   .island-dock { bottom: max(14px, env(safe-area-inset-bottom)); padding: 0 12px; }
   .island, .island.wide { --w: 196px; --r: 22px; }
   .island.square { --r: 12px; }
-  .island.open { --w: min(92vw, 420px); --r: 20px; }
+  .island.open { --w: min(90vw, 400px); --r: 20px; }
   .isl-bar { height: 44px; padding: 5px; gap: 4px; }
   .isl-main { height: 34px; padding: 0 8px; font-size: 13px; }
   .isl-btn { width: 34px; height: 34px; }
@@ -553,7 +553,7 @@ a.tcard:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(0,0,0,.
   .island-dock { bottom: 10px; }
   .island, .island.wide { --w: 196px; --r: 22px; }
   .island.square { --r: 12px; }
-  .island.open { --w: min(92vw, 420px); --r: 20px; }
+  .island.open { --w: min(90vw, 400px); --r: 20px; }
   .isl-bar { height: 44px; padding: 5px; gap: 4px; }
   .isl-main { height: 34px; padding: 0 8px; font-size: 13px; }
   .isl-btn { width: 34px; height: 34px; }
@@ -580,4 +580,10 @@ a.tcard:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(0,0,0,.
   .isl-q .rc { padding: 5px 6px; }
   .isl-q img { width: 42px; }
   .isl-seg button { height: 28px; min-width: 36px; padding: 0 8px; }
+}
+
+/* iPhone сам приближает страницу, если шрифт в поле ввода меньше 16px (из-за этого пилюля «на весь экран»).
+   На сенсорных экранах поля ввода — 16px, тогда приближения нет. */
+@media (hover: none), (pointer: coarse) {
+  input, textarea, select { font-size: 16px !important; }
 }
