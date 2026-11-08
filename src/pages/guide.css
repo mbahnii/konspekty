@@ -70,3 +70,8 @@
   .g-hero > *, .g-card, .g-media video, .g-foot { animation: none; }
   .g-glow i { animation: none; opacity: .4; }
 }
+
+/* Телефон: место слева под плавающую кнопку «назад» (как у приветствия на других страницах) */
+@media (max-width: 860px) {
+  .g-eyebrow { margin-left: 48px; }
+}
