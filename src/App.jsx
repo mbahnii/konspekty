@@ -11,6 +11,7 @@ import Topics from './pages/Topics'
 import Learned from './pages/Learned'
 import Later from './pages/Later'
 import LoginModal from './components/LoginModal'
+import BackButton from './components/BackButton'
 import { useHoverHighlight } from './lib/useHoverHighlight'
 import { initAuth } from './store/auth'
 import { useNav } from './store/nav'
@@ -59,6 +60,7 @@ export default function App() {
         </Routes>
       </div>
       <Island open={island} setOpen={setIsland} />
+      <BackButton visible={loc.pathname !== '/'} onClick={back} />
       <LoginModal />
       <Toast />
     </MenuProvider>

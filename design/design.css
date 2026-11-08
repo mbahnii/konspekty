@@ -24,7 +24,7 @@ svg.i { width: 18px; height: 18px; flex: none; stroke: currentColor; fill: none;
    ===================================================================== */
 .shell {
   --side-w: var(--sidebar);
-  max-width: var(--shell); margin: 0 auto; min-height: 100dvh; padding-top: env(safe-area-inset-top, 0px);
+  max-width: var(--shell); margin: 0 auto; min-height: 100dvh; 
   display: grid; grid-template-columns: var(--side-w) minmax(0, 1fr) var(--rail);
   gap: var(--s6); padding: 0 var(--s5);
   transition: grid-template-columns var(--t-slow) var(--ease-out);
@@ -127,7 +127,7 @@ a.chip:hover, button.chip:hover { background: var(--surface-hover); color: var(-
 .chip.accent:hover { background: color-mix(in srgb, var(--accent) 22%, transparent); color: var(--accent-text); }
 .chip svg.i { width: 14px; height: 14px; }
 
-.sticky { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; padding: var(--s3) var(--s3) var(--s2); margin: 0 calc(-1 * var(--s3));
+.sticky { position: sticky; top: 0; z-index: 5; padding: var(--s3) var(--s3) var(--s2); margin: 0 calc(-1 * var(--s3));
   background: color-mix(in srgb, var(--bg) 62%, transparent); -webkit-backdrop-filter: var(--blur); backdrop-filter: var(--blur); }
 .sticky .seg { background: var(--surface); box-shadow: var(--shadow-card), 0 0 0 1px var(--separator); overflow-x: auto; scrollbar-width: none; }
 .sticky .seg .thumb { background: var(--surface-2); box-shadow: none; }
@@ -371,7 +371,7 @@ a.chip:hover, button.chip:hover { background: var(--surface-hover); color: var(-
   .sticky .seg button { padding: 0 var(--s3); }
   .seg .badge-n { display: none; }
   /* «назад» плавает над страницей: под часами iPhone, всегда на виду и нажимается */
-  .back { display: grid !important; position: fixed; top: calc(env(safe-area-inset-top, 0px) + 10px); left: 16px; z-index: 70; }
+  .back { display: grid !important; position: fixed; top: 10px; left: 16px; z-index: 70; }
   h1 { font-size: 24px; }
   .card { padding: var(--s5); }
   main { padding-bottom: 96px; }
@@ -498,7 +498,7 @@ a.chip { transition: background-color 200ms var(--ease-out), color 200ms var(--e
 .isl-seg .thumb { position: absolute; border-radius: 9px; background: color-mix(in srgb, var(--island-text) 20%, transparent); transition: left 320ms var(--ease-out), width 320ms var(--ease-out), top 320ms var(--ease-out), height 320ms var(--ease-out); }
 .isl-seg .thumb.init { transition: none !important; }
 
-body::before { content: ""; position: fixed; top: 0; left: 0; right: 0; height: env(safe-area-inset-top, 0px); z-index: 60; background: color-mix(in srgb, var(--bg) 70%, transparent); -webkit-backdrop-filter: var(--blur); backdrop-filter: var(--blur); pointer-events: none; }
+body::before { content: ""; position: fixed; top: 0; left: 0; right: 0; height: 0; z-index: 60; background: color-mix(in srgb, var(--bg) 70%, transparent); -webkit-backdrop-filter: var(--blur); backdrop-filter: var(--blur); pointer-events: none; }
 /* текст в кнопках по центру */
 .modal-btn, .isl-link .go, .isl-q .del { display: grid; place-items: center; text-align: center; }
 .seg.scroll { overflow-x: auto; scrollbar-width: none; max-width: 100%; }
@@ -537,12 +537,27 @@ a.tcard:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(0,0,0,.
 
 /* Безопасная зона iPhone: часы, Dynamic Island, индикаторы не перекрывают контент.
    Стоит в конце файла с !important, потому что shorthand `padding` выше сбрасывал верхний отступ. */
-.shell, .shell.mini { padding-top: env(safe-area-inset-top, 0px) !important; }
 .m-head { padding-top: var(--s4); }
 .ret { width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; color: var(--accent-text); background: var(--material); -webkit-backdrop-filter: var(--blur); backdrop-filter: var(--blur); box-shadow: 0 0 0 1px var(--separator), var(--shadow-card); transition: transform var(--t-fast) var(--ease-out), background-color var(--t-fast) var(--ease-out); }
 .ret:active { transform: scale(.92); }
 .ret svg.i { width: 20px; height: 20px; stroke-width: 2.2; }
 .m-actions { display: flex; align-items: center; gap: var(--s3); }
 
-.back { animation: backIn 320ms var(--ease-out) both; }
-@keyframes backIn { from { opacity: 0; transform: scale(.85); } to { opacity: 1; transform: none; } }
+/* «назад» всегда в DOM: плавно появляется/исчезает, ничего не пересоздаётся и не прыгает */
+.back { opacity: 0; transform: scale(.85); pointer-events: none; transition: opacity 260ms var(--ease-out), transform 360ms var(--ease-out), background-color var(--t-fast) var(--ease-out); }
+.back.show { opacity: 1; transform: none; pointer-events: auto; }
+.back.show:active { transform: scale(.92); }
+
+/* Телефон в горизонтальном положении: маленькая высота — пилюля тоже компактная */
+@media (max-height: 520px) {
+  .island-dock { bottom: 10px; }
+  .island, .island.wide { --w: 196px; --r: 22px; }
+  .island.square { --r: 12px; }
+  .island.open { --w: 440px; --r: 20px; }
+  .isl-bar { height: 44px; padding: 5px; gap: 4px; }
+  .isl-main { height: 34px; padding: 0 8px; font-size: 13px; }
+  .isl-btn { width: 34px; height: 34px; }
+  .isl-btn.wide-btn { display: none; }
+  .isl-scroll { max-height: 55vh; }
+  main { padding-bottom: 80px; }
+}

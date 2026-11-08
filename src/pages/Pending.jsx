@@ -1,5 +1,4 @@
 import { useT } from '../i18n'
-import BackButton from '../components/BackButton'
 import { useMenu } from '../components/Menu'
 import { useVideoMenu } from '../components/VideoMenu'
 import { coverOf } from '../components/VideoRow'
@@ -15,7 +14,7 @@ export default function Pending({ v, onBack }) {
   return (
     <div className="wrap">
       <div className="head"><div className="titles">
-        <div className="hello"><BackButton onClick={onBack} /><span>{hello(t)} 👋</span></div>
+        <div className="hello"><span>{hello(t)} 👋</span></div>
         <h1>{v.title}</h1>
       </div>
       <div className="head-actions"><button className="pill-btn sq tap" onClick={(e) => { e.stopPropagation(); menu.open(e.currentTarget, videoMenu(v), { alignRight: true }) }} title={t('more')}><IMore /></button></div></div>
