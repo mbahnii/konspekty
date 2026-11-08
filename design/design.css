@@ -587,3 +587,39 @@ a.tcard:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(0,0,0,.
 @media (hover: none), (pointer: coarse) {
   input, textarea, select { font-size: 16px !important; }
 }
+
+/* ===== Единые размеры (правка 2026-11-09) ===== */
+/* Сайдбар: строка видео той же высоты и тем же шрифтом, что и пункт меню */
+.vrow { min-height: 40px; padding: 4px var(--s3); }
+.vrow .av { width: 32px; height: 32px; border-radius: 9px; }
+.vrow .vt { line-height: 1.2; }
+/* Телефон: пункты меню и видео — по 48px, текст 15px */
+.m-card .row { height: 48px; font-size: var(--fs-body); }
+.vrow.big { min-height: 48px; padding: 4px var(--s3); }
+.vrow.big .av { width: 40px; height: 40px; border-radius: 11px; }
+.vrow.big .vt b { font-size: var(--fs-body); }
+.vrow.big .vt small { font-size: var(--fs-cap); }
+
+/* Пилюля: все элементы одной высоты (--ctl) и с одинаковым шрифтом */
+.island { --ctl: 40px; --ctl-r: 12px; }
+.isl-bar { height: calc(var(--ctl) + 12px); padding: 6px; }
+.isl-main, .isl-btn { height: var(--ctl); }
+.isl-btn { width: var(--ctl); }
+.isl-link { height: var(--ctl); padding: 3px; border-radius: var(--ctl-r); align-items: center; }
+.isl-link input { height: 100%; }
+.isl-link .go { height: calc(var(--ctl) - 6px); border-radius: calc(var(--ctl-r) - 3px); font-size: inherit; }
+.isl-search { height: var(--ctl); border-radius: var(--ctl-r); }
+.isl-seg { height: var(--ctl); padding: 3px; border-radius: var(--ctl-r); }
+.isl-seg button { height: calc(var(--ctl) - 6px); border-radius: calc(var(--ctl-r) - 3px); font-size: inherit; }
+.isl-row, .isl-q .rc { min-height: var(--ctl); }
+.isl-warn button { height: calc(var(--ctl) - 10px); font-size: inherit; }
+@media (max-width: 860px), (max-height: 520px) {
+  .island { --ctl: 38px; }
+  .isl-bar { height: calc(var(--ctl) + 10px); padding: 5px; }
+}
+/* Сенсорные экраны: поля ввода 16px (иначе iPhone приближает страницу) — и весь текст пилюли тоже 16px, чтобы не было разнобоя */
+@media (hover: none), (pointer: coarse) {
+  .island.open { font-size: 16px; }
+  .isl-h { font-size: 12px; }
+  .isl-q .st, .isl-row .st, .prev .pt small, .qt small { font-size: 13px; }
+}
