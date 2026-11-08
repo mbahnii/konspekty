@@ -11,6 +11,8 @@ export const useSettings = create(
   persist(
     (set) => ({
       theme: 'system', lang: 'uk', sidebarCollapsed: false,
+      seenGuide: false,                       // страница «Як користуватися» открывается сама один раз
+      setSeenGuide: () => set({ seenGuide: true }),
       setTheme: (theme) => set({ theme }),
       setLang: (lang) => set({ lang }),
       toggleSidebar: () => set((s) => ({ sidebarCollapsed: !s.sidebarCollapsed })),

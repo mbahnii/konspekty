@@ -5,7 +5,7 @@ import { useSettingsMenu } from './SettingsMenu'
 import VideoRow from './VideoRow'
 import { useVideos } from '../lib/videos'
 import { useTopicsCount, useLaterCount } from '../data/aggregate'
-import { IBook, IBookmark, ICheckSm, IStack, IPlus, ISidebar, IGear } from './Icons'
+import { IBook, IBookmark, ICheckSm, IStack, IPlus, ISidebar, IGear, IPlaySm } from './Icons'
 
 const Tile = ({ color, children, lg }) => <span className={`tile ${lg ? 'lg' : ''}`} style={{ '--tile': color }}>{children}</span>
 
@@ -39,6 +39,7 @@ export default function Sidebar({ onAdd }) {
       </div>
 
       <div className="side-foot">
+        <NavLink to="/guide" className={link} title={t('nav.guide')}><span className="emoji"><IPlaySm /></span><span className="name">{t('nav.guide')}</span></NavLink>
         <button className="row tap" onClick={settings} title={t('settings')}><span className="emoji"><IGear /></span><span className="name">{t('settings')}</span></button>
       </div>
     </aside>

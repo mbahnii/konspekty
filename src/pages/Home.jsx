@@ -6,7 +6,7 @@ import { useQueue } from '../store/ui'
 import { useTopicsCount, useLaterCount } from '../data/aggregate'
 import { useSettingsMenu } from '../components/SettingsMenu'
 import VideoRow, { coverOf } from '../components/VideoRow'
-import { IBack, IBook, IBookmark, ICheckSm, IGear, IForward } from '../components/Icons'
+import { IBack, IBook, IBookmark, ICheckSm, IGear, IForward, IPlaySm } from '../components/Icons'
 import { useNav } from '../store/nav'
 
 export const PageHead = ({ title, sub, onBack }) => {
@@ -59,6 +59,7 @@ export default function Home({ onBack }) {
           <NavLink to="/topics" className="row tap"><span className="emoji"><Tile color="#0a84ff"><IBook /></Tile></span><span className="name">{t('nav.topics')}</span><span className="count">{topics || ''}</span></NavLink>
           <NavLink to="/learned" className="row tap"><span className="emoji"><Tile color="#34c759"><ICheckSm /></Tile></span><span className="name">{t('nav.learned')}</span><span className="count">{learned || ''}</span></NavLink>
           <NavLink to="/later" className="row tap"><span className="emoji"><Tile color="#ff9f0a"><IBookmark /></Tile></span><span className="name">{t('nav.later')}</span><span className="count">{later || ''}</span></NavLink>
+          <NavLink to="/guide" className="row tap"><span className="emoji"><Tile color="#af52de"><IPlaySm /></Tile></span><span className="name">{t('nav.guide')}</span><span className="count" /></NavLink>
         </div>
         <div className="side-card m-card">
           <div className="side-title"><span>{t('videos')}</span><span className="count">{videos.length}</span></div>

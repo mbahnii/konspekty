@@ -10,6 +10,7 @@ import Video from './pages/Video'
 import Topics from './pages/Topics'
 import Learned from './pages/Learned'
 import Later from './pages/Later'
+import Guide from './pages/Guide'
 import LoginModal from './components/LoginModal'
 import BackButton from './components/BackButton'
 import { useHoverHighlight } from './lib/useHoverHighlight'
@@ -25,6 +26,13 @@ export default function App() {
   const depth = useRef(null)
   useHoverHighlight()
   useEffect(() => { initAuth(); initSync() }, [])
+  // Самый первый вход на этом устройстве — сразу показываем «Як користуватися»
+  useEffect(() => {
+    const s = useSettings.getState()
+    if (s.seenGuide) return
+    s.setSeenGuide()
+    if (loc.pathname === '/') nav('/guide', { replace: true })
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     const el = document.documentElement
@@ -55,6 +63,7 @@ export default function App() {
           <Route path="/topics" element={page(Topics)} />
           <Route path="/learned" element={page(Learned)} />
           <Route path="/later" element={page(Later)} />
+          <Route path="/guide" element={page(Guide)} />
           <Route path="/v/:id/:tab?" element={<Video onBack={back} />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
