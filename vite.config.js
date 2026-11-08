@@ -27,8 +27,8 @@ export default defineConfig({
         globPatterns: ['**/*.{js,css,html,png,svg}'],   // сам сайт — сразу офлайн
         navigateFallback: null,
         runtimeCaching: [
-          // конспекты: показываем сохранённое, в фоне обновляем
-          { urlPattern: /\/data\/.*\.json$/, handler: 'StaleWhileRevalidate', options: { cacheName: 'data' } },
+          // конспекты: сначала свежие данные из сети (офлайн — сохранённые)
+          { urlPattern: /\/data\/.*\.json$/, handler: 'NetworkFirst', options: { cacheName: 'data', networkTimeoutSeconds: 4 } },   // свежее из сети, из кэша — только офлайн
           // кадры не меняются — берём из кэша
           { urlPattern: /\/data\/.*\.(webp|jpg)$/, handler: 'CacheFirst', options: { cacheName: 'frames', expiration: { maxEntries: 5000 } } },
           { urlPattern: /^https:\/\/i\.ytimg\.com\//, handler: 'CacheFirst', options: { cacheName: 'covers', expiration: { maxEntries: 300 } } },
