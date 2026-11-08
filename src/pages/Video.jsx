@@ -121,6 +121,7 @@ export default function Video({ onBack }) {
           <section className="panel on" key={tab}>
             {tab === 'main' && (
               <>
+                {summary.engine && <div className="card draft"><p>✦ {t('draft', { m: summary.engine })}</p></div>}
                 <div className="card"><p className="tldr">{inline(summary.tldr)}</p></div>
                 <div className="card"><h2>{t('keyPoints')}</h2>
                   <div className="list">{summary.key_points.map((k, i) => (

@@ -13,6 +13,7 @@ fs.mkdirSync(path.join(OUT, 'v'), { recursive: true })
 
 const index = []
 for (const name of fs.readdirSync(SRC)) {
+  try {
   const dir = path.join(SRC, name)
   const metaP = path.join(dir, 'meta.json')
   if (!fs.statSync(dir).isDirectory() || !fs.existsSync(metaP)) continue
@@ -42,6 +43,7 @@ for (const name of fs.readdirSync(SRC)) {
     if (fs.existsSync(path.join(dir, 'frames'))) fs.cpSync(path.join(dir, 'frames'), path.join(vdir, 'frames'), { recursive: true })
   }
   index.push(item)
+  } catch (e) { console.warn('пропускаю папку', name, '—', e.message) }   // сломанная/недокачанная папка не должна ломать публикацию
 }
 fs.writeFileSync(path.join(OUT, 'index.json'), JSON.stringify(index))
 // «Главное по темам», которое пишет Claude (необязательно)

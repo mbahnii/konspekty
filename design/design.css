@@ -567,3 +567,6 @@ a.tcard:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(0,0,0,.
 .isl-warn { display: flex; align-items: center; gap: var(--s3); padding: 8px 10px; margin-bottom: 6px; border-radius: 10px; background: color-mix(in srgb, var(--warning) 22%, transparent); font-size: var(--fs-cap); line-height: 1.35; }
 .isl-warn span { flex: 1; }
 .isl-warn button { flex: none; height: 28px; padding: 0 12px; border-radius: 8px; background: var(--accent); color: #fff; font-weight: 600; font-size: var(--fs-cap); }
+
+.card.draft { background: color-mix(in srgb, var(--warning) 14%, transparent); box-shadow: none; padding: var(--s3) var(--s5); font-size: var(--fs-sub); color: var(--text-2); }
+.card.draft p { margin: 0; }

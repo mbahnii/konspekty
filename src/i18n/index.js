@@ -5,6 +5,7 @@ const idx = { uk: 0, ru: 1, en: 2 }
 
 // key: [украинский, русский, английский]
 const K = {
+  draft: ['Конспект зроблено локальною нейромережею ({m}) — можливі неточності. Щоб покращити, попросіть Claude переписати.', 'Конспект сделан локальной нейросетью ({m}) — возможны неточности. Чтобы улучшить, попросите Claude переписать.', 'Notes made by a local AI model ({m}) — may contain mistakes. Ask Claude to rewrite for better quality.'],
   version: ['версія', 'версия', 'version'],
   'login.none': ['не увійшли', 'не вошли', 'not signed in'],
   'stage.published': ['публікується', 'публикуется', 'publishing'],
