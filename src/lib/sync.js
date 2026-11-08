@@ -32,7 +32,7 @@ async function syncKv() {
       const { data, error: e } = await supabase.from('kv').upsert({ key, value: spec.get(spec.store.getState()), updated_at: new Date().toISOString() }, { onConflict: 'user_id,key' }).select('updated_at').single()
       if (e) throw e
       m.dirty = false; m.at = data.updated_at
-    } else if (row.updated_at !== m.at) {
+    } else if (row && row.updated_at !== m.at) {
       applying = true; spec.store.setState(spec.set(row.value)); applying = false
       m.at = row.updated_at
     }
