@@ -1,6 +1,8 @@
 // Человеческие названия тем (slug из summary.json → uk / ru / en)
 const N = {
   setup: ['Встановлення і старт', 'Установка и старт', 'Setup'],
+  genshin: ['Genshin Impact', 'Genshin Impact', 'Genshin Impact'],
+  probability: ['Теорія ймовірностей', 'Теория вероятностей', 'Probability'],
   psychology: ['Психологія', 'Психология', 'Psychology'],
   communication: ['Комунікація', 'Коммуникация', 'Communication'],
   boundaries: ['Особисті межі', 'Личные границы', 'Boundaries'],
