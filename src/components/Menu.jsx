@@ -25,6 +25,7 @@ export function MenuProvider({ children }) {
     if (opts.point) { x = opts.point.x; y = opts.point.y }
     else { x = opts.alignRight ? r.right - mw : r.left; y = r.bottom + 6 }
     if (x + mw > innerWidth - 8) { x = Math.max(8, x - (opts.point ? mw : 0)); if (x + mw > innerWidth - 8) x = innerWidth - mw - 8; ox = 'right' }
+    if (x < 8) x = 8                                   // не уходим за левый край окна
     if (y + mh > innerHeight - 8) { y = opts.point ? y - mh : r.top - mh - 6; oy = 'bottom' }
     if (y < 8) y = 8
     if (opts.alignRight) ox = 'right'

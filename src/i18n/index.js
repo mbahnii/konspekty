@@ -139,7 +139,7 @@ const K = {
   tlTitle: ['Хронологія відео', 'Хронология видео', 'Video timeline'],
   tlHint: ['Наведіть, щоб побачити кадри', 'Наведите, чтобы увидеть кадры', 'Hover to preview frames'],
   'tl.skipped': [' (пропущено)', ' (пропущено)', ' (skipped)'],
-  'isl.link': ['Вставте посилання на YouTube', 'Вставьте ссылку на YouTube', 'Paste a YouTube link'],
+  'isl.link': ['Посилання на YouTube', 'Ссылка на YouTube', 'YouTube link'],
   'isl.go': ['Додати', 'Добавить', 'Add'],
   'isl.expand': ['Розгорнути', 'Развернуть', 'Expand'],
   'isl.collapse': ['Згорнути', 'Свернуть', 'Collapse'],

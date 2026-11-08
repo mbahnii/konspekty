@@ -15,7 +15,12 @@ export default function Segmented({ items, value, onChange, className = 'seg' })
     if (!placed.current) { void th.offsetWidth; th.classList.remove('init'); placed.current = true }
   }
   useLayoutEffect(move)
-  useLayoutEffect(() => { addEventListener('resize', move); return () => removeEventListener('resize', move) })
+  useLayoutEffect(() => {
+    addEventListener('resize', move)
+    const ro = typeof ResizeObserver !== 'undefined' && box.current ? new ResizeObserver(() => move()) : null
+    ro?.observe(box.current)
+    return () => { removeEventListener('resize', move); ro?.disconnect() }
+  })
 
   return (
     <div className={className} ref={box} role="tablist" onPointerLeave={() => setHover(null)}>
