@@ -11,6 +11,7 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',            // новая версия сайта ставится сама
+      injectRegister: false,                  // регистрируем сами в main.jsx, чтобы проверять обновления, пока приложение открыто
       includeAssets: ['icons/apple-touch-icon.png'],
       manifest: {
         name: 'Конспекти', short_name: 'Конспекти', lang: 'uk',
