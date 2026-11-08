@@ -364,21 +364,35 @@ a.chip:hover, button.chip:hover { background: var(--surface-hover); color: var(-
 }
 @media (max-width: 860px) {
   .shell, .shell.mini { grid-template-columns: minmax(0, 1fr); padding: 0 var(--s5); gap: 0; }
+  .sidebar, .rail { display: none; }
   .head { flex-direction: column-reverse; gap: var(--s2); }
   .head-actions { align-self: stretch; justify-content: flex-end; margin-bottom: -40px; position: relative; z-index: 2; }
   .head .hello { padding-right: 120px; }
-  #filterLbl { display: none; }
-  #filterBtn { width: 32px; padding: 0; justify-content: center; }
   .sticky .seg button { padding: 0 var(--s3); }
-  .sidebar { position: fixed; inset: 0; z-index: 30; background: var(--bg); padding: max(16px, env(safe-area-inset-top)) var(--s5) var(--s6); transform: translateX(-100%); transition: transform var(--t-slow) var(--ease-out); }
-  .shell.side-open .sidebar { transform: none; }
-  .collapse-btn { display: none !important; }
+  .seg .badge-n { display: none; }
   .back { display: inline-flex !important; }
   h1 { font-size: 24px; }
   .card { padding: var(--s5); }
-  .island { --w: 100%; } .island.wide { --w: 100%; }
-  .row { height: 44px; }
+  main { padding-bottom: 96px; }
+  input, textarea { font-size: 16px !important; }       /* iOS не приближает страницу при вводе */
+  .tl-head .hint, .tl-scale { display: none; }
+  .tl-bar { height: 34px; }
+  /* Пилюля поменьше */
+  .island-dock { bottom: max(14px, env(safe-area-inset-bottom)); padding: 0 12px; }
+  .island, .island.wide { --w: 196px; --r: 22px; }
+  .island.square { --r: 12px; }
+  .island.open { --w: 440px; --r: 20px; }
+  .isl-bar { height: 44px; padding: 5px; gap: 4px; }
+  .isl-main { height: 34px; padding: 0 8px; font-size: 13px; }
+  .isl-btn { width: 34px; height: 34px; }
+  .isl-btn.wide-btn { display: none; }
 }
+.m-only { display: none; }
+@media (max-width: 860px) { .m-only { display: block; } .d-only { display: none; } }
+.m-head { display: flex; align-items: center; justify-content: space-between; padding-top: max(var(--s5), env(safe-area-inset-top)); margin-bottom: var(--s4); }
+.m-head h1 { font-size: 30px; }
+.m-card { margin-bottom: var(--s4); }
+.m-card .row { height: 48px; }
 .back { display: none; align-items: center; gap: 2px; height: 32px; padding: 0 8px 0 2px; border-radius: 9px; color: var(--accent-text); font-weight: 500; font-size: var(--fs-body); }
 .back:hover { background: var(--accent-soft); }
 
@@ -420,3 +434,63 @@ a.chip { transition: background-color 200ms var(--ease-out), color 200ms var(--e
 .modal-btn.primary:hover { filter: brightness(1.1); background: var(--accent); }
 .modal-btn:disabled { opacity: .6; }
 .modal-err { color: var(--danger); font-size: var(--fs-sub); }
+
+/* =====================================================================
+   Строка видео: обложка + название + подпись (как чат в Telegram)
+   ===================================================================== */
+.vrow { position: relative; display: flex; align-items: center; gap: var(--s4); width: 100%; padding: 6px var(--s3); border-radius: var(--r-md); color: inherit; -webkit-touch-callout: none; user-select: none; touch-action: manipulation; }
+.vrow:hover { background: var(--surface-hover); }
+.vrow.active { background: var(--surface-2); }
+.vrow.active::before { content: ""; position: absolute; left: -8px; top: 12px; bottom: 12px; width: 3px; border-radius: 2px; background: var(--accent); }
+.vrow .av { width: 40px; height: 40px; border-radius: 12px; flex: none; background: var(--surface-2) center / cover no-repeat; display: grid; place-items: center; color: var(--text-3); box-shadow: 0 0 0 1px var(--separator) inset; }
+.vrow .av svg.i { width: 18px; height: 18px; }
+.vrow .vt { flex: 1; min-width: 0; display: flex; flex-direction: column; line-height: 1.25; }
+.vrow .vt b { font-size: var(--fs-sub); font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.vrow .vt small { color: var(--text-2); font-size: var(--fs-cap); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.vrow .vr { flex: none; display: flex; align-items: center; gap: 6px; color: var(--text-3); font-size: var(--fs-cap); font-variant-numeric: tabular-nums; }
+.vrow .vr svg.i { width: 12px; height: 12px; }
+.vrow.pending { opacity: .55; }
+.vrow .more { position: absolute; right: 6px; width: 28px; height: 28px; border-radius: 8px; display: grid; place-items: center; color: var(--text-2); opacity: 0; transform: scale(.8); transition: opacity var(--t-fast), transform var(--t-mid) var(--ease-out), background-color var(--t-fast); }
+.vrow .more:hover { background: var(--surface); color: var(--text); }
+.vrow:hover .more, .vrow .more.open { opacity: 1; transform: none; }
+.vrow:hover .vr { opacity: 0; }
+.vrow .vt, .vrow .vr, .vrow .more { transition: opacity var(--t-mid) var(--ease-out); }
+.shell.mini .vrow .vt, .shell.mini .vrow .vr, .shell.mini .vrow .more { opacity: 0; pointer-events: none; }
+.vrow.big { padding: 8px var(--s3); gap: var(--s4); }
+.vrow.big .av { width: 52px; height: 52px; border-radius: 14px; }
+.vrow.big .vt b { font-size: var(--fs-body); } .vrow.big .vt small { font-size: var(--fs-sub); }
+@media (hover: none) { .vrow .more { display: none; } .vrow:hover .vr { opacity: 1; } }
+@media (hover: hover) { .vrow:not(.active):hover { background: transparent; } }
+.row, .vrow, .card, button { -webkit-tap-highlight-color: transparent; }
+.row { touch-action: manipulation; }
+
+/* =====================================================================
+   Пилюля: превью ссылки, очередь с названиями, удаление с подтверждением
+   ===================================================================== */
+.isl-prev { display: grid; grid-template-rows: 0fr; transition: grid-template-rows .45s var(--ease-island); }
+.isl-prev.show { grid-template-rows: 1fr; }
+.isl-prev > div { overflow: hidden; min-height: 0; }
+.prev { display: flex; gap: var(--s3); align-items: center; margin-top: 8px; padding: 8px; border-radius: 14px; background: var(--island-key); opacity: 0; transform: translateY(-4px); transition: opacity 300ms var(--ease-out), transform 400ms var(--ease-out); }
+.isl-prev.show .prev { opacity: 1; transform: none; }
+.prev img { width: 96px; aspect-ratio: 16/9; object-fit: cover; border-radius: 9px; flex: none; background: rgba(255,255,255,.08); }
+.prev .pt { min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.prev .pt b { font-size: var(--fs-sub); line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.prev .pt small, .qt small { color: color-mix(in srgb, var(--island-text) 55%, transparent); font-size: var(--fs-cap); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.prev .sk { height: 12px; width: 70%; border-radius: 6px; background: rgba(255,255,255,.12); animation: pulse 1.2s ease-in-out infinite; }
+.isl-q { position: relative; overflow: hidden; border-radius: 10px; }
+.isl-q .rc { display: flex; align-items: center; gap: var(--s3); padding: 6px 8px; transition: transform 340ms var(--ease-out); }
+.isl-q.conf .rc { transform: translateX(-88px); }
+.isl-q img { width: 48px; aspect-ratio: 16/9; object-fit: cover; border-radius: 6px; flex: none; background: rgba(255,255,255,.08); }
+.isl-q .qt { flex: 1; min-width: 0; display: flex; flex-direction: column; line-height: 1.3; }
+.isl-q .qt b { font-size: var(--fs-sub); font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.isl-q .st { font-size: var(--fs-cap); color: color-mix(in srgb, var(--island-text) 55%, transparent); white-space: nowrap; }
+.isl-q .trash { width: 32px; height: 32px; border-radius: 9px; display: grid; place-items: center; color: #ff6b62; flex: none; transition: background-color 200ms var(--ease-out), transform 200ms var(--ease-out); }
+.isl-q .trash:hover { background: rgba(255,69,58,.18); } .isl-q .trash:active { transform: scale(.88); }
+.isl-q .del { position: absolute; right: 0; top: 0; bottom: 0; width: 84px; border-radius: 10px; background: var(--danger); color: #fff; font-weight: 600; font-size: var(--fs-sub); opacity: 0; transform: translateX(14px); pointer-events: none; transition: opacity 280ms var(--ease-out), transform 340ms var(--ease-out); }
+.isl-q.conf .del { opacity: 1; transform: none; pointer-events: auto; }
+/* переключатели темы и языка в пилюле: плашка ездит как во вкладках */
+.isl-seg { position: relative; }
+.isl-seg button { position: relative; z-index: 1; }
+.isl-seg button.on { background: transparent; color: var(--island-text); }
+.isl-seg .thumb { position: absolute; border-radius: 9px; background: color-mix(in srgb, var(--island-text) 20%, transparent); transition: left 320ms var(--ease-out), width 320ms var(--ease-out), top 320ms var(--ease-out), height 320ms var(--ease-out); }
+.isl-seg .thumb.init { transition: none !important; }

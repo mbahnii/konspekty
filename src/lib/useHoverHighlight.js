@@ -2,7 +2,7 @@ import { useEffect } from 'react'
 
 // Плашка наведения: одна на список, появляется плавно и дальше переезжает за курсором
 const GROUPS = '.side-card, .side-foot, .toc, .list, .menu, .isl-scroll'
-const ITEMS = '.row:not(.add), .toc a, .mini-row, .next.tap, .li, .mi, button.isl-row'
+const ITEMS = '.row:not(.add), .vrow, .toc a, .mini-row, .next.tap, .li, .mi, button.isl-row'
 
 export function useHoverHighlight() {
   useEffect(() => {

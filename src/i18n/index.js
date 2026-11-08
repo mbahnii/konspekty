@@ -5,6 +5,10 @@ const idx = { uk: 0, ru: 1, en: 2 }
 
 // key: [украинский, русский, английский]
 const K = {
+  'isl.confirm': ['Видалити', 'Удалить', 'Delete'],
+  'st.error': ['помилка', 'ошибка', 'error'],
+  min: ['хв', 'мин', 'min'],
+  tlHintTouch: ['Торкніться відрізка, щоб перейти', 'Коснитесь отрезка, чтобы перейти', 'Tap a segment to jump'],
   'login.signout': ['Вийти', 'Выйти', 'Sign out'],
   'login.out': ['Ви вийшли', 'Вы вышли', 'Signed out'],
   'login.ok': ['Синхронізація ввімкнена', 'Синхронизация включена', 'Sync enabled'],
@@ -95,7 +99,7 @@ const K = {
   tlTitle: ['Хронологія відео', 'Хронология видео', 'Video timeline'],
   tlHint: ['Наведіть, щоб побачити кадри', 'Наведите, чтобы увидеть кадры', 'Hover to preview frames'],
   'tl.skipped': [' (пропущено)', ' (пропущено)', ' (skipped)'],
-  'isl.link': ['Посилання на YouTube', 'Ссылка на YouTube', 'YouTube link'],
+  'isl.link': ['Вставте посилання на YouTube', 'Вставьте ссылку на YouTube', 'Paste a YouTube link'],
   'isl.go': ['Додати', 'Добавить', 'Add'],
   'isl.expand': ['Розгорнути', 'Развернуть', 'Expand'],
   'isl.collapse': ['Згорнути', 'Свернуть', 'Collapse'],

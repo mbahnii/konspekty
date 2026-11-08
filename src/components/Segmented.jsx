@@ -1,7 +1,7 @@
 import { useLayoutEffect, useRef, useState } from 'react'
 
 // Вкладки: рамка («ползунок») стоит на активной и ездит за курсором; активная остаётся подкрашенной
-export default function Segmented({ items, value, onChange }) {
+export default function Segmented({ items, value, onChange, className = 'seg' }) {
   const box = useRef(null), thumb = useRef(null), placed = useRef(false)
   const [hover, setHover] = useState(null)
   const target = hover ?? value
@@ -18,10 +18,10 @@ export default function Segmented({ items, value, onChange }) {
   useLayoutEffect(() => { addEventListener('resize', move); return () => removeEventListener('resize', move) })
 
   return (
-    <div className="seg" ref={box} role="tablist" onPointerLeave={() => setHover(null)}>
+    <div className={className} ref={box} role="tablist" onPointerLeave={() => setHover(null)}>
       <span className="thumb" ref={thumb} />
       {items.map((it) => (
-        <button key={it.id} data-id={it.id} className={value === it.id ? 'on' : ''} role="tab"
+        <button key={it.id} data-id={it.id} title={it.title} className={value === it.id ? 'on' : ''} role="tab"
           onPointerEnter={(e) => e.pointerType === 'mouse' && setHover(it.id)} onClick={() => onChange(it.id)}>
           {it.label}{it.count != null && <> <span className="badge-n">{it.count}</span></>}
         </button>

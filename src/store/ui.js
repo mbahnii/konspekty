@@ -24,7 +24,7 @@ export const useQueue = create(
       items: [],              // { id, url, kind: add | reprocess | delete, status: queued | processing | done | error, at, pending }
       removed: [],            // id, которые надо удалить в облаке
       sync: 'ok',             // ok | busy | off
-      add: (url, kind = 'add') => set({ items: [...get().items, { id: crypto.randomUUID(), url, kind, status: 'queued', at: Date.now(), pending: true }] }),
+      add: (url, kind = 'add', meta = {}) => set({ items: [...get().items, { id: crypto.randomUUID(), url, kind, status: 'queued', at: Date.now(), pending: true, title: meta.title, channel: meta.channel, vid: meta.vid }] }),
       remove: (id) => set({ items: get().items.filter((x) => x.id !== id), removed: [...get().removed, id] }),
       setSync: (sync) => set({ sync }),
     }),

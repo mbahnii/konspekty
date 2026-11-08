@@ -14,7 +14,7 @@ export default function Timeline({ id, summary, meta, current, onPick }) {
   const total = secs[secs.length - 1].end
   const step = total > 3600 ? 600 : total > 900 ? 120 : 60
   const marks = []
-  for (let x = 0; x < total; x += step) marks.push(x)
+  for (let x = 0; x < total; x += step) if (x / total < 0.9) marks.push(x)
 
   useEffect(() => {
     const onScroll = () => hide()
@@ -41,7 +41,7 @@ export default function Timeline({ id, summary, meta, current, onPick }) {
 
   return (
     <div className="timeline">
-      <div className="tl-head"><IFilm />{t('tlTitle')}<span className="hint">{t('tlHint')}</span></div>
+      <div className="tl-head"><IFilm />{t('tlTitle')}<span className="hint">{t(matchMedia('(hover: none)').matches ? 'tlHintTouch' : 'tlHint')}</span></div>
       <div className="tl-bar">
         {secs.map((s) => {
           const f = s.skip ? null : framesFor(meta, s, 1)[0]

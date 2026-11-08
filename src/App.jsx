@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
+import { Routes, Route, Navigate, useNavigate } from 'react-router-dom'
 import { useSettings } from './store/settings'
 import { MenuProvider } from './components/Menu'
 import Toast from './components/Toast'
@@ -18,8 +18,7 @@ import { initSync } from './lib/sync'
 export default function App() {
   const { theme, lang, sidebarCollapsed } = useSettings()
   const [island, setIsland] = useState(false)
-  const [sideOpen, setSideOpen] = useState(false)
-  const loc = useLocation()
+  const nav = useNavigate()
   useHoverHighlight()
   useEffect(() => { initAuth(); initSync() }, [])
 
@@ -28,15 +27,14 @@ export default function App() {
     if (theme === 'system') el.removeAttribute('data-theme'); else el.setAttribute('data-theme', theme)
   }, [theme])
   useEffect(() => { document.documentElement.lang = lang }, [lang])
-  useEffect(() => { setSideOpen(false) }, [loc.pathname])
 
-  const back = () => setSideOpen(true)
+  const back = () => nav('/')           // «‹ Відео» всегда ведёт к списку
   const page = (El) => <><main><El onBack={back} /></main><aside className="rail" /></>
 
   return (
     <MenuProvider>
-      <div className={`shell ${sidebarCollapsed ? 'mini' : ''} ${sideOpen ? 'side-open' : ''}`}>
-        <Sidebar onAdd={(e) => { e.stopPropagation(); setIsland(true); setSideOpen(false) }} onPick={() => setSideOpen(false)} />
+      <div className={`shell ${sidebarCollapsed ? 'mini' : ''}`}>
+        <Sidebar onAdd={(e) => { e.stopPropagation(); setIsland(true) }} />
         <Routes>
           <Route path="/" element={page(Home)} />
           <Route path="/topics" element={page(Topics)} />

@@ -48,16 +48,16 @@ async function syncQueue() {
   }
   const pending = q.items.filter((x) => x.pending)
   if (pending.length) {
-    const { error } = await supabase.from('queue').upsert(pending.map((x) => ({ id: x.id, url: x.url, kind: x.kind })), { onConflict: 'id' })
+    const { error } = await supabase.from('queue').upsert(pending.map((x) => ({ id: x.id, url: x.url, kind: x.kind, note: JSON.stringify({ title: x.title, channel: x.channel, vid: x.vid }) })), { onConflict: 'id' })
     if (error) throw error
   }
-  const { data, error } = await supabase.from('queue').select('id,url,kind,status,created_at').order('created_at')
+  const { data, error } = await supabase.from('queue').select('id,url,kind,status,note,created_at').order('created_at')
   if (error) throw error
   const cur = useQueue.getState()
   const mine = cur.items.filter((x) => x.pending && !pending.some((p) => p.id === x.id))   // добавлено, пока шёл запрос
   useQueue.setState({
     removed: cur.removed.filter((id) => !q.removed.includes(id)),
-    items: [...data.map((r) => ({ id: r.id, url: r.url, kind: r.kind, status: r.status, at: Date.parse(r.created_at) })), ...mine],
+    items: [...data.map((r) => { let n = {}; try { n = JSON.parse(r.note) ?? {} } catch { /* ignore */ } return { id: r.id, url: r.url, kind: r.kind, status: r.status, at: Date.parse(r.created_at), title: n.title, channel: n.channel, vid: n.vid } }), ...mine],
   })
 }
 
