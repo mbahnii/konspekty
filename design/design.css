@@ -623,3 +623,4 @@ a.tcard:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(0,0,0,.
   .isl-h { font-size: 12px; }
   .isl-q .st, .isl-row .st, .prev .pt small, .qt small { font-size: 13px; }
 }
+@media (hover: none), (pointer: coarse) { .isl-main { font-size: 15px; } }
