@@ -8,7 +8,7 @@ const SRC = path.resolve(here, '../../output')
 const OUT = path.resolve(here, '../public/data')
 
 const readJson = (p) => JSON.parse(fs.readFileSync(p, 'utf8'))
-fs.rmSync(OUT, { recursive: true, force: true })
+fs.rmSync(OUT, { recursive: true, force: true, maxRetries: 10, retryDelay: 300 })   // повтор при ENOTEMPTY (гонка с другим процессом)
 fs.mkdirSync(path.join(OUT, 'v'), { recursive: true })
 
 const index = []
