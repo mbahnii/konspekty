@@ -1,4 +1,4 @@
-import { Link, NavLink } from 'react-router-dom'
+import { Link, NavLink, useNavigate } from 'react-router-dom'
 import { useT } from '../i18n'
 import { hello } from '../lib/hello'
 import { useVideos } from '../lib/videos'
@@ -6,7 +6,8 @@ import { useQueue } from '../store/ui'
 import { useTopicsCount, useLaterCount } from '../data/aggregate'
 import { useSettingsMenu } from '../components/SettingsMenu'
 import VideoRow, { coverOf } from '../components/VideoRow'
-import { IBack, IBook, IBookmark, ICheckSm, IGear } from '../components/Icons'
+import { IBack, IBook, IBookmark, ICheckSm, IGear, IForward } from '../components/Icons'
+import { useNav } from '../store/nav'
 
 export const PageHead = ({ title, sub, onBack }) => {
   const t = useT()
@@ -37,6 +38,8 @@ const Tile = ({ color, children }) => <span className="tile" style={{ '--tile': 
 
 export default function Home({ onBack }) {
   const t = useT()
+  const nav = useNavigate()
+  const last = useNav((s) => s.last)
   const { videos, loaded } = useVideos()
   const items = useQueue((s) => s.items)
   const queue = items.filter((x) => x.status !== 'done' && (x.kind ?? 'add') === 'add')
@@ -48,7 +51,10 @@ export default function Home({ onBack }) {
     <div className="wrap">
       {/* Телефон: список, как чаты в Telegram */}
       <div className="m-only">
-        <div className="m-head"><h1>{t('app')}</h1><button className="icon-btn tap" onClick={settings} aria-label={t('settings')}><IGear /></button></div>
+        <div className="m-head"><h1>{t('app')}</h1><div className="m-actions">
+          <button className="icon-btn tap" onClick={settings} aria-label={t('settings')}><IGear /></button>
+          {last && <button className="ret tap" onClick={() => nav(last)} aria-label={t('return')} title={t('return')}><IForward /></button>}
+        </div></div>
         <div className="side-card m-card">
           <NavLink to="/topics" className="row tap"><span className="emoji"><Tile color="#0a84ff"><IBook /></Tile></span><span className="name">{t('nav.topics')}</span><span className="count">{topics || ''}</span></NavLink>
           <NavLink to="/learned" className="row tap"><span className="emoji"><Tile color="#34c759"><ICheckSm /></Tile></span><span className="name">{t('nav.learned')}</span><span className="count">{learned || ''}</span></NavLink>

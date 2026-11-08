@@ -33,3 +33,4 @@ export const IStack = P(<><rect x="4" y="4" width="16" height="6" rx="2" /><rect
 export const IExpand = P(<path d="M14 4h6v6M10 20H4v-6M20 4l-6 6M4 20l6-6" />)
 export const ICollapse = P(<path d="M4 14h6v6M20 10h-6V4M10 14l-6 6M14 10l6-6" />)
 export const ICloud = P(<path d="M7 18a4 4 0 0 1-.6-7.96A5.5 5.5 0 0 1 17 8.5a4.75 4.75 0 0 1 .5 9.5z" />)
+export const IForward = P(<path d="M9 18l6-6-6-6" />)

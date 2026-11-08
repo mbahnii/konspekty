@@ -534,3 +534,12 @@ a.tcard:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(0,0,0,.
   .vrow:active, .row:active, .li:active, .mini-row:active { background: var(--surface-hover); }
   .li:hover .n { background: var(--surface-2); color: var(--text-2); }
 }
+
+/* Безопасная зона iPhone: часы, Dynamic Island, индикаторы не перекрывают контент.
+   Стоит в конце файла с !important, потому что shorthand `padding` выше сбрасывал верхний отступ. */
+.shell, .shell.mini { padding-top: env(safe-area-inset-top, 0px) !important; }
+.m-head { padding-top: var(--s4); }
+.ret { width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; color: var(--accent-text); background: var(--material); -webkit-backdrop-filter: var(--blur); backdrop-filter: var(--blur); box-shadow: 0 0 0 1px var(--separator), var(--shadow-card); transition: transform var(--t-fast) var(--ease-out), background-color var(--t-fast) var(--ease-out); }
+.ret:active { transform: scale(.92); }
+.ret svg.i { width: 20px; height: 20px; stroke-width: 2.2; }
+.m-actions { display: flex; align-items: center; gap: var(--s3); }

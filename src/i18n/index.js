@@ -5,6 +5,7 @@ const idx = { uk: 0, ru: 1, en: 2 }
 
 // key: [украинский, русский, английский]
 const K = {
+  return: ['Повернутися на сторінку', 'Вернуться на страницу', 'Back to the page'],
   'pend.text': ['Субтитри й кадри вже завантажено. Коли Claude напише конспект, тут з’являться головне, інструкції та терміни.', 'Субтитры и кадры уже загружены. Когда Claude напишет конспект, здесь появятся главное, инструкции и термины.', 'Subtitles and frames are downloaded. Once Claude writes the notes, the summary, guides and terms will appear here.'],
   'pend.title': ['Конспект ще готується', 'Конспект ещё готовится', 'Notes are on the way'],
   'topics.best': ['Найкраще за цією темою', 'Лучшее по этой теме', 'Best on this topic'],

@@ -13,6 +13,7 @@ import Later from './pages/Later'
 import LoginModal from './components/LoginModal'
 import { useHoverHighlight } from './lib/useHoverHighlight'
 import { initAuth } from './store/auth'
+import { useNav } from './store/nav'
 import { initSync } from './lib/sync'
 
 export default function App() {
@@ -29,6 +30,7 @@ export default function App() {
     if (theme === 'system') el.removeAttribute('data-theme'); else el.setAttribute('data-theme', theme)
   }, [theme])
   useEffect(() => { document.documentElement.lang = lang }, [lang])
+  useEffect(() => { if (loc.pathname !== '/') useNav.getState().setLast(loc.pathname + loc.search) }, [loc.pathname, loc.search])
   // Переход список ⇄ страница: новая страница плавно въезжает (вперёд — справа, назад — слева)
   useLayoutEffect(() => {
     const d = loc.pathname === '/' ? 0 : 1, prev = depth.current
