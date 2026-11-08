@@ -23,6 +23,7 @@ for (const name of fs.readdirSync(SRC)) {
   const item = {
     id: meta.id, title: meta.title, channel: meta.channel, duration: meta.duration,
     url: meta.url, ready: !!summary,
+    added: Math.round(fs.statSync(summary ? sumP : metaP).mtimeMs),   // когда появилось — новые видео показываем сверху
   }
   if (summary) {
     Object.assign(item, {

@@ -18,6 +18,6 @@ export function useVideos() {
     ...v, pinned: !!pinned[v.id], learned: !!learned[v.id],
     done: doneOf(marks, v), total: (v.guides ?? []).length,
   }))
-  list.sort((a, b) => (b.pinned - a.pinned) || (b.ready - a.ready))
+  list.sort((a, b) => (b.pinned - a.pinned) || (b.ready - a.ready) || ((b.added ?? 0) - (a.added ?? 0)))
   return { videos: list, loaded: !!data }
 }
