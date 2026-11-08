@@ -11,6 +11,10 @@ const N = {
   agents: ['Агенти', 'Агенты', 'Agents'],
   hooks: ['Хуки', 'Хуки', 'Hooks'],
   prompts: ['Як ставити задачі', 'Как ставить задачи', 'Prompting'],
+  german: ['Німецька мова', 'Немецкий язык', 'German'],
+  pronunciation: ['Вимова', 'Произношение', 'Pronunciation'],
+  'language-learning': ['Вивчення мов', 'Изучение языков', 'Language learning'],
+  habits: ['Звички й регулярність', 'Привычки и регулярность', 'Habits & consistency'],
 }
 const I = { uk: 0, ru: 1, en: 2 }
 export const topicName = (id, lang) => N[id]?.[I[lang] ?? 0] ?? id.replace(/-/g, ' ')
