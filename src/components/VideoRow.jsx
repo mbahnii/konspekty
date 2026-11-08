@@ -23,7 +23,5 @@ export default function VideoRow({ v, big, onPick }) {
   )
   const ctx = (e) => { e.preventDefault(); menu.open(e.currentTarget, videoMenu(v), { point: { x: e.clientX, y: e.clientY } }) }
   const cls = `vrow tap ${big ? 'big' : ''}`
-  return v.ready
-    ? <NavLink to={`/v/${v.id}`} className={({ isActive }) => `${cls} ${isActive ? 'active' : ''}`} title={v.title} onClick={onPick} onContextMenu={ctx}>{body}</NavLink>
-    : <div className={`${cls} pending`} title={`${v.title} · ${t('processing')}`} onContextMenu={ctx}>{body}</div>
+  return <NavLink to={`/v/${v.id}`} className={({ isActive }) => `${cls} ${v.ready ? '' : 'pending'} ${isActive ? 'active' : ''}`} title={v.title} onClick={onPick} onContextMenu={ctx}>{body}</NavLink>
 }

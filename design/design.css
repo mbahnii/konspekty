@@ -452,7 +452,7 @@ a.chip { transition: background-color 200ms var(--ease-out), color 200ms var(--e
 .vrow .vt small { color: var(--text-2); font-size: var(--fs-cap); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .vrow .vr { flex: none; display: flex; align-items: center; gap: 6px; color: var(--text-3); font-size: var(--fs-cap); font-variant-numeric: tabular-nums; }
 .vrow .vr svg.i { width: 12px; height: 12px; }
-.vrow.pending { opacity: .55; }
+.vrow.pending { opacity: .7; }
 .vrow .more { position: absolute; right: 6px; width: 28px; height: 28px; border-radius: 8px; display: grid; place-items: center; color: var(--text-2); opacity: 0; transform: scale(.8); transition: opacity var(--t-fast), transform var(--t-mid) var(--ease-out), background-color var(--t-fast); }
 .vrow .more:hover { background: var(--surface); color: var(--text); }
 .vrow:hover .more, .vrow .more.open { opacity: 1; transform: none; }
@@ -522,3 +522,15 @@ a.tcard:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(0,0,0,.
 .best { color: var(--success); font-size: var(--fs-cap); font-weight: 600; }
 .pts { margin: var(--s2) 0 0; padding-left: 1.2em; color: var(--text-2); font-size: var(--fs-sub); }
 @media (max-width: 560px) { .tcard { flex-direction: column; } .tcard .cv { width: 100%; } }
+
+.pend-cover { aspect-ratio: 16/9; border-radius: var(--r-lg); background: var(--surface-2) center / cover no-repeat; margin-top: var(--s2); box-shadow: 0 0 0 1px var(--separator) inset; }
+.card.pend { display: flex; gap: var(--s4); align-items: flex-start; }
+.card.pend h3 { margin-bottom: var(--s2); } .card.pend p { color: var(--text-2); font-size: var(--fs-sub); }
+.vrow.pending .vt b { font-weight: 500; }
+/* На телефоне :hover «залипает» после касания — отключаем и даём отклик на нажатие */
+@media (hover: none) {
+  .vrow:not(.active):hover, .row:not(.active):hover, .li:hover, .toc a:hover, .mini-row:hover, .next:hover { background: transparent; }
+  .vrow:hover .vr { opacity: 1; }
+  .vrow:active, .row:active, .li:active, .mini-row:active { background: var(--surface-hover); }
+  .li:hover .n { background: var(--surface-2); color: var(--text-2); }
+}

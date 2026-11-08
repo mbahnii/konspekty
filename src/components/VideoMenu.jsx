@@ -12,7 +12,7 @@ export function useVideoMenu() {
   const lib = useLibrary()
   const add = useQueue((s) => s.add)
   return (v) => [
-    v.ready && { icon: <IOpen />, label: t('m.open'), onSelect: () => nav(`/v/${v.id}`) },
+    { icon: <IOpen />, label: t('m.open'), onSelect: () => nav(`/v/${v.id}`) },
     { icon: <IYt />, label: t('watch'), onSelect: () => window.open(v.url, '_blank') },
     { icon: <ILink />, label: t('copyLink'), onSelect: () => { navigator.clipboard?.writeText(v.url); say(t('toast.linkCopied')) } },
     '-',

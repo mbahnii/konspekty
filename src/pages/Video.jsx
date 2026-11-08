@@ -9,6 +9,7 @@ import { useProgress, stepOn } from '../store/progress'
 import Segmented from '../components/Segmented'
 import Timeline from '../components/Timeline'
 import Rail from '../components/Rail'
+import Pending from './Pending'
 import { useVideoMenu } from '../components/VideoMenu'
 import { useIndex } from '../data/useData'
 import { IChevDown, IMore, IPlay, IClock, IYt, ILink, IPrint, ICopy, IOk, ICheck, ISearch, IBack } from '../components/Icons'
@@ -62,7 +63,9 @@ export default function Video({ onBack }) {
     return () => io.disconnect()
   }, [tab, summary, filter])
 
+  const entry = index?.find((x) => x.id === id)
   const shell = (el) => <><main><div className="wrap">{el}</div></main><aside className="rail" /></>
+  if (entry && !entry.ready) return <><main><Pending v={entry} onBack={onBack} /></main><aside className="rail" /></>
   if (error) return shell(<p>{t('notFound')}</p>)
   if (!summary || !meta) return shell(<p style={{ color: 'var(--text-3)' }}>{t('loading')}</p>)
   if (!TABS.includes(tab)) { nav(`/v/${id}`, { replace: true }); return null }

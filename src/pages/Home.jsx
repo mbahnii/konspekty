@@ -30,7 +30,7 @@ export function VideoCard({ v }) {
       {v.ready && <div className="bar"><i style={{ width: `${v.learned ? 100 : pct}%` }} /></div>}
     </>
   )
-  return v.ready ? <Link className="vcard tap" to={`/v/${v.id}`}>{inner}</Link> : <div className="vcard" style={{ opacity: .6 }}>{inner}</div>
+  return <Link className="vcard tap" to={`/v/${v.id}`} style={v.ready ? undefined : { opacity: .75 }}>{inner}</Link>
 }
 
 const Tile = ({ color, children }) => <span className="tile" style={{ '--tile': color }}>{children}</span>
