@@ -18,6 +18,7 @@ const N = {
   networking: ['Мережі', 'Сети', 'Networking'],
   'neural-nets': ['Нейромережі', 'Нейросети', 'Neural networks'],
   programming: ['Програмування', 'Программирование', 'Programming'],
+  git: ['Git і GitHub', 'Git и GitHub', 'Git & GitHub'],
   security: ['Безпека', 'Безопасность', 'Security'],
   'claude-md': ['CLAUDE.md і правила', 'CLAUDE.md и правила', 'CLAUDE.md & rules'],
   sessions: ['Сесії', 'Сессии', 'Sessions'],
