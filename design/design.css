@@ -24,7 +24,7 @@ svg.i { width: 18px; height: 18px; flex: none; stroke: currentColor; fill: none;
    ===================================================================== */
 .shell {
   --side-w: var(--sidebar);
-  max-width: var(--shell); margin: 0 auto; min-height: 100dvh;
+  max-width: var(--shell); margin: 0 auto; min-height: 100dvh; padding-top: env(safe-area-inset-top, 0px);
   display: grid; grid-template-columns: var(--side-w) minmax(0, 1fr) var(--rail);
   gap: var(--s6); padding: 0 var(--s5);
   transition: grid-template-columns var(--t-slow) var(--ease-out);
@@ -127,7 +127,7 @@ a.chip:hover, button.chip:hover { background: var(--surface-hover); color: var(-
 .chip.accent:hover { background: color-mix(in srgb, var(--accent) 22%, transparent); color: var(--accent-text); }
 .chip svg.i { width: 14px; height: 14px; }
 
-.sticky { position: sticky; top: 0; z-index: 5; padding: var(--s3) var(--s3) var(--s2); margin: 0 calc(-1 * var(--s3));
+.sticky { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; padding: var(--s3) var(--s3) var(--s2); margin: 0 calc(-1 * var(--s3));
   background: color-mix(in srgb, var(--bg) 62%, transparent); -webkit-backdrop-filter: var(--blur); backdrop-filter: var(--blur); }
 .sticky .seg { background: var(--surface); box-shadow: var(--shadow-card), 0 0 0 1px var(--separator); overflow-x: auto; scrollbar-width: none; }
 .sticky .seg .thumb { background: var(--surface-2); box-shadow: none; }
@@ -370,7 +370,7 @@ a.chip:hover, button.chip:hover { background: var(--surface-hover); color: var(-
   .head .hello { padding-right: 120px; }
   .sticky .seg button { padding: 0 var(--s3); }
   .seg .badge-n { display: none; }
-  .back { display: inline-flex !important; }
+  .back { display: grid !important; }
   h1 { font-size: 24px; }
   .card { padding: var(--s5); }
   main { padding-bottom: 96px; }
@@ -389,12 +389,14 @@ a.chip:hover, button.chip:hover { background: var(--surface-hover); color: var(-
 }
 .m-only { display: none; }
 @media (max-width: 860px) { .m-only { display: block; } .d-only { display: none; } }
-.m-head { display: flex; align-items: center; justify-content: space-between; padding-top: max(var(--s5), env(safe-area-inset-top)); margin-bottom: var(--s4); }
+.m-head { display: flex; align-items: center; justify-content: space-between; padding-top: var(--s5); margin-bottom: var(--s4); }
 .m-head h1 { font-size: 30px; }
 .m-card { margin-bottom: var(--s4); }
 .m-card .row { height: 48px; }
-.back { display: none; align-items: center; gap: 2px; height: 32px; padding: 0 8px 0 2px; border-radius: 9px; color: var(--accent-text); font-weight: 500; font-size: var(--fs-body); }
-.back:hover { background: var(--accent-soft); }
+.back { display: none; width: 36px; height: 36px; border-radius: 50%; place-items: center; flex: none; color: var(--text); background: var(--material); -webkit-backdrop-filter: var(--blur); backdrop-filter: var(--blur); box-shadow: 0 0 0 1px var(--separator), var(--shadow-card); transition: transform var(--t-fast) var(--ease-out), background-color var(--t-fast) var(--ease-out); }
+.back svg.i { width: 20px; height: 20px; stroke-width: 2.2; }
+.back:hover { background: var(--surface-hover); }
+.hello { height: 36px; }
 
 /* =====================================================================
    Страницы-списки (Головна, Огляд тем, Вивчено, На потім)
@@ -494,3 +496,28 @@ a.chip { transition: background-color 200ms var(--ease-out), color 200ms var(--e
 .isl-seg button.on { background: transparent; color: var(--island-text); }
 .isl-seg .thumb { position: absolute; border-radius: 9px; background: color-mix(in srgb, var(--island-text) 20%, transparent); transition: left 320ms var(--ease-out), width 320ms var(--ease-out), top 320ms var(--ease-out), height 320ms var(--ease-out); }
 .isl-seg .thumb.init { transition: none !important; }
+
+body::before { content: ""; position: fixed; top: 0; left: 0; right: 0; height: env(safe-area-inset-top, 0px); z-index: 60; background: color-mix(in srgb, var(--bg) 70%, transparent); -webkit-backdrop-filter: var(--blur); backdrop-filter: var(--blur); pointer-events: none; }
+/* текст в кнопках по центру */
+.modal-btn, .isl-link .go, .isl-q .del { display: grid; place-items: center; text-align: center; }
+.seg.scroll { overflow-x: auto; scrollbar-width: none; max-width: 100%; }
+.dup { color: var(--warning); font-size: var(--fs-cap); font-weight: 600; }
+
+/* =====================================================================
+   Огляд тем
+   ===================================================================== */
+.topics-bar { margin-top: var(--s5); }
+.thead { margin-top: var(--s4); }
+.thead h2 { font-size: var(--fs-title); }
+.thead p { color: var(--text-2); font-size: var(--fs-sub); margin-top: var(--s2); }
+.tcard { display: flex; gap: var(--s4); padding: var(--s4); margin-top: var(--s3); border-radius: var(--r-lg); background: var(--surface); box-shadow: var(--shadow-card); color: inherit; transition: transform 300ms var(--ease-out), box-shadow 300ms var(--ease-out); }
+a.tcard:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(0,0,0,.08), 0 0 0 1px var(--separator); }
+.tcard .cv { width: 132px; aspect-ratio: 16/9; flex: none; border-radius: var(--r-md); background: var(--surface-2) center / cover no-repeat; align-self: flex-start; }
+.tcard .tb { min-width: 0; flex: 1; display: flex; flex-direction: column; gap: 6px; }
+.tcard b { font-size: var(--fs-body); line-height: 1.3; }
+.tcard .tl { color: var(--text-2); font-size: var(--fs-sub); line-height: 1.45; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.tcard .tags { display: flex; flex-wrap: wrap; gap: 6px; }
+.tcard .chip { height: 24px; font-size: var(--fs-cap); }
+.best { color: var(--success); font-size: var(--fs-cap); font-weight: 600; }
+.pts { margin: var(--s2) 0 0; padding-left: 1.2em; color: var(--text-2); font-size: var(--fs-sub); }
+@media (max-width: 560px) { .tcard { flex-direction: column; } .tcard .cv { width: 100%; } }

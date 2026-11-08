@@ -6,13 +6,16 @@ export const useMenu = () => useContext(Ctx)
 // Всплывающее меню: позиционируется так, чтобы всегда помещаться на экране (переворачивается), с размытием
 export function MenuProvider({ children }) {
   const ref = useRef(null)
+  const live = useRef(null)
   const [st, setSt] = useState({ items: [], opts: {}, anchor: null, phase: 'closed', pos: { left: 0, top: 0, origin: 'top left' } })
 
+  live.current = st
   const close = useCallback(() => setSt((s) => { s.anchor?.classList.remove('open'); return s.phase === 'closed' ? s : { ...s, phase: 'closed', anchor: null } }), [])
   const open = useCallback((anchor, items, opts = {}) => {
+    if (live.current?.anchor === anchor && live.current.phase !== 'closed') { close(); return }   // второй клик по той же кнопке — закрыть
     items = items.filter((it, i, a) => it !== '-' || (i > 0 && a[i - 1] !== '-' && i < a.length - 1))
     setSt((s) => { s.anchor?.classList.remove('open'); return { items, opts, anchor, phase: 'measure', pos: s.pos } })
-  }, [])
+  }, [close])
 
   useLayoutEffect(() => {
     if (st.phase !== 'measure' || !ref.current) return

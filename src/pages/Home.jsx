@@ -12,7 +12,7 @@ export const PageHead = ({ title, sub, onBack }) => {
   const t = useT()
   return (
     <div className="head"><div className="titles">
-      <div className="hello"><button className="back tap" onClick={onBack}><IBack />{t('back')}</button><span>{hello(t)} 👋</span></div>
+      <div className="hello"><button className="back tap" onClick={onBack} aria-label={t('back')}><IBack /></button><span>{hello(t)} 👋</span></div>
       <h1>{title}</h1>
       {sub && <p className="page-sub">{sub}</p>}
     </div></div>

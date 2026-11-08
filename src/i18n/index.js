@@ -5,6 +5,11 @@ const idx = { uk: 0, ru: 1, en: 2 }
 
 // key: [украинский, русский, английский]
 const K = {
+  'topics.best': ['Найкраще за цією темою', 'Лучшее по этой теме', 'Best on this topic'],
+  'topics.auto': ['Відео за цією темою.', 'Видео по этой теме.', 'Videos on this topic.'],
+  'topics.all': ['Усі', 'Все', 'All'],
+  'isl.dupQueue': ['Це відео вже в черзі', 'Это видео уже в очереди', 'This video is already queued'],
+  'isl.dupVideo': ['Це відео вже є на сайті', 'Это видео уже есть на сайте', 'This video is already on the site'],
   'isl.confirm': ['Видалити', 'Удалить', 'Delete'],
   'st.error': ['помилка', 'ошибка', 'error'],
   min: ['хв', 'мин', 'min'],
@@ -27,7 +32,7 @@ const K = {
   'learned.none': ['Поки нічого не вивчено', 'Пока ничего не изучено', 'Nothing learned yet'],
   'learned.sub': ['Відео, які ви вже вивчили.', 'Видео, которые вы уже изучили.', 'Videos you’ve finished.'],
   'topics.empty': ['Теми з’являться, коли будуть готові конспекти.', 'Темы появятся, когда будут готовы конспекты.', 'Topics appear once notes are ready.'],
-  'topics.sub': ['Усі теми з ваших відео в одному місці.', 'Все темы из ваших видео в одном месте.', 'All topics from your videos in one place.'],
+  'topics.sub': ['Обирайте тему — побачите всі відео про неї.', 'Выберите тему — увидите все видео о ней.', 'Pick a topic to see every video about it.'],
   'home.empty': ['Додайте перше відео через пілюлю внизу.', 'Добавьте первое видео через пилюлю внизу.', 'Add your first video with the pill below.'],
   'home.sub': ['Готово конспектів: {n} · в обробці: {q}', 'Готово конспектов: {n} · в обработке: {q}', 'Ready: {n} · processing: {q}'],
   'isl.wide': ['Ширше', 'Шире', 'Wider'],

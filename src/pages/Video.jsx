@@ -62,8 +62,9 @@ export default function Video({ onBack }) {
     return () => io.disconnect()
   }, [tab, summary, filter])
 
-  if (error) return <div className="wrap"><p>{t('notFound')}</p></div>
-  if (!summary || !meta) return <div className="wrap"><p style={{ color: 'var(--text-3)' }}>{t('loading')}</p></div>
+  const shell = (el) => <><main><div className="wrap">{el}</div></main><aside className="rail" /></>
+  if (error) return shell(<p>{t('notFound')}</p>)
+  if (!summary || !meta) return shell(<p style={{ color: 'var(--text-3)' }}>{t('loading')}</p>)
   if (!TABS.includes(tab)) { nav(`/v/${id}`, { replace: true }); return null }
 
   const words = JSON.stringify(summary.sections.filter((s) => !s.skip).map((s) => s.body)).split(/\s+/).length
@@ -94,7 +95,7 @@ export default function Video({ onBack }) {
         <div className="wrap">
           <div className="head">
             <div className="titles">
-              <div className="hello"><button className="back tap" onClick={onBack}><IBack />{t('back')}</button><span>{hello(t)} 👋</span></div>
+              <div className="hello"><button className="back tap" onClick={onBack} aria-label={t('back')}><IBack /></button><span>{hello(t)} 👋</span></div>
               <h1>{meta.title}</h1>
             </div>
             <div className="head-actions">

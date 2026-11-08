@@ -14,13 +14,12 @@ export default function LoginModal() {
     const onKey = (e) => e.key === 'Escape' && setLoginOpen(false)
     document.addEventListener('keydown', onKey); return () => document.removeEventListener('keydown', onKey)
   }, [])
-  useEffect(() => { if (session && loginOpen) { const id = setTimeout(() => setLoginOpen(false), 600); return () => clearTimeout(id) } }, [session, loginOpen])
 
   const submit = async (e) => {
     e.preventDefault(); setBusy(true); setErr('')
     const { error } = await signIn(email.trim(), pass)
     setBusy(false)
-    if (error) setErr(t('login.bad')); else { setPass(''); say(t('login.ok')) }
+    if (error) setErr(t('login.bad')); else { setPass(''); say(t('login.ok')); setTimeout(() => setLoginOpen(false), 450) }
   }
 
   return (

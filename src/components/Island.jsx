@@ -3,7 +3,8 @@ import { useNavigate } from 'react-router-dom'
 import { useT } from '../i18n'
 import { useSettings } from '../store/settings'
 import { useQueue, useToast, useIslandPrefs } from '../store/ui'
-import { useAllSummaries } from '../data/useData'
+import { useAllSummaries, useIndex } from '../data/useData'
+import { useLibrary } from '../store/library'
 import Segmented from './Segmented'
 import { IPlus, IExpand, ICollapse, ISearch, ISystem, ISun, IMoon, ITrash } from './Icons'
 
@@ -41,6 +42,12 @@ export default function Island({ open, setOpen }) {
   const box = useRef(null), input = useRef(null)
   const all = useAllSummaries(open)
   const prev = usePreview(url)
+  const { data: index } = useIndex()
+  const hidden = useLibrary((s) => s.hidden)
+  // это видео уже есть на сайте или уже стоит в очереди?
+  const dup = !prev.id ? null
+    : index?.some((v) => v.id === prev.id && !hidden[v.id]) ? 'isl.dupVideo'
+    : items.some((it) => (it.kind ?? 'add') === 'add' && it.status !== 'done' && it.status !== 'error' && ytId(it.url) === prev.id) ? 'isl.dupQueue' : null
   const lastPrev = useRef(prev)
   if (prev.shown) lastPrev.current = prev
   const p = lastPrev.current
@@ -68,6 +75,7 @@ export default function Island({ open, setOpen }) {
       box.current.animate([{ translate: '0' }, { translate: '-6px' }, { translate: '6px' }, { translate: '0' }], { duration: 280 })
       return
     }
+    if (dup) { say(t(dup)); box.current.animate([{ translate: '0' }, { translate: '-6px' }, { translate: '6px' }, { translate: '0' }], { duration: 280 }); return }
     add(url.trim(), 'add', { title: prev.title, channel: prev.channel, vid: prev.id }); setUrl(''); say(t('isl.queued'))
   }
 
@@ -92,7 +100,7 @@ export default function Island({ open, setOpen }) {
           <div className={`isl-prev ${prev.shown ? 'show' : ''}`}><div>
             <div className="prev">
               {p.id && <img src={`https://i.ytimg.com/vi/${p.id}/mqdefault.jpg`} alt="" />}
-              <div className="pt">{p.title ? <><b>{p.title}</b><small>{p.channel}</small></> : p.loading ? <span className="sk" /> : <small>{shortUrl(url)}</small>}</div>
+              <div className="pt">{p.title ? <><b>{p.title}</b><small>{p.channel}</small></> : p.loading ? <span className="sk" /> : <small>{shortUrl(url)}</small>}{dup && <span className="dup">{t(dup)}</span>}</div>
             </div>
           </div></div>
 

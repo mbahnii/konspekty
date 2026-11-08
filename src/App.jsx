@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react'
-import { Routes, Route, Navigate, useNavigate } from 'react-router-dom'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom'
 import { useSettings } from './store/settings'
 import { MenuProvider } from './components/Menu'
 import Toast from './components/Toast'
@@ -19,6 +19,8 @@ export default function App() {
   const { theme, lang, sidebarCollapsed } = useSettings()
   const [island, setIsland] = useState(false)
   const nav = useNavigate()
+  const loc = useLocation()
+  const depth = useRef(null)
   useHoverHighlight()
   useEffect(() => { initAuth(); initSync() }, [])
 
@@ -27,6 +29,16 @@ export default function App() {
     if (theme === 'system') el.removeAttribute('data-theme'); else el.setAttribute('data-theme', theme)
   }, [theme])
   useEffect(() => { document.documentElement.lang = lang }, [lang])
+  // Переход список ⇄ страница: новая страница плавно въезжает (вперёд — справа, назад — слева)
+  useLayoutEffect(() => {
+    const d = loc.pathname === '/' ? 0 : 1, prev = depth.current
+    depth.current = d
+    if (prev === null || prev === d || matchMedia('(prefers-reduced-motion: reduce)').matches) return
+    const el = document.querySelector('.shell > main')
+    const dx = (d > prev ? 1 : -1) * (innerWidth < 860 ? 36 : 20)
+    el?.animate([{ opacity: 0, transform: `translateX(${dx}px)` }, { opacity: 1, transform: 'none' }], { duration: 420, easing: 'cubic-bezier(0.32, 0.72, 0, 1)' })
+    scrollTo({ top: 0 })
+  }, [loc.pathname])
 
   const back = () => nav('/')           // «‹ Відео» всегда ведёт к списку
   const page = (El) => <><main><El onBack={back} /></main><aside className="rail" /></>

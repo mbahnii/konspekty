@@ -6,7 +6,7 @@ export function useTopics() {
   const { data: index } = useIndex()
   const [custom, setCustom] = useState(undefined)
   useEffect(() => { fetch('./data/topics.json').then((r) => (r.ok ? r.json() : null)).then(setCustom).catch(() => setCustom(null)) }, [])
-  if (custom) return custom
+  if (custom && index) return custom.map((tp) => ({ ...tp, videos: (tp.videos ?? []).map((id) => index.find((v) => v.id === id)).filter(Boolean) }))
   const map = new Map()
   for (const v of index ?? []) for (const tp of v.topics ?? []) {
     if (!map.has(tp)) map.set(tp, { id: tp, videos: [] })
