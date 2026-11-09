@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useAllSummaries, useIndex } from './useData'
 
-// Темы: если Claude написал topics.json — берём его; иначе группируем видео по полю topics
+// Темы: если есть topics.json — берём его; иначе группируем видео по полю topics
 export function useTopics() {
   const { data: index } = useIndex()
   const [custom, setCustom] = useState(undefined)

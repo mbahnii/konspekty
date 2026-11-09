@@ -47,7 +47,7 @@ for (const name of fs.readdirSync(SRC)) {
   } catch (e) { console.warn('пропускаю папку', name, '—', e.message) }   // сломанная/недокачанная папка не должна ломать публикацию
 }
 fs.writeFileSync(path.join(OUT, 'index.json'), JSON.stringify(index))
-// «Главное по темам», которое пишет Claude (необязательно)
+// «Главное по темам» (необязательно)
 const topicsP = path.join(SRC, 'topics.json')
 if (fs.existsSync(topicsP)) fs.copyFileSync(topicsP, path.join(OUT, 'topics.json'))
 console.log(`build-data: ${index.length} видео, готово к показу: ${index.filter((v) => v.ready).length}`)
