@@ -3,17 +3,32 @@ import { useNavigate } from 'react-router-dom'
 import { useT } from '../i18n'
 import './guide.css'
 
-// Ролики лежат в public/guide (сделаны в Проекты/Туториал)
+// Ролики (украинская версия) лежат в public/guide/uk (ноутбук) и public/guide/uk/tel (телефон, вертикальные).
+// Сделаны в Проекты/Туториал (Remotion).
 const CLIPS = [
-  'v1-dobavit-video',
-  'v2-otkryt-konspekt',
-  'v3-hronologiya',
-  'v4-chek-list',
-  'v5-menyu-video',
-  'v6-razdely',
-  'v7-yazyk-i-tema',
+  'uk1-dodaty-video',
+  'uk2-vidkryty-konspekt',
+  'uk3-hronologiya',
+  'uk4-chek-list',
+  'uk5-menyu-video',
+  'uk6-rozdily',
+  'uk7-mova-i-tema',
+  'uk8-poshuk',
+  'uk9-vydalennya',
 ]
-const src = (name, ext) => `${import.meta.env.BASE_URL}guide/${name}.${ext}`
+const PHONE = '(max-width: 860px)'
+const src = (name, ext, tel) => `${import.meta.env.BASE_URL}guide/uk/${tel ? 'tel/' : ''}${name}.${ext}`
+
+// На телефоне — вертикальные ролики, на ноутбуке — горизонтальные
+function usePhone() {
+  const [tel, setTel] = useState(() => typeof matchMedia !== 'undefined' && matchMedia(PHONE).matches)
+  useEffect(() => {
+    const m = matchMedia(PHONE), on = () => setTel(m.matches)
+    m.addEventListener('change', on)
+    return () => m.removeEventListener('change', on)
+  }, [])
+  return tel
+}
 
 const ISound = ({ on }) => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
@@ -22,7 +37,7 @@ const ISound = ({ on }) => (
   </svg>
 )
 
-function Clip({ name, i, active, cardRef }) {
+function Clip({ name, i, active, cardRef, tel }) {
   const t = useT()
   const ref = useRef(null)
   const [sound, setSound] = useState(false)
@@ -54,8 +69,8 @@ function Clip({ name, i, active, cardRef }) {
   const n = i + 1
   return (
     <article ref={cardRef} className={`g-card ${active ? 'active' : ''}`} style={{ '--i': i }}>
-      <div className="g-media">
-        <video ref={ref} src={src(name, 'mp4')} poster={src(name, 'jpg')} muted loop playsInline preload="metadata" />
+      <div className={`g-media ${tel ? 'tel' : ''}`}>
+        <video key={tel ? 't' : 'd'} ref={ref} src={src(name, 'mp4', tel)} poster={src(name, 'jpg', tel)} muted loop playsInline preload="metadata" />
         <button className={`g-sound tap ${sound ? 'on' : ''}`} onClick={toggleSound} aria-label={t('guide.sound')} title={t('guide.sound')}>
           <ISound on={sound} />
         </button>
@@ -102,6 +117,7 @@ export default function Guide() {
   const nav = useNavigate()
   const cards = useRef([])
   const focused = useFocused(cards)
+  const tel = usePhone()
   return (
     <div className="guide">
       <div className="g-glow" aria-hidden><i /><i /><i /></div>
@@ -111,7 +127,7 @@ export default function Guide() {
         <p className="page-sub">{t('guide.sub')}</p>
       </header>
       <div className="g-grid">
-        {CLIPS.map((name, i) => <Clip key={name} name={name} i={i} active={i === focused} cardRef={(el) => { cards.current[i] = el }} />)}
+        {CLIPS.map((name, i) => <Clip key={name} name={name} i={i} active={i === focused} cardRef={(el) => { cards.current[i] = el }} tel={tel} />)}
       </div>
       <footer className="g-foot" style={{ '--i': CLIPS.length }}>
         <button className="g-start tap" onClick={() => nav('/')}>{t('guide.start')}</button>

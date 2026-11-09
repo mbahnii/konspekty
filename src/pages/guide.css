@@ -75,3 +75,6 @@
 @media (max-width: 860px) {
   .g-eyebrow { margin-left: 48px; }
 }
+
+/* Телефон: вертикальные ролики (9:16), не выше ~72% экрана */
+.g-media.tel { aspect-ratio: 9 / 16; width: min(100%, calc(72vh * 9 / 16)); width: min(100%, calc(72dvh * 9 / 16)); margin: 0 auto; }
