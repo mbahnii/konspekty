@@ -1,7 +1,7 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useAuth, setLoginOpen, signIn, signOut } from '../store/auth'
 import { supabase } from '../lib/supabase'
-import { TELEGRAM_BOT } from '../lib/accounts'
+import { TELEGRAM_BOT_ID } from '../lib/accounts'
 import { useT } from '../i18n'
 import { useToast } from '../store/ui'
 import Segmented from './Segmented'
@@ -26,7 +26,6 @@ export default function AuthModal() {
   const [nick, setNick] = useState(''), [email, setEmail] = useState(''), [pass, setPass] = useState('')
   const [show, setShow] = useState(false), [code, setCode] = useState('')
   const [err, setErr] = useState(''), [busy, setBusy] = useState(false), [wait, setWait] = useState(0)
-  const tgBox = useRef(null)
 
   useEffect(() => {
     const onKey = (e) => e.key === 'Escape' && setLoginOpen(false)
@@ -75,21 +74,27 @@ export default function AuthModal() {
     const { error } = await supabase.auth.signInWithOAuth({ provider, options: { redirectTo: location.origin + location.pathname } })
     if (error) fail(error)
   }
-  // Telegram: официальный виджет → функция Supabase «telegram-auth» проверяет подпись → сессия
-  useEffect(() => {
-    if (!TELEGRAM_BOT || !loginOpen || !tgBox.current || tgBox.current.dataset.ready) return
-    tgBox.current.dataset.ready = '1'
-    window.onKonspektyTelegram = async (user) => {
+  // Telegram: наша кнопка открывает официальное окно входа Telegram (скрипт telegram-widget.js);
+  // подпись проверяет функция Supabase «telegram-auth», потом выдаётся сессия.
+  const telegram = async () => {
+    setErr('')
+    const load = () => new Promise((ok, no) => {
+      if (window.Telegram?.Login) return ok()
+      const sc = document.createElement('script')
+      sc.src = 'https://telegram.org/js/telegram-widget.js?22'; sc.async = true; sc.onload = ok; sc.onerror = no
+      document.head.appendChild(sc)
+    })
+    try { await load() } catch { setErr(t('au.fail')); return }
+    window.Telegram.Login.auth({ bot_id: TELEGRAM_BOT_ID, request_access: 'write' }, async (user) => {
+      if (!user) return                                   // окно закрыли
+      setBusy(true)
       const { data, error } = await supabase.functions.invoke('telegram-auth', { body: user })
-      if (error || !data?.token_hash) return fail(error || 'telegram')
+      if (error || !data?.token_hash) { setBusy(false); return fail(error || 'telegram') }
       const r = await supabase.auth.verifyOtp({ token_hash: data.token_hash, type: 'magiclink' })
+      setBusy(false)
       if (r.error) fail(r.error); else { say(t('login.ok')); setLoginOpen(false) }
-    }
-    const s = document.createElement('script')
-    s.async = true; s.src = 'https://telegram.org/js/telegram-widget.js?22'
-    Object.entries({ 'telegram-login': TELEGRAM_BOT, size: 'large', radius: '14', onauth: 'onKonspektyTelegram(user)', 'request-access': 'write' }).forEach(([k, v]) => s.setAttribute('data-' + k, v))
-    tgBox.current.appendChild(s)
-  }, [loginOpen]) // eslint-disable-line
+    })
+  }
 
   const sc = score(pass)
   const nickBad = tab === 'up' && nick && !/^[A-Za-z0-9_.-]{3,24}$/.test(nick)
@@ -128,9 +133,7 @@ export default function AuthModal() {
             <div className="am-social">
               <button type="button" className="am-sbtn tap" onClick={() => oauth('google')}>{ICON.google}Google</button>
               <button type="button" className="am-sbtn tap" onClick={() => oauth('github')}>{ICON.github}GitHub</button>
-              {TELEGRAM_BOT
-                ? <div className="am-sbtn tg" ref={tgBox} />
-                : <button type="button" className="am-sbtn tap" disabled title={t('au.soon')}>{ICON.telegram}Telegram<small>{t('au.soon')}</small></button>}
+              <button type="button" className="am-sbtn tap" onClick={telegram}>{ICON.telegram}Telegram</button>
             </div>
             <div className="am-or"><span>{t('au.or')}</span></div>
             <form onSubmit={submit}>
