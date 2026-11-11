@@ -1151,3 +1151,11 @@ a.tcard:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(0,0,0,.
 }
 @media (max-width: 380px) { .isl-tabs.isl-seg button { flex-direction: column; gap: 1px; font-size: 10.5px; } .isl-tabs.isl-seg { height: 46px; } .isl-tabs.isl-seg button { height: 40px; } }
 @media (max-width: 860px) { .ph-modes button small { display: none; } .ph-zone small { font-size: 11px; } }
+
+/* телефон, закрытая пилюля: компактнее и плотнее (сквозь неё не должен просвечивать текст страницы) */
+@media (max-width: 860px) {
+  .island:not(.open) { --ctl: 36px; --g: 6px; font-size: 13px; --island-glass: color-mix(in srgb, var(--glass-base-island) 92%, transparent); }
+  .island:not(.open) .isl-main { font-size: 13px; padding: 0 10px; gap: 8px; }
+  .island:not(.open).wide { --w: min(300px, calc(100vw - 32px)); }
+  .island-dock { bottom: max(18px, calc(env(safe-area-inset-bottom) + 10px)); }
+}
