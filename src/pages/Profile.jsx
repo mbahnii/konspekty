@@ -6,9 +6,14 @@ import { useToast } from '../store/ui'
 import { useVideos } from '../lib/videos'
 import { accountInfo } from '../lib/account'
 import { ICON } from '../components/ProviderBadge'
+import { IChevDown } from '../components/Icons'
 import { PageHead } from './Home'
 
-// Профиль: как человек вошёл, имя и никнейм (можно менять), сколько у него конспектов
+// Профиль: шапка с аватаром, сгруппированные строки «подпись — значение» (как «Настройки» в iOS), «Зберегти» появляется плавно
+const Row = ({ label, children, hint, bad }) => (
+  <label className={`pf-row ${bad ? 'bad' : ''}`}><span className="pf-l">{label}</span><span className="pf-v">{children}</span>{hint && <small>{hint}</small>}</label>
+)
+
 export default function Profile({ onBack }) {
   const t = useT()
   const say = useToast((s) => s.say)
@@ -41,27 +46,36 @@ export default function Profile({ onBack }) {
   }
 
   if (!acc) return (
-    <div className="wrap">
+    <div className="wrap pf">
       <PageHead title={t('pf.title')} sub={t('pf.sub')} onBack={onBack} />
       <div className="empty"><b>{t('pf.need')}</b><div><button className="nf-btn tap" onClick={() => setLoginOpen(true)}>{t('login.go')}</button></div></div>
     </div>
   )
+  const initial = (acc.name || '?').trim().charAt(0).toUpperCase()
   return (
-    <div className="wrap">
+    <div className="wrap pf">
       <PageHead title={t('pf.title')} sub={t('pf.sub')} onBack={onBack} />
-      <div className="card pf-who">
-        <span className="pf-ic">{acc.picture ? <img src={acc.picture} alt="" referrerPolicy="no-referrer" /> : ICON[acc.provider] || ICON.email}</span>
-        <div className="pf-t"><b>{acc.name}</b><small>{t('pf.via')} {acc.label}{acc.provider !== 'telegram' && acc.sub && acc.sub !== acc.label ? ` · ${acc.sub}` : acc.provider === 'telegram' && acc.sub !== 'Telegram' ? ` · ${acc.sub}` : ''}</small></div>
-        <span className="pf-prov">{ICON[acc.provider] || ICON.email}</span>
-      </div>
-      <div className="card pf-form">
-        <label><span>{t('pf.name')}</span><input value={name} onChange={(e) => setName(e.target.value)} maxLength={40} autoComplete="name" /></label>
-        <label><span>{t('pf.nick')}</span><input value={nick} onChange={(e) => setNick(e.target.value.replace(/\s/g, ''))} maxLength={24} autoCapitalize="off" autoCorrect="off" spellCheck="false" className={nickOk ? '' : 'bad'} /><small className={nickOk ? '' : 'bad'}>{t('pf.nickHint')}</small></label>
-        {acc.provider !== 'telegram' && acc.email && <label><span>{t('pf.email')}</span><input value={acc.email} readOnly className="ro" /></label>}
-        <div className="pf-act"><button className="nf-btn tap pf-save" disabled={!dirty || busy || !nickOk} onClick={save}>{t('pf.save')}</button></div>
-      </div>
-      <div className="card pf-stat"><span>{t('pf.mine')}</span><b>{counts.mine}</b></div>
-      <button className="pf-out tap" onClick={async () => { await signOut(); onBack() }}>{t('pf.signout')}</button>
+
+      <section className="card pf-hero">
+        <span className="pf-ava">{acc.picture ? <img src={acc.picture} alt="" referrerPolicy="no-referrer" /> : <b>{initial}</b>}<i className="pf-badge">{ICON[acc.provider] || ICON.email}</i></span>
+        <h2>{acc.name}</h2>
+        <p>{t('pf.via')} {acc.label}{acc.sub && acc.sub !== acc.label ? ` · ${acc.sub}` : ''}</p>
+        <div className="pf-chips"><span className="chip">{t('pf.mine')}: {counts.mine}</span></div>
+      </section>
+
+      <section className="card pf-group">
+        <h3>{t('pf.profile')}</h3>
+        <Row label={t('pf.name')}><input value={name} onChange={(e) => setName(e.target.value)} maxLength={40} autoComplete="name" /></Row>
+        <Row label={t('pf.nick')} bad={!nickOk} hint={t('pf.nickHint')}><input value={nick} onChange={(e) => setNick(e.target.value.replace(/\s/g, ''))} maxLength={24} placeholder="nickname" autoCapitalize="off" autoCorrect="off" spellCheck="false" /></Row>
+        {acc.provider !== 'telegram' && acc.email && <Row label={t('pf.email')}><input value={acc.email} readOnly className="ro" /></Row>}
+        <div className={`pf-save ${dirty ? 'on' : ''}`}><div><button className="nf-btn tap" disabled={busy || !nickOk} onClick={save}>{t('pf.save')}</button></div></div>
+      </section>
+
+      <section className="card pf-group">
+        <h3>{t('pf.account')}</h3>
+        <div className="pf-row"><span className="pf-l">{t('pf.via')}</span><span className="pf-v pf-prov">{ICON[acc.provider] || ICON.email}{acc.label}</span></div>
+        <button className="pf-row pf-out tap" onClick={async () => { await signOut(); onBack() }}><span className="pf-l">{t('pf.signout')}</span><IChevDown className="i" /></button>
+      </section>
     </div>
   )
 }

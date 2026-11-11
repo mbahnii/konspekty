@@ -14,13 +14,14 @@ import { supabase } from '../lib/supabase'
 import { flyToList } from '../lib/fly'
 import { ms } from '../lib/motion'
 import { shareDefault } from '../lib/share'
+import { ytId } from '../lib/yt'
 import { setArrive, useArrive } from '../store/arrive'
 import { IYt, IPhoto, IPlus, IExpand, ICollapse, ISearch, ISystem, ISun, IMoon, ITrash } from './Icons'
 
 // Сколько показываем «готово» и «скоро зникне», прежде чем видео улетит в список
-const DONE_MS = 1500
+const DONE_MS = 1100
 const QMAX = 3                                           // строк очереди в пилюле (остальные — «ще N»), чтобы ничего не прокручивалось
-const LEAVE_MS = 15000                                   // сколько после «готово» висит обратный отсчёт, прежде чем видео улетит в список
+const LEAVE_MS = 0                                       // обратного отсчёта нет: показали «Готово» — и видео сразу улетает в список
 const STAGE = { download: 1, ocr: 1, pack: 1, 'waiting-summary': 2, summary: 2, translate: 2, published: 3 }
 const short = (label) => label.replace(/^(st|stage)\./, 'sh.')          // короткая подпись для телефона
 
@@ -53,7 +54,6 @@ function useClock(active) {
   return active ? now : Date.now()
 }
 
-const ytId = (u) => u.match(/(?:youtu\.be\/|[?&]v=|shorts\/|live\/|embed\/)([\w-]{11})/)?.[1]
 
 // Превью по ссылке: картинка сразу, название и канал подгружаются
 function usePreview(url) {
@@ -153,7 +153,7 @@ export default function Island({ open, setOpen }) {
   // «ушедшая» строка остаётся на экране, пока из неё вылетает шарик и она сворачивается
   const shown = items.filter((it) => { const ph = phases[it.id]; return !ph.gone || leaving[it.id] || (!ph.quiet && !flown.current.has(it.id)) })
   const lead = shown.find((it) => !leaving[it.id])
-  const leadPh = lead ? (phases[lead.id].gone ? { k: 4, mode: 'leaving', label: 'st.leaving' } : phases[lead.id]) : null
+  const leadPh = lead ? (phases[lead.id].gone ? { k: 4, mode: 'done', label: 'st.done' } : phases[lead.id]) : null
 
   // этап «скоро зникне» закончился → шарик летит в список, строка очереди сворачивается
   useEffect(() => {
@@ -245,7 +245,7 @@ export default function Island({ open, setOpen }) {
       <div className="isl-h">{t('isl.queue')}{shown.length > 0 && <span className="isl-hn">{shown.length}</span>}</div>
       {!session && <div className="isl-warn"><span>{t('isl.nologin')}</span><button className="tap" onClick={(e) => { e.stopPropagation(); setLoginOpen(true) }}>{t('login.go')}</button></div>}
       {shown.length ? shown.slice(0, QMAX).map((it) => {
-        const ph = phases[it.id].gone ? { k: 4, mode: 'leaving', label: 'st.leaving' } : phases[it.id]
+        const ph = phases[it.id].gone ? { k: 4, mode: 'done', label: 'st.done' } : phases[it.id]
         const step = ph.mode === 'run' || ph.mode === 'done' ? t('q.step', { a: Math.min(ph.k + 1, 5), b: 5 }) : null
         const kindTag = it.tr ? `${t('q.translate')} ${it.tr.toUpperCase()} · ` : it.kind && it.kind !== 'add' ? `${t(`q.${it.kind}`)} · ` : ''
         return (

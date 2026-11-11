@@ -1348,25 +1348,3 @@ a.tcard:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(0,0,0,.
 .ms-acc small { font-size: 11.5px; color: var(--text-3); overflow: hidden; text-overflow: ellipsis; max-width: 170px; }
 .mi:hover .ms-acc small { color: rgba(255,255,255,.8); }
 .mi .sc svg { width: 14px; height: 14px; }
-
-/* ---------- профиль ---------- */
-.pf-who { display: flex; align-items: center; gap: var(--s4); }
-.pf-ic { width: 56px; height: 56px; border-radius: 50%; overflow: hidden; display: grid; place-items: center; flex: none; background: var(--surface-2); }
-.pf-ic img { width: 100%; height: 100%; object-fit: cover; }
-.pf-ic .am-badge { position: static; width: 56px; height: 56px; border-radius: 50%; } .pf-ic .am-badge svg { width: 28px; height: 28px; }
-.pf-t { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
-.pf-t b { font-size: var(--fs-body); font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.pf-t small { color: var(--text-2); font-size: var(--fs-sub); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.pf-prov .am-badge { position: static; width: 28px; height: 28px; } .pf-prov .am-badge svg { width: 16px; height: 16px; }
-.pf-form { display: flex; flex-direction: column; gap: var(--s4); }
-.pf-form label { display: flex; flex-direction: column; gap: 4px; }
-.pf-form label > span { font-size: var(--fs-cap); font-weight: 600; color: var(--text-2); }
-.pf-form input { height: 44px; padding: 0 var(--s4); border-radius: var(--r-md); background: var(--surface-2); border: 1px solid transparent; color: var(--text); font: inherit; font-size: 16px; outline: none; transition: border-color calc(200ms * var(--mo)) var(--ease-out), background-color calc(200ms * var(--mo)) var(--ease-out); }
-.pf-form input:focus { border-color: var(--accent); background: var(--surface); }
-.pf-form input.bad { border-color: var(--danger); } .pf-form input.ro { color: var(--text-3); }
-.pf-form small { font-size: 11.5px; color: var(--text-3); } .pf-form small.bad { color: var(--danger); }
-.pf-act { display: flex; justify-content: flex-end; }
-.pf-save:disabled { opacity: .4; pointer-events: none; }
-.pf-stat { display: flex; align-items: center; justify-content: space-between; } .pf-stat b { font-size: var(--fs-large); font-variant-numeric: tabular-nums; }
-.pf-out { display: grid; place-items: center; width: 100%; height: 46px; margin-top: var(--s2); border-radius: var(--r-md); background: var(--surface); box-shadow: 0 0 0 1px var(--separator); color: var(--danger); font-weight: 600; }
-.pf-out:hover { background: color-mix(in srgb, var(--danger) 10%, var(--surface)); }

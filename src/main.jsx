@@ -8,6 +8,7 @@ import './app.css'
 import './styles/glass.css'
 import './styles/island.css'
 import './styles/motion.css'
+import './styles/profile.css'
 
 // Вход через Telegram (стандартный): после подтверждения Telegram возвращает на сайт с #tgAuthResult=… — забираем до роутера
 try {

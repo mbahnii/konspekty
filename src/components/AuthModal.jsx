@@ -10,6 +10,7 @@ import { QueueRing } from './QueueRing'
 // Вход и регистрация: почта + пароль (с кодом из письма), Google, GitHub, Telegram.
 // Всегда в DOM: открывается и закрывается одной анимацией. Включается флагом (lib/accounts.js).
 import { ICON } from './ProviderBadge'
+import { rowKey, decryptKey } from '../lib/tglogin'
 
 const score = (p) => [p.length >= 8, /[A-Z]/.test(p) && /[a-z]/.test(p), /\d/.test(p), /[^A-Za-z0-9]/.test(p) || p.length >= 12].filter(Boolean).length
 
@@ -69,7 +70,7 @@ export default function AuthModal() {
   // Telegram: открываем бота (t.me/<бот>?start=<код>), человек жмёт «Start», бот присылает сайту ключ входа
   // через Realtime-канал tg-login-<код> (функция Supabase «telegram-auth»). Запасной путь — кнопка-ссылка в чате с ботом.
   const [tgWait, setTgWait] = useState(null)        // { code, ch } пока ждём подтверждения в Telegram
-  const stopTg = () => setTgWait((w) => { if (w?.ch) supabase.removeChannel(w.ch); clearTimeout(w?.timer); return null })
+  const stopTg = () => setTgWait((w) => { if (w?.ch) supabase.removeChannel(w.ch); clearTimeout(w?.timer); clearInterval(w?.iv); if (w?.onVis) document.removeEventListener('visibilitychange', w.onVis); return null })
   const telegram = () => {
     setErr('')
     const code = [...crypto.getRandomValues(new Uint8Array(16))].map((b) => b.toString(16).padStart(2, '0')).join('')
@@ -79,8 +80,23 @@ export default function AuthModal() {
       stopTg()
       if (r.error) fail(r.error); else { say(t('login.ok')); setLoginOpen(false) }
     }).subscribe()
+    // запасной путь: вкладка могла «уснуть» в фоне и не получить мгновенный ключ — спрашиваем зашифрованную запись раз в 2 с и при возврате на вкладку
+    let busyPoll = false
+    const poll = async () => {
+      if (busyPoll) return; busyPoll = true
+      try {
+        const { data } = await supabase.from('site').select('value').eq('key', await rowKey(code)).maybeSingle()
+        if (data?.value?.ct) {
+          const r = await supabase.auth.verifyOtp({ token_hash: await decryptKey(code, data.value), type: 'magiclink' })
+          if (!r.error) { stopTg(); say(t('login.ok')); setLoginOpen(false); supabase.from('site').delete().eq('key', await rowKey(code)) }
+        }
+      } catch { /* повторим */ }
+      busyPoll = false
+    }
+    const iv = setInterval(poll, 2000), onVis = () => { if (!document.hidden) poll() }
+    document.addEventListener('visibilitychange', onVis)
     const timer = setTimeout(stopTg, 10 * 60 * 1000)
-    setTgWait({ code, ch, link, timer })
+    setTgWait({ code, ch, link, timer, iv, onVis })
     window.open(link, '_blank', 'noopener')           // на телефоне откроется приложение Telegram
   }
   useEffect(() => { if (!loginOpen) stopTg() }, [loginOpen]) // eslint-disable-line
