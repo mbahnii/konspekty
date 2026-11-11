@@ -207,11 +207,9 @@ export default function Island({ open, setOpen }) {
     <div className="island-dock">
       <div ref={box} className={`island ${open ? 'open' : ''} ${wide ? 'wide' : ''} ${square ? 'square' : ''} ${photoOpen ? 'photo' : ''}`}>
         <div className="isl-panel"><div className="isl-inner">
-          <div className="isl-tabs" role="tablist">
-            {[['video', <IYt key="i" />, 'pane.video'], ['photo', <IPhoto key="i" />, 'pane.photo'], ['search', <ISearch key="i" />, 'pane.search'], ['look', <ISun key="i" />, 'pane.look']].map(([id, ic, lb]) => (
-              <button key={id} role="tab" aria-selected={pane === id} className={`tap ${pane === id ? 'on' : ''}`} onClick={(e) => { e.stopPropagation(); setPane(id) }}>{ic}<span>{t(lb)}</span></button>
-            ))}
-          </div>
+          <Segmented className="isl-seg isl-tabs" value={pane} onChange={setPane}
+            items={[['video', <IYt key="i" />, 'pane.video'], ['photo', <IPhoto key="i" />, 'pane.photo'], ['search', <ISearch key="i" />, 'pane.search'], ['look', <ISun key="i" />, 'pane.look']]
+              .map(([id, ic, lb]) => ({ id, label: <>{ic}<span>{t(lb)}</span></> }))} />
           <div className="isl-pane-wrap" ref={paneOuter}><div ref={paneInner} className="isl-pane-in">
             {pane === 'video' && <div className="isl-pane" key="video">
               <div className="isl-link">

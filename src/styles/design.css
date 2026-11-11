@@ -1082,3 +1082,72 @@ a.tcard:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(0,0,0,.
   .ph-title input { flex: 1 1 auto; } .ph-title .go { flex: none; width: auto; padding: 0 16px; }
   .modal.am { max-height: calc(100dvh - 16px); }
 }
+
+/* =====================================================================
+   Пилюля, раунд 10: единая сетка (как в todo-main). Один отступ --g, одна высота --ctl,
+   внутренний радиус = внешний − отступ. Вкладки — переключатель с ездящей плашкой.
+   ===================================================================== */
+.island { --g: 8px; --ctl: 40px; --rin: 12px; font-size: 13.5px; }
+.island.open { --r: 22px; }
+.island.square { --rin: 8px; }
+.isl-inner { padding: var(--g) var(--g) 0; }
+.isl-pane-in { padding: var(--g) 0 0; display: block; }
+.isl-pane > * + * { margin-top: var(--g); }
+.isl-bar { height: calc(var(--ctl) + var(--g) * 2); padding: var(--g); gap: 6px; }
+.isl-main, .isl-btn { height: var(--ctl); }
+.isl-btn { width: var(--ctl); }
+/* вкладки */
+.isl-tabs.isl-seg { display: grid; grid-template-columns: repeat(4, 1fr); height: var(--ctl); padding: 3px; gap: 0; border-radius: var(--rin); width: 100%; }
+.isl-tabs.isl-seg button { height: calc(var(--ctl) - 6px); min-width: 0; padding: 0 6px; display: flex; align-items: center; justify-content: center; gap: 6px; border-radius: calc(var(--rin) - 3px);
+  font-size: 12.5px; font-weight: 600; flex-direction: row; }
+.isl-tabs.isl-seg button svg { width: 16px; height: 16px; flex: none; }
+.isl-tabs.isl-seg button span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.isl-tabs.isl-seg .thumb { border-radius: calc(var(--rin) - 3px); }
+/* поля: одна высота и радиус */
+.isl-link, .isl-search { height: var(--ctl); border-radius: var(--rin); margin: 0; }
+.isl-link { padding: 3px; }
+.isl-link .go { height: calc(var(--ctl) - 6px); border-radius: calc(var(--rin) - 3px); padding: 0 14px; font-size: 13px; }
+.isl-link input, .isl-search input { font-size: 14px; }
+.isl-search { padding: 0 12px; }
+.isl-prev { margin-top: 0 !important; }
+.isl-prev.show { margin-top: var(--g) !important; }
+.prev { padding: 6px; border-radius: var(--rin); }
+/* заголовок секции — тихий, без лишней высоты */
+.isl-h { padding: 4px 4px 0; font-size: 11px; font-weight: 600; letter-spacing: .05em; }
+.isl-warn { margin: 0; min-height: var(--ctl); padding: 6px 6px 6px 12px; border-radius: var(--rin); font-size: 12.5px; }
+.isl-warn button { height: calc(var(--ctl) - 12px); border-radius: calc(var(--rin) - 6px); padding: 0 12px; }
+/* очередь: строки одной высоты, без лишних полей */
+.isl-pane .isl-qw + .isl-qw { margin-top: 2px; }
+.isl-q { border-radius: var(--rin); }
+.isl-q .rc { min-height: 48px; padding: 6px 4px 6px 6px; gap: 10px; }
+.isl-q img, .isl-q .noimg { width: 48px; height: 27px; border-radius: 6px; }
+.isl-q .qt b { font-size: 13px; }
+.isl-q .qsub, .slabel { font-size: 11.5px; }
+.isl-q .trash { width: 30px; height: 30px; }
+.qring { width: 26px; height: 26px; }
+.isl-empty { padding: 4px 4px 2px; font-size: 12.5px; }
+.isl-more { padding: 0 4px; font-size: 12px; }
+.isl-row { min-height: var(--ctl); padding: 0 10px; border-radius: var(--rin); font-size: 13px; }
+/* вид: два переключателя одной высоты */
+.isl-seg.full { height: var(--ctl); padding: 3px; border-radius: var(--rin); }
+.isl-seg.full button { min-height: 0; height: calc(var(--ctl) - 6px); border-radius: calc(var(--rin) - 3px); font-size: 12.5px; }
+/* фото: та же сетка */
+.ph > * + * { margin-top: var(--g); }
+.ph-modes { height: var(--ctl); padding: 3px; border-radius: var(--rin); }
+.ph-modes button { height: calc(var(--ctl) - 6px); padding: 0 8px; flex-direction: row; justify-content: center; gap: 6px; border-radius: calc(var(--rin) - 3px); font-size: 12.5px; }
+.ph-modes button small { font-size: 11px; opacity: .6; }
+.ph-zone { margin: 0; min-height: 88px; padding: 12px; border-radius: var(--rin); gap: 2px; }
+.ph-grid { margin: 0 -2px; padding: 2px; }
+.ph-th, .ph-add { width: 64px; height: 64px; border-radius: 10px; }
+.ph-title { height: var(--ctl); padding: 3px; border-radius: var(--rin); }
+.ph-title .go { height: calc(var(--ctl) - 6px); border-radius: calc(var(--rin) - 3px); }
+.ph-cam { height: var(--ctl); border-radius: var(--rin); margin: 0; }
+/* телефон */
+@media (max-width: 860px), (max-height: 520px) {
+  .island { --ctl: 42px; }
+  .isl-tabs.isl-seg button span { font-size: 12px; }
+  .ph-title { height: auto; padding: 0; background: none; }
+  .ph-title input, .ph-title .go { height: var(--ctl); border-radius: var(--rin); }
+}
+@media (max-width: 380px) { .isl-tabs.isl-seg button { flex-direction: column; gap: 1px; font-size: 10.5px; } .isl-tabs.isl-seg { height: 46px; } .isl-tabs.isl-seg button { height: 40px; } }
+@media (max-width: 860px) { .ph-modes button small { display: none; } .ph-zone small { font-size: 11px; } }
