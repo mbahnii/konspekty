@@ -44,6 +44,24 @@ async function syncKv() {
   saveMeta()
 }
 
+// «звонок» ноутбуку: worker держит открытое соединение и сразу проверяет очередь (без ожидания)
+export function wakeWorker() {
+  const u = user(); if (!u) return
+  const bell = supabase.channel('wake-' + u.id)
+  bell.send({ type: 'broadcast', event: 'wake', payload: {} }).catch(() => {}).finally(() => supabase.removeChannel(bell))
+}
+
+// Нейросеть сказала «это не материал для конспекта» — человек решил «всё равно сделать»: снимаем вопрос, worker пишет конспект
+export async function confirmQueue(id) {
+  const { data, error } = await supabase.from('queue').select('note').eq('id', id).maybeSingle()
+  if (error || !data) throw error || new Error('no row')
+  let n = {}; try { n = JSON.parse(data.note) ?? {} } catch { /* пусто */ }
+  const note = JSON.stringify({ ...n, force: true, stage: 'summary', reason: null, claude_tries: 0 })
+  const r = await supabase.from('queue').update({ note, updated_at: new Date().toISOString() }).eq('id', id)
+  if (r.error) throw r.error
+  wakeWorker(); schedule(300)
+}
+
 async function syncQueue() {
   const q = useQueue.getState()
   if (q.removed.length) {
@@ -54,9 +72,7 @@ async function syncQueue() {
   if (pending.length) {
     const { error } = await supabase.from('queue').upsert(pending.map(queueRow), { onConflict: 'id' })
     if (error) throw error
-    // «звонок» ноутбуку: worker держит открытое соединение и сразу проверяет очередь (без ожидания)
-    const bell = supabase.channel('wake-' + user().id)
-    bell.send({ type: 'broadcast', event: 'wake', payload: {} }).catch(() => {}).finally(() => supabase.removeChannel(bell))
+    wakeWorker()
   }
   const { data, error } = await supabase.from('queue').select('id,url,kind,status,note,created_at,updated_at').order('created_at')
   if (error) throw error
@@ -67,7 +83,7 @@ async function syncQueue() {
   const mine = cur.items.filter((x) => x.pending && !pending.some((p) => p.id === x.id))   // добавлено, пока шёл запрос
   useQueue.setState({
     removed: cur.removed.filter((id) => !q.removed.includes(id)),
-    items: [...data.map((r) => { let n = {}; try { n = JSON.parse(r.note) ?? {} } catch { /* ignore */ } return { id: r.id, url: r.url, kind: r.kind, status: r.status, stage: n.stage, at: Date.parse(r.created_at), upd: Date.parse(r.updated_at), title: n.title, channel: n.channel, vid: n.vid, tr: n.translate, thumb: n.thumb, photos: n.photos?.length ? n.photos : undefined } }), ...mine],
+    items: [...data.map((r) => { let n = {}; try { n = JSON.parse(r.note) ?? {} } catch { /* ignore */ } return { id: r.id, url: r.url, kind: r.kind, status: r.status, stage: n.stage, at: Date.parse(r.created_at), upd: Date.parse(r.updated_at), title: n.title, channel: n.channel, vid: n.vid, tr: n.translate, thumb: n.thumb, photos: n.photos?.length ? n.photos : undefined, reason: n.reason || undefined } }), ...mine],
   })
   if (newlyDone) {                      // видео опубликовано — показать его в списке сразу
     // новое видео не показываем в списке сразу: сначала из очереди «прилетит» шарик (lib/fly.js)

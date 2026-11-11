@@ -4,7 +4,8 @@ import { useLibrary } from '../store/library'
 import { useQueue, useToast } from '../store/ui'
 import { useAuth } from '../store/auth'
 import { canDelete } from '../lib/admin'
-import { IYt, ILink, IDone, IPin, IRedo, ITrash, IOpen, IPhoto } from './Icons'
+import { useMove } from './MovePane'
+import { IYt, ILink, IDone, IPin, IRedo, ITrash, IOpen, IPhoto, IStack } from './Icons'
 
 // Пункты меню видео (⋯ и правый клик) — все рабочие
 // Метки видео, как цветные теги в Finder: цвет + значок (показываются в списке)
@@ -44,6 +45,7 @@ export function useVideoMenu() {
     v.ready && '-',
     v.ready && { icon: <IDone />, label: t(lib.learned[v.id] ? 'm.unlearned' : 'm.learned'), onSelect: () => { lib.toggle('learned', v.id); say(t(lib.learned[v.id] ? 'toast.unlearned' : 'toast.learned')) } },
     { icon: <IPin />, label: t(lib.pinned[v.id] ? 'm.unpin' : 'm.pin'), onSelect: () => lib.toggle('pinned', v.id) },
+    v.ready && !!session?.user?.id && v.owner === session.user.id && { icon: <IStack />, label: t('mv.menu'), onSelect: () => setTimeout(() => useMove.getState().open(v), 60) },   // «Мої» ⇄ «Загальні» — только свои
     !photo && { icon: <IRedo />, label: t('m.redo'), onSelect: () => { add(v.url, 'reprocess', { title: v.title, vid: v.id }); say(t('toast.redo')) } },
     ...(canDelete(session, v) ? ['-'] : []),     // удалять можно только свои конспекты (администратор — любые)
     canDelete(session, v) && { icon: <ITrash />, label: t('m.delete'), danger: true, onSelect: () => { lib.setFlag('hidden', v.id, true); add(v.url || `photos:${v.id}`, 'delete', { title: v.title, vid: v.id }); say(t('toast.deleted')); nav('/') } },

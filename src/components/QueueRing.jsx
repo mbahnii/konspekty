@@ -10,7 +10,7 @@ const HUES = [16, 34, 50, 84, 138]
 export const stepColor = (k) => `hsl(${HUES[Math.max(0, Math.min(STEPS - 1, k))]} 86% 54%)`
 
 // цвет кольца и свечения за строкой: по этапу
-export const ringColor = (k, mode) => mode === 'error' ? 'hsl(4 100% 62%)' : mode === 'local' ? 'hsl(0 0% 62%)'
+export const ringColor = (k, mode) => mode === 'error' ? 'hsl(4 100% 62%)' : mode === 'ask' ? 'hsl(38 100% 55%)' : mode === 'local' ? 'hsl(0 0% 62%)'
   : mode === 'done' || mode === 'leaving' ? stepColor(STEPS - 1) : stepColor(k)
 
 // сколько процентов заполнено: то же число ведёт и кольцо, и свечение за строкой

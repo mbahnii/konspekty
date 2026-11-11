@@ -167,12 +167,12 @@ test('shareDefault: головна, телефон', () => {
 test('shareDefault: «Мої» — завжди особисте', () => {
   for (const hash of ['', '#/', '#/topics']) for (const wide of [false, true]) { env({ hash, wide, catalog: 'mine' }); assert.equal(shareDefault(), false, `${hash} wide=${wide}`) }
 })
-test('shareDefault: #/topics на телефоні — особисте; на ноутбуці — публічне', () => {
-  env({ hash: '#/topics', wide: false, catalog: 'all' }); assert.equal(shareDefault(), false)
-  env({ hash: '#/topics', wide: false, catalog: 'public' }); assert.equal(shareDefault(), false)
-  env({ hash: '#/topics', wide: true, catalog: 'all' }); assert.equal(shareDefault(), true)
-  env({ hash: '#/video/abc', wide: false, catalog: 'all' }); assert.equal(shareDefault(), false)
-  env({ hash: '#/video/abc', wide: true, catalog: 'public' }); assert.equal(shareDefault(), true)
+test('shareDefault: важлива ЛИШЕ вкладка в момент додавання — сторінка й пристрій не впливають (правило власника 12.11)', () => {
+  for (const hash of ['#/', '#/topics', '#/video/abc', '#/profile']) for (const wide of [false, true]) {
+    env({ hash, wide, catalog: 'all' }); assert.equal(shareDefault(), true, `«Усі» ${hash} wide=${wide}`)
+    env({ hash, wide, catalog: 'public' }); assert.equal(shareDefault(), true, `«Загальні» ${hash} wide=${wide}`)
+    env({ hash, wide, catalog: 'mine' }); assert.equal(shareDefault(), false, `«Мої» ${hash} wide=${wide}`)
+  }
 })
 test('shareDefault: повертає саме boolean', () => {
   env({ hash: '#/', catalog: 'all' }); assert.equal(typeof shareDefault(), 'boolean')

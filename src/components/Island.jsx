@@ -9,8 +9,10 @@ import { useAuth, setLoginOpen } from '../store/auth'
 import Segmented from './Segmented'
 import { QueueRing, StageLabel, ringColor, ringPct } from './QueueRing'
 import PhotoPanel from './PhotoPanel'
+import MovePane, { useMove } from './MovePane'
 import { accountsOn } from '../lib/accounts'
 import { supabase } from '../lib/supabase'
+import { confirmQueue } from '../lib/sync'
 import { flyToList } from '../lib/fly'
 import { ms } from '../lib/motion'
 import { shareDefault } from '../lib/share'
@@ -30,6 +32,7 @@ function phaseOf(it, seen, now) {
   if (it.pending) return { k: 0, mode: 'local', label: 'st.local' }
   if (it.status === 'error') return { k: 0, mode: 'error', label: 'st.error' }
   if (it.status === 'queued') return { k: 0, mode: 'run', label: 'st.queued' }
+  if (it.status === 'processing' && it.stage === 'needs-confirm') return { k: 2, mode: 'ask', label: 'st.ask' }
   if (it.status === 'processing') {
     const k = STAGE[it.stage] ?? 1
     return { k, mode: 'run', label: it.stage ? `stage.${it.stage}` : 'st.processing' }
@@ -127,7 +130,14 @@ export default function Island({ open, setOpen }) {
     ro?.observe(m)
     return () => { removeEventListener('resize', on); ro?.disconnect() }
   })
+  // состояние «Де лежить конспект»: открывается из меню конспекта, вкладки при этом прячутся (отдельный режим, как Face ID)
+  const mv = useMove((s) => s.v)
+  const lastMv = useRef(null)
+  if (mv) lastMv.current = mv
+  useEffect(() => { if (mv) { setOpen(true); setPane('move') } }, [mv]) // eslint-disable-line
+  useEffect(() => { if (!open && useMove.getState().v) useMove.getState().close() }, [open])
   const pickPane = (p) => {
+    if (p !== 'move' && useMove.getState().v) useMove.getState().close()
     setPane(p)
     if (p === 'search') searchIn.current?.focus({ preventScroll: true })    // сразу в нажатии — иначе iPhone не покажет клавиатуру
   }
@@ -279,6 +289,16 @@ export default function Island({ open, setOpen }) {
               </div>
               <button className="del" onClick={() => drop(it.id)}>{t('isl.confirm')}</button>
             </div>
+            {/* нейросеть сомневается, что это материал для конспекта: объясняем почему и даём решить */}
+            <div className={`dyn-grow ${ph.mode === 'ask' ? 'on' : ''}`}><div>
+              <div className="q-ask">
+                <p>{it.reason || t('q.askDefault')}</p>
+                <div className="q-ask-b">
+                  <button className="tap" onClick={() => setConfirm(it.id)}>{t('m.delete')}</button>
+                  <button className="tap go" onClick={() => confirmQueue(it.id).then(() => say(t('q.askOk'))).catch(() => say(t('au.fail')))}>{t('q.askYes')}</button>
+                </div>
+              </div>
+            </div></div>
           </div></div>
         )
       }) : <div className="isl-empty">{t('isl.empty')}</div>}
@@ -292,9 +312,11 @@ export default function Island({ open, setOpen }) {
       <div ref={box} className={`dyn ${open ? 'open' : ''} ${wide ? 'wide' : ''} ${sizing ? 'sizing' : ''}`}>
         <div className="dyn-panel" ref={panel} aria-hidden={!open}>
           <div className="dyn-inner" ref={inner}>
+            <div className={`dyn-grow ${pane === 'move' ? '' : 'on'}`}><div>
             <Segmented className="isl-seg isl-tabs" value={pane} onChange={pickPane}
               items={[['video', <IYt key="i" />, 'pane.video'], ['photo', <IPhoto key="i" />, 'pane.photo'], ['search', <ISearch key="i" />, 'pane.search'], ['look', <ISun key="i" />, 'pane.look']]
                 .map(([id, ic, lb]) => ({ id, label: <>{ic}<span>{t(lb)}</span></> }))} />
+            </div></div>
             <div className="dyn-panes">
               <div className={paneCls('video')} aria-hidden={pane !== 'video'}>
                 <div className="isl-link">
@@ -318,6 +340,9 @@ export default function Island({ open, setOpen }) {
                 {results.slice(0, 5).map((r, i) => <button key={i} className="isl-row tap" onClick={() => { setOpen(false); r.go() }}><span className="nm">{r.name}<small className="from">{r.from}</small></span><span className="st">{t(r.kind)}</span></button>)}
                 {lq && !results.length && <div className="isl-empty">{t('isl.none')}</div>}
                 {!lq && <div className="isl-empty">{t('isl.searchHint')}</div>}
+              </div>
+              <div className={paneCls('move')} aria-hidden={pane !== 'move'}>
+                {lastMv.current && <MovePane key={lastMv.current.id} v={lastMv.current} onDone={() => { useMove.getState().close(); setPane('video') }} />}
               </div>
               <div className={paneCls('look')} aria-hidden={pane !== 'look'}>
                 <div className="dyn-set"><span>{t('isl.theme')}</span>

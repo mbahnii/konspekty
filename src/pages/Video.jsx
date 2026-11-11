@@ -179,6 +179,7 @@ export default function Video({ onBack }) {
             <span className="chip">{meta.channel}</span>
             <span className="chip"><IClock /> {photos ? `${meta.pages} ${t('ph.page')}` : fmt(meta.duration)} · {t('read', { n: readMin })}</span>
             <span className="chip">{t(`level.${summary.level}`)}</span>
+            {summary.kind && <span className="chip kind">{t(`kind.${summary.kind}`)}</span>}
           </div>
 
           <div className="sticky" ref={stickyRef}>
@@ -194,6 +195,7 @@ export default function Video({ onBack }) {
               <>
                 {trWaiting && <div className="card draft"><p>✦ {t('tr.pending', { l: LANGS[noteLang] })}</p></div>}
                 {summary.engine && <div className="card draft"><p>✦ {t('draft', { m: summary.engine })}</p></div>}
+                {summary.kind_note && <div className="card kind-note"><p>{inline(summary.kind_note)}</p></div>}
                 <div className="card"><p className="tldr">{inline(summary.tldr)}</p></div>
                 <div className="card"><h2>{t('keyPoints')}</h2>
                   <div className="list">{summary.key_points.map((k, i) => (
