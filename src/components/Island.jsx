@@ -117,6 +117,16 @@ export default function Island({ open, setOpen }) {
     on(); vv.addEventListener('resize', on); vv.addEventListener('scroll', on)
     return () => { vv.removeEventListener('resize', on); vv.removeEventListener('scroll', on) }
   }, [])
+  // --cw = ширина колонки контента на этой странице: пилюля «шире» никогда не выходит за неё
+  useEffect(() => {
+    const d = dock.current, m = document.querySelector('main')
+    if (!d || !m) return
+    const on = () => d.style.setProperty('--cw', Math.min(760, m.clientWidth || innerWidth - 32) + 'px')
+    on(); addEventListener('resize', on)
+    const ro = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(on) : null
+    ro?.observe(m)
+    return () => { removeEventListener('resize', on); ro?.disconnect() }
+  })
   const pickPane = (p) => {
     setPane(p)
     if (p === 'search') searchIn.current?.focus({ preventScroll: true })    // сразу в нажатии — иначе iPhone не покажет клавиатуру

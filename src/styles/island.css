@@ -45,16 +45,16 @@
 }
 .dyn.wide { --w: min(284px, calc(var(--cw) - 56px)); }
 .dyn.open { --w: max(292px, calc(var(--cw) * .8)); --r: calc(24px * var(--k)); }
-.dyn.open.wide { --w: var(--cw); --pane-max: min(60dvh, calc(var(--vvh, 100dvh) - 170px)); }
+.dyn.open.wide { --w: var(--cw); --pane-max: min(46dvh, calc(var(--vvh, 100dvh) - 170px)); }
 .dyn:not(.open):active { transform: scale(.96); }
 @media (hover: hover) { .dyn:not(.open):hover { transform: scale(1.025); } }
 
 /* телефон лёжа: мало высоты — пилюля чуть больше закрытой, открытая не во весь экран */
 @media (max-height: 520px) and (min-width: 561px) {
-  .dyn { --w: 236px; --pane-max: calc(var(--vvh, 100dvh) - 186px); }
+  .dyn { --w: 236px; --pane-max: min(46dvh, calc(var(--vvh, 100dvh) - 186px)); }
   .dyn.wide { --w: 330px; }
   .dyn.open { --w: min(420px, var(--cw)); }
-  .dyn.open.wide { --w: min(580px, var(--cw)); --pane-max: calc(var(--vvh, 100dvh) - 186px); }
+  .dyn.open.wide { --w: min(580px, var(--cw)); --pane-max: min(46dvh, calc(var(--vvh, 100dvh) - 186px)); }
 }
 /* планшет / узкое окно */
 @media (min-width: 561px) and (min-height: 521px) {
@@ -218,3 +218,23 @@ html[data-motion="max"] { --dyn-spring: cubic-bezier(.3, 1.6, .5, 1); }
 /* отклик как у Apple: нажатие реагирует сразу, отпускание — мягкая пружинка; кнопка пилюли и вкладки отвечают без задержки */
 .dyn-btn:active, .dyn-main:active { transition-duration: calc(60ms * var(--mo)); }
 .dyn .isl-seg button { transition-delay: 0ms; }
+
+/* кнопка «Надіслати» всегда на виду: приклеена к низу прокручиваемой панели (на телефоне лёжа она раньше пряталась под нижней панелью) */
+.dyn .ph .ph-send { position: sticky; bottom: 0; z-index: 2; box-shadow: 0 0 0 var(--g) var(--island-glass); }
+@media (max-height: 520px) { .dyn .ph .ph-list ol { max-height: 92px; } }
+/* ноутбук: в обычной открытой пилюле помещаются 5 страниц целиком — строки компактнее */
+@media (min-width: 861px) and (min-height: 521px) {
+  .dyn .ph-row { padding: 4px 5px; } .dyn .ph-pic { width: 38px; height: 48px; }
+  .dyn .ph-ctl button { width: 32px; height: 32px; } .dyn .ph-ctl button svg { width: 16px; height: 16px; }
+  .dyn .ph .ph-list ol { max-height: max(150px, calc(var(--pane-max) - 190px)); }
+}
+/* подсказки в полях чуть контрастнее */
+.dyn input::placeholder { color: color-mix(in srgb, var(--island-text) 58%, transparent); }
+.dyn .ph-send:disabled { opacity: .6; }
+
+/* ноутбук: название и «Надіслати» в одной строке — пилюля с 5 фото ниже (экономим высоту) */
+@media (min-width: 861px) and (min-height: 521px) {
+  .dyn .ph { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: var(--g); }
+  .dyn .ph > .ph-modes, .dyn .ph > .ph-list, .dyn .ph > .ph-zone, .dyn .ph > .ph-two, .dyn .ph > .ph-bar, .dyn .ph > p { grid-column: 1 / -1; }
+  .dyn .ph .ph-send { width: auto; min-width: 150px; padding: 0 18px; }
+}
