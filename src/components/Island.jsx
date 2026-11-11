@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useT } from '../i18n'
 import { useSettings } from '../store/settings'
@@ -12,10 +12,11 @@ import PhotoPanel from './PhotoPanel'
 import { accountsOn } from '../lib/accounts'
 import { supabase } from '../lib/supabase'
 import { flyToList } from '../lib/fly'
-import { IPhoto, IPlus, IExpand, ICollapse, ISearch, ISystem, ISun, IMoon, ITrash } from './Icons'
+import { IYt, IPhoto, IPlus, IExpand, ICollapse, ISearch, ISystem, ISun, IMoon, ITrash } from './Icons'
 
 // Сколько показываем «готово» и «скоро зникне», прежде чем видео улетит в список
 const DONE_MS = 1500
+const QMAX = 3                                           // строк очереди в пилюле (остальные — «ще N»), чтобы ничего не прокручивалось
 const LEAVE_MS = 15000                                   // сколько после «готово» висит обратный отсчёт, прежде чем видео улетит в список
 const STAGE = { download: 1, ocr: 1, pack: 1, 'waiting-summary': 2, summary: 2, translate: 2, published: 3 }
 const short = (label) => label.replace(/^(st|stage)\./, 'sh.')          // короткая подпись для телефона
@@ -84,8 +85,19 @@ export default function Island({ open, setOpen }) {
   const [q, setQ] = useState('')
   const [confirm, setConfirm] = useState(null)
   const seenAlive = useRef(new Set())
-  const [photoOpen, setPhotoOpen] = useState(false)
-  const wantPhotos = useCallback(() => { setOpen(true); setPhotoOpen(true) }, [setOpen])      // файлы тащат над окном — открываем пилюлю с панелью фото
+  // Открытая пилюля — несколько «состояний», как Dynamic Island: видео, фото, поиск, вид. Без прокрутки: высота подстраивается сама.
+  const [pane, setPane] = useState('video')
+  const photoOpen = pane === 'photo'
+  const setPhotoOpen = (v) => setPane(v ? 'photo' : 'video')
+  const wantPhotos = useCallback(() => { setOpen(true); setPane('photo') }, [setOpen])      // файлы тащат над окном — открываем пилюлю с панелью фото
+  const paneOuter = useRef(null), paneInner = useRef(null)
+  useLayoutEffect(() => {
+    const o = paneOuter.current, i = paneInner.current
+    if (!o || !i || typeof ResizeObserver === 'undefined') return
+    const fit = () => { o.style.height = i.offsetHeight + 'px' }
+    fit(); const ro = new ResizeObserver(fit); ro.observe(i)
+    return () => ro.disconnect()
+  }, [])
   const box = useRef(null), input = useRef(null)
   const all = useAllSummaries(open)
   const prev = usePreview(url)
@@ -194,24 +206,28 @@ export default function Island({ open, setOpen }) {
   return (
     <div className="island-dock">
       <div ref={box} className={`island ${open ? 'open' : ''} ${wide ? 'wide' : ''} ${square ? 'square' : ''} ${photoOpen ? 'photo' : ''}`}>
-        <div className="isl-panel"><div className="isl-inner"><div className="isl-scroll">
-          <div className="isl-link">
-            <input ref={input} value={url} onChange={(e) => setUrl(e.target.value)} placeholder={t('isl.link')} inputMode="url" autoCapitalize="off" autoCorrect="off"
-              onKeyDown={(e) => e.key === 'Enter' && submit()} />
-            <button className="go tap" onClick={submit}>{t('isl.go')}</button>
+        <div className="isl-panel"><div className="isl-inner">
+          <div className="isl-tabs" role="tablist">
+            {[['video', <IYt key="i" />, 'pane.video'], ['photo', <IPhoto key="i" />, 'pane.photo'], ['search', <ISearch key="i" />, 'pane.search'], ['look', <ISun key="i" />, 'pane.look']].map(([id, ic, lb]) => (
+              <button key={id} role="tab" aria-selected={pane === id} className={`tap ${pane === id ? 'on' : ''}`} onClick={(e) => { e.stopPropagation(); setPane(id) }}>{ic}<span>{t(lb)}</span></button>
+            ))}
           </div>
-          <button className={`isl-photobtn tap ${photoOpen ? 'on' : ''}`} onClick={() => setPhotoOpen(!photoOpen)} aria-expanded={photoOpen}><IPhoto />{t('ph.btn')}</button>
-          <div className={`isl-ph ${photoOpen ? 'show' : ''}`}><div><PhotoPanel open={open && photoOpen} onDone={() => setPhotoOpen(false)} onWantOpen={wantPhotos} /></div></div>
-          <div className={`isl-prev ${prev.shown ? 'show' : ''}`}><div>
-            <div className="prev">
-              {p.id && <img src={`https://i.ytimg.com/vi/${p.id}/mqdefault.jpg`} alt="" />}
-              <div className="pt">{p.title ? <><b>{p.title}</b><small>{p.channel}</small></> : p.loading ? <span className="sk" /> : <small>{shortUrl(url)}</small>}{dup && <span className="dup">{t(dup)}</span>}</div>
-            </div>
-          </div></div>
-
-          <div className="isl-h">{t('isl.queue')}</div>
+          <div className="isl-pane-wrap" ref={paneOuter}><div ref={paneInner} className="isl-pane-in">
+            {pane === 'video' && <div className="isl-pane" key="video">
+              <div className="isl-link">
+                <input ref={input} value={url} onChange={(e) => setUrl(e.target.value)} placeholder={t('isl.link')} inputMode="url" autoCapitalize="off" autoCorrect="off"
+                  onKeyDown={(e) => e.key === 'Enter' && submit()} />
+                <button className="go tap" onClick={submit}>{t('isl.go')}</button>
+              </div>
+              <div className={`isl-prev ${prev.shown ? 'show' : ''}`}><div>
+                <div className="prev">
+                  {p.id && <img src={`https://i.ytimg.com/vi/${p.id}/mqdefault.jpg`} alt="" />}
+                  <div className="pt">{p.title ? <><b>{p.title}</b><small>{p.channel}</small></> : p.loading ? <span className="sk" /> : <small>{shortUrl(url)}</small>}{dup && <span className="dup">{t(dup)}</span>}</div>
+                </div>
+              </div></div>
+          <div className="isl-h">{t('isl.queue')}{shown.length > 0 && <span className="isl-hn">{shown.length}</span>}</div>
           {!session && <div className="isl-warn"><span>{t('isl.nologin')}</span><button className="tap" onClick={(e) => { e.stopPropagation(); setLoginOpen(true) }}>{t('login.go')}</button></div>}
-          {shown.length ? shown.map((it) => {
+          {shown.length ? shown.slice(0, QMAX).map((it) => {
             const ph = phases[it.id].gone ? { k: 4, mode: 'leaving', label: 'st.leaving' } : phases[it.id]
             const step = ph.mode === 'run' || ph.mode === 'done' ? t('q.step', { a: Math.min(ph.k + 1, 5), b: 5 }) : null
             const kindTag = it.tr ? `${t('q.translate')} ${it.tr.toUpperCase()} · ` : it.kind && it.kind !== 'add' ? `${t(`q.${it.kind}`)} · ` : ''
@@ -225,7 +241,6 @@ export default function Island({ open, setOpen }) {
                       <span className="qsub">
                         <StageLabel text={t(ph.label)} className={`st-${ph.mode}`} />
                         {step && <span className="qstep">{step}</span>}
-                        <small className="qurl">{shortUrl(it.url)}</small>
                       </span>
                     </div>
                     <QueueRing k={ph.k} mode={ph.mode} frac={ph.frac} ringRef={(el) => { ringEls.current[it.id] = el }} />
@@ -235,21 +250,56 @@ export default function Island({ open, setOpen }) {
                 </div>
               </div></div>
             )
-          }) : <div className="isl-row"><span className="st" style={{ margin: 0 }}>{t('isl.empty')}</span></div>}
-
-          <div className="isl-h">{t('isl.search')}</div>
-          <label className="isl-search"><ISearch /><input value={q} onChange={(e) => setQ(e.target.value)} placeholder={t('isl.searchPh')} /></label>
-          {results.slice(0, 8).map((r, i) => <button key={i} className="isl-row tap" onClick={() => { setOpen(false); r.go() }}><span className="nm">{r.name}<small className="from">{r.from}</small></span><span className="st">{t(r.kind)}</span></button>)}
-          {lq && !results.length && <div className="isl-row"><span className="st" style={{ margin: 0 }}>{t('isl.none')}</span></div>}
-
-          <div className="isl-h">{t('isl.themeLang')}</div>
-          <div className="isl-opts">
-            <Segmented className="isl-seg" value={theme} onChange={setTheme}
-              items={[{ id: 'system', label: <ISystem />, title: t('theme.system') }, { id: 'light', label: <ISun />, title: t('theme.light') }, { id: 'dark', label: <IMoon />, title: t('theme.dark') }]} />
-            <Segmented className="isl-seg" value={lang} onChange={setLang}
-              items={[{ id: 'uk', label: 'УКР' }, { id: 'ru', label: 'РУС' }, { id: 'en', label: 'ENG' }]} />
-          </div>
-        </div></div></div>
+          }) : <div className="isl-empty">{t('isl.empty')}</div>}
+          {shown.length > QMAX && <div className="isl-more">{t('isl.more', { n: shown.length - QMAX })}</div>}
+            </div>}
+            <div className={`isl-pane ${photoOpen ? '' : 'isl-hide'}`} key="photo" aria-hidden={!photoOpen}>
+              <PhotoPanel open={open && photoOpen} onDone={() => setPane('video')} onWantOpen={wantPhotos} />
+              {photoOpen && <>          <div className="isl-h">{t('isl.queue')}{shown.length > 0 && <span className="isl-hn">{shown.length}</span>}</div>
+          {false && <div className="isl-warn"><span>{t('isl.nologin')}</span><button className="tap" onClick={(e) => { e.stopPropagation(); setLoginOpen(true) }}>{t('login.go')}</button></div>}
+          {shown.length ? shown.slice(0, QMAX).map((it) => {
+            const ph = phases[it.id].gone ? { k: 4, mode: 'leaving', label: 'st.leaving' } : phases[it.id]
+            const step = ph.mode === 'run' || ph.mode === 'done' ? t('q.step', { a: Math.min(ph.k + 1, 5), b: 5 }) : null
+            const kindTag = it.tr ? `${t('q.translate')} ${it.tr.toUpperCase()} · ` : it.kind && it.kind !== 'add' ? `${t(`q.${it.kind}`)} · ` : ''
+            return (
+              <div key={it.id} className={`isl-qw ${leaving[it.id] || removing[it.id] ? 'out' : ''} ${firstIds.current.has(it.id) ? '' : 'enter'}`}><div>
+                <div className={`isl-q ${confirm === it.id ? 'conf' : ''} m-${ph.mode}`} style={{ '--sc': ringColor(ph.k, ph.mode), '--prog': ringPct(ph.k, ph.mode, ph.frac) / 100 }}>
+                  <div className="rc">
+                    {it.vid && !String(it.vid).startsWith('ph-') ? <img src={`https://i.ytimg.com/vi/${it.vid}/mqdefault.jpg`} alt="" /> : <span className="noimg">{it.photos && <IPhoto />}</span>}
+                    <div className="qt">
+                      <b>{kindTag}{it.title || shortUrl(it.url)}</b>
+                      <span className="qsub">
+                        <StageLabel text={t(ph.label)} className={`st-${ph.mode}`} />
+                        {step && <span className="qstep">{step}</span>}
+                      </span>
+                    </div>
+                    <QueueRing k={ph.k} mode={ph.mode} frac={ph.frac} ringRef={(el) => { ringEls.current[it.id] = el }} />
+                    <button className="trash" aria-label={t('m.delete')} title={t('m.delete')} onClick={() => setConfirm(confirm === it.id ? null : it.id)}><ITrash /></button>
+                  </div>
+                  <button className="del" onClick={() => drop(it.id)}>{t('isl.confirm')}</button>
+                </div>
+              </div></div>
+            )
+          }) : <div className="isl-empty">{t('isl.empty')}</div>}
+          {shown.length > QMAX && <div className="isl-more">{t('isl.more', { n: shown.length - QMAX })}</div>}
+              </>}
+            </div>
+            {pane === 'search' && <div className="isl-pane" key="search">
+              <label className="isl-search"><ISearch /><input autoFocus value={q} onChange={(e) => setQ(e.target.value)} placeholder={t('isl.searchPh')} /></label>
+              {results.slice(0, 5).map((r, i) => <button key={i} className="isl-row tap" onClick={() => { setOpen(false); r.go() }}><span className="nm">{r.name}<small className="from">{r.from}</small></span><span className="st">{t(r.kind)}</span></button>)}
+              {lq && !results.length && <div className="isl-empty">{t('isl.none')}</div>}
+              {!lq && <div className="isl-empty">{t('isl.searchHint')}</div>}
+            </div>}
+            {pane === 'look' && <div className="isl-pane" key="look">
+              <div className="isl-h">{t('isl.theme')}</div>
+              <Segmented className="isl-seg full" value={theme} onChange={setTheme}
+                items={[{ id: 'system', label: <><ISystem /><span>{t('theme.system')}</span></> }, { id: 'light', label: <><ISun /><span>{t('theme.light')}</span></> }, { id: 'dark', label: <><IMoon /><span>{t('theme.dark')}</span></> }]} />
+              <div className="isl-h">{t('isl.lang')}</div>
+              <Segmented className="isl-seg full" value={lang} onChange={setLang}
+                items={[{ id: 'uk', label: 'Українська' }, { id: 'ru', label: 'Русский' }, { id: 'en', label: 'English' }]} />
+            </div>}
+          </div></div>
+        </div></div>
 
         <div className="isl-bar">
           <button className="isl-main" onClick={(e) => { e.stopPropagation(); setOpen(!open) }}><IPlus />{t('addVideo')}</button>

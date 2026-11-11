@@ -1,16 +1,17 @@
 import { useEffect, useState } from 'react'
 import { useAuth, setLoginOpen, signIn, signOut } from '../store/auth'
 import { supabase } from '../lib/supabase'
-import { TELEGRAM_BOT_ID } from '../lib/accounts'
+import { TELEGRAM_BOT } from '../lib/accounts'
 import { useT } from '../i18n'
 import { useToast } from '../store/ui'
 import Segmented from './Segmented'
+import { QueueRing } from './QueueRing'
 
 // Вход и регистрация: почта + пароль (с кодом из письма), Google, GitHub, Telegram.
 // Всегда в DOM: открывается и закрывается одной анимацией. Включается флагом (lib/accounts.js).
 const Badge = ({ bg, children }) => <span className="am-badge" style={{ background: bg }}>{children}</span>
 const ICON = {
-  google: <Badge bg="#4285f4"><b>G</b></Badge>,
+  google: <Badge bg="#fff"><svg viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.1H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34.1 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.6-.4-3.9z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34.1 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-8l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.1H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.6-.4-3.9z"/></svg></Badge>,
   github: <Badge bg="#24292f"><svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 0 0-3.2 19.5c.5.1.7-.2.7-.5v-1.7c-2.8.6-3.4-1.2-3.4-1.2-.5-1.1-1.1-1.4-1.1-1.4-.9-.6.1-.6.1-.6 1 .1 1.5 1 1.5 1 .9 1.5 2.4 1.1 3 .8.1-.7.4-1.1.6-1.3-2.2-.3-4.600-1.100-4.600-5 0-1.100.4-2 1-2.700-.1-.3-.4-1.300.1-2.700 0 0 .8-.3 2.700 1a9.400 9.400 0 0 1 5 0c1.900-1.300 2.700-1 2.700-1 .5 1.400.2 2.400.1 2.700.6.7 1 1.600 1 2.700 0 3.900-2.400 4.700-4.600 5 .4.3.7.9.7 1.800v2.700c0 .3.2.6.7.5A10 10 0 0 0 12 2z" fill="#fff" stroke="none" /></svg></Badge>,
   telegram: <Badge bg="#29a9eb"><svg viewBox="0 0 24 24"><path d="M20.5 4.200 3.700 10.700c-1.100.4-1.100 1.100-.2 1.400l4.300 1.300 1.700 5.100c.2.600.1.800.7.800.5 0 .7-.2 1-.5l2.100-2 4.400 3.200c.8.400 1.400.2 1.600-.7L22 5.500c.3-1.200-.5-1.700-1.500-1.300zM9 13.400l9.200-5.800c.4-.3.800-.1.500.2l-7.500 6.800-.3 3.100z" fill="#fff" stroke="none" /></svg></Badge>,
 }
@@ -69,31 +70,30 @@ export default function AuthModal() {
     const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), { redirectTo: location.origin + location.pathname })
     setBusy(false); if (error) fail(error); else { say(t('au.sent')); setStep('form') }
   }
-  const oauth = async (provider) => {
+
+  // Telegram: открываем бота (t.me/<бот>?start=<код>), человек жмёт «Start», бот присылает сайту ключ входа
+  // через Realtime-канал tg-login-<код> (функция Supabase «telegram-auth»). Запасной путь — кнопка-ссылка в чате с ботом.
+  const [tgWait, setTgWait] = useState(null)        // { code, ch } пока ждём подтверждения в Telegram
+  const stopTg = () => setTgWait((w) => { if (w?.ch) supabase.removeChannel(w.ch); clearTimeout(w?.timer); return null })
+  const telegram = () => {
     setErr('')
-    const { error } = await supabase.auth.signInWithOAuth({ provider, options: { redirectTo: location.origin + location.pathname } })
-    if (error) fail(error)
-  }
-  // Telegram: наша кнопка открывает официальное окно входа Telegram (скрипт telegram-widget.js);
-  // подпись проверяет функция Supabase «telegram-auth», потом выдаётся сессия.
-  const telegram = async () => {
-    setErr('')
-    const load = () => new Promise((ok, no) => {
-      if (window.Telegram?.Login) return ok()
-      const sc = document.createElement('script')
-      sc.src = 'https://telegram.org/js/telegram-widget.js?22'; sc.async = true; sc.onload = ok; sc.onerror = no
-      document.head.appendChild(sc)
-    })
-    try { await load() } catch { setErr(t('au.fail')); return }
-    window.Telegram.Login.auth({ bot_id: TELEGRAM_BOT_ID, request_access: 'write' }, async (user) => {
-      if (!user) return                                   // окно закрыли
-      setBusy(true)
-      const { data, error } = await supabase.functions.invoke('telegram-auth', { body: user })
-      if (error || !data?.token_hash) { setBusy(false); return fail(error || 'telegram') }
-      const r = await supabase.auth.verifyOtp({ token_hash: data.token_hash, type: 'magiclink' })
-      setBusy(false)
+    const code = [...crypto.getRandomValues(new Uint8Array(16))].map((b) => b.toString(16).padStart(2, '0')).join('')
+    const link = `https://t.me/${TELEGRAM_BOT}?start=${code}`
+    const ch = supabase.channel(`tg-login-${code}`).on('broadcast', { event: 'login' }, async ({ payload }) => {
+      const r = await supabase.auth.verifyOtp({ token_hash: payload?.token_hash, type: 'magiclink' })
+      stopTg()
       if (r.error) fail(r.error); else { say(t('login.ok')); setLoginOpen(false) }
-    })
+    }).subscribe()
+    const timer = setTimeout(stopTg, 10 * 60 * 1000)
+    setTgWait({ code, ch, link, timer })
+    window.open(link, '_blank', 'noopener')           // на телефоне откроется приложение Telegram
+  }
+  useEffect(() => { if (!loginOpen) stopTg() }, [loginOpen]) // eslint-disable-line
+  useEffect(() => { if (session) stopTg() }, [session])     // eslint-disable-line
+  const oauthPick = (provider) => {                  // каждый раз даём выбрать аккаунт, а не входим молча в прошлый
+    setErr('')
+    supabase.auth.signInWithOAuth({ provider, options: { redirectTo: location.origin + location.pathname, queryParams: { prompt: 'select_account' } } })
+      .then(({ error }) => error && fail(error))
   }
 
   const sc = score(pass)
@@ -107,6 +107,15 @@ export default function AuthModal() {
             <p className="modal-sub">{t('login.as', { email: session.user.email })}</p>
             <button className="modal-btn tap" onClick={async () => { await signOut(); say(t('login.out')) }}>{t('login.signout')}</button>
           </>
+        ) : tgWait ? (
+          <div className="am-step am-tg" key="tg">
+            <span className="am-tg-ic">{ICON.telegram}</span>
+            <h3>{t('au.tgTitle')}</h3>
+            <p className="modal-sub">{t('au.tgSub')}</p>
+            <div className="am-tg-wait"><QueueRing k={2} mode="run" size={22} /><span>{t('au.tgWait')}</span></div>
+            <a className="modal-btn primary tap" href={tgWait.link} target="_blank" rel="noopener noreferrer">{t('au.tgOpen')}</a>
+            <button className="am-link tap" onClick={stopTg}>{t('au.back')}</button>
+          </div>
         ) : step === 'code' ? (
           <div className="am-step" key="code">
             <h3>{t('au.codeTitle')}</h3>
@@ -131,8 +140,8 @@ export default function AuthModal() {
             <h3>{t(tab === 'in' ? 'au.inTitle' : 'au.upTitle')}</h3>
             <Segmented className="seg am-seg" value={tab} onChange={(v) => { setTab(v); setErr('') }} items={[{ id: 'in', label: t('au.in') }, { id: 'up', label: t('au.up') }]} />
             <div className="am-social">
-              <button type="button" className="am-sbtn tap" onClick={() => oauth('google')}>{ICON.google}Google</button>
-              <button type="button" className="am-sbtn tap" onClick={() => oauth('github')}>{ICON.github}GitHub</button>
+              <button type="button" className="am-sbtn tap" onClick={() => oauthPick('google')}>{ICON.google}Google</button>
+              <button type="button" className="am-sbtn tap" onClick={() => oauthPick('github')}>{ICON.github}GitHub</button>
               <button type="button" className="am-sbtn tap" onClick={telegram}>{ICON.telegram}Telegram</button>
             </div>
             <div className="am-or"><span>{t('au.or')}</span></div>

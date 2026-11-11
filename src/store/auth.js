@@ -5,6 +5,12 @@ export const useAuth = create(() => ({ session: null, ready: false, loginOpen: f
 export const setLoginOpen = (v) => useAuth.setState({ loginOpen: v })
 
 export function initAuth() {
+  // ссылка «Відкрити Конспекти» из бота Telegram: ?tg=<одноразовый ключ> → вход, затем ключ убираем из адреса
+  const tgKey = new URLSearchParams(location.search).get('tg')
+  if (tgKey) {
+    const u = new URL(location.href); u.searchParams.delete('tg'); history.replaceState(null, '', u.toString())
+    supabase.auth.verifyOtp({ token_hash: tgKey, type: 'magiclink' }).catch(() => {})   // уже вошли на этой странице — ключ просто не нужен
+  }
   supabase.auth.getSession().then(({ data }) => useAuth.setState({ session: data.session, ready: true }))
   supabase.auth.onAuthStateChange((_e, session) => useAuth.setState({ session }))
 }

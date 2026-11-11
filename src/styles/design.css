@@ -993,3 +993,92 @@ a.tcard:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(0,0,0,.
 .cat-seg button { height: 28px; font-weight: 600; }
 .cat-filter.wide { margin: var(--s4) 0 0; max-width: 340px; }
 .cat-filter.wide .cat-seg { height: 38px; font-size: var(--fs-sub); } .cat-filter.wide .cat-seg button { height: 32px; }
+
+/* Вход через Telegram: ожидание подтверждения в боте */
+.am-tg { align-items: center; text-align: center; }
+.am-tg-ic .am-badge { position: static; width: 56px; height: 56px; border-radius: 18px; margin-bottom: 4px; } .am-tg-ic .am-badge svg { width: 30px; height: 30px; }
+.am-tg-wait { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: 12px; background: color-mix(in srgb, var(--text) 6%, transparent); color: var(--text-2); font-size: var(--fs-sub); }
+.am-tg .modal-btn { width: 100%; display: grid; place-items: center; text-decoration: none; }
+.am-badge[style*="#fff"] { box-shadow: inset 0 0 0 1px rgba(0,0,0,.08); }
+
+/* =====================================================================
+   Пилюля, раунд 9: состояния как у Dynamic Island, без прокрутки
+   ===================================================================== */
+.island { font-size: 14px; }
+.island.open { --w: clamp(340px, 34vw, 420px); }
+.island.open.wide { --w: clamp(460px, 48vw, 600px); }
+.isl-inner { padding: 8px 8px 0; }
+.isl-scroll { display: contents; }
+/* вкладки-состояния */
+.isl-tabs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 2px; padding: 3px; border-radius: 14px; background: var(--island-key); }
+.isl-tabs button { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 6px 2px 5px; border-radius: 11px; font-size: 11px; font-weight: 600; color: color-mix(in srgb, var(--island-text) 62%, transparent);
+  transition: background-color 260ms var(--ease-out), color 260ms var(--ease-out), transform 220ms var(--ease-pop); }
+.isl-tabs button svg { width: 18px; height: 18px; }
+.isl-tabs button.on { background: color-mix(in srgb, var(--island-text) 18%, transparent); color: var(--island-text); }
+@media (hover: hover) { .isl-tabs button:not(.on):hover { color: var(--island-text); } }
+.isl-tabs button:active { transform: scale(.94); }
+/* содержимое: высота плавно подстраивается под состояние (Dynamic Island «морфится») */
+.isl-pane-wrap { overflow: hidden; transition: height 460ms var(--ease-island); }
+.isl-pane-in { padding: 10px 2px 4px; }
+.isl-pane { animation: paneIn 380ms var(--ease-out) both; }
+.isl-hide { display: none; }
+@keyframes paneIn { from { opacity: 0; transform: translateY(6px) scale(.985); filter: blur(4px); } }
+.isl-h { display: flex; align-items: center; gap: 6px; padding: 12px 4px 6px; font-size: 11px; letter-spacing: .06em; }
+.isl-hn { min-width: 17px; height: 17px; padding: 0 5px; border-radius: 9px; background: var(--island-key); font-size: 10.5px; line-height: 17px; text-align: center; letter-spacing: 0; color: var(--island-text); }
+.isl-empty, .isl-more { padding: 8px 6px; font-size: 12.5px; color: color-mix(in srgb, var(--island-text) 58%, transparent); }
+.isl-more { padding-top: 2px; text-align: center; }
+.isl-link input { font-size: 14px; }
+.isl-q .rc { min-height: 50px; padding: 6px 4px 6px 6px; gap: 10px; }
+.isl-q img, .isl-q .noimg { width: 52px; height: 30px; }
+.isl-q .qt b { font-size: 13px; }
+.isl-q .qsub, .slabel { font-size: 11.5px; }
+.isl-seg.full { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; width: 100%; height: auto; }
+.isl-seg.full button { height: auto; min-height: 34px; padding: 6px 4px; display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 12.5px; }
+.isl-seg.full button svg { width: 16px; height: 16px; flex: none; }
+.isl-search input { font-size: 14px; }
+.isl-row { min-height: 40px; font-size: 13px; }
+/* панель фото — компактнее: зона ниже, миниатюры лентой */
+.ph { padding: 0; }
+.ph-zone { padding: 14px 12px; margin: 8px 0; gap: 2px; }
+.ph-zone b { font-size: 13.5px; } .ph-zone small { font-size: 11.5px; }
+.ph-zi { width: 36px; height: 36px; border-radius: 11px; margin-bottom: 2px; } .ph-zi svg { width: 19px; height: 19px; }
+.ph-grid { display: flex; gap: 8px; overflow-x: auto; overflow-y: hidden; margin: 8px -2px; padding: 2px 2px 6px; scrollbar-width: none; scroll-snap-type: x proximity; }
+.ph-grid::-webkit-scrollbar { display: none; }
+.ph-th, .ph-add { flex: none; width: 74px; height: 74px; aspect-ratio: auto; scroll-snap-align: start; }
+.ph-modes button { padding: 6px; font-size: 13px; } .ph-modes button small { font-size: 11px; }
+.ph-title .go { font-size: 13.5px; }
+/* телефон: шрифт полей 16px (иначе iPhone приближает страницу), остальное компактно */
+@media (max-width: 860px), (max-height: 520px) {
+  .island.open { --w: calc(100vw - 24px); }
+  .island.open.wide { --w: calc(100vw - 24px); }
+  .isl-link input, .isl-search input, .ph-title input { font-size: 16px; }
+  .island.open { font-size: 14px; }
+}
+@media (prefers-reduced-motion: reduce) { .isl-pane { animation: none; } .isl-pane-wrap { transition: none; } }
+/* свечение строки очереди: мягкое со всех сторон, без прямоугольных краёв */
+.isl-q::before { top: 6px; bottom: 6px; left: 0; width: calc(40px + var(--prog) * (100% - 40px)); border-radius: 16px;
+  background: linear-gradient(90deg, color-mix(in srgb, var(--sc) 6%, transparent), color-mix(in srgb, var(--sc) 34%, transparent) 75%, color-mix(in srgb, var(--sc) 0%, transparent));
+  filter: blur(14px); -webkit-mask-image: none; mask-image: none; }
+.isl-q.m-run::before { animation: qglow2 2.4s ease-in-out infinite; }
+@keyframes qglow2 { 50% { opacity: .55; } }
+/* телефон: название и «Надіслати» — два отдельных аккуратных поля */
+@media (max-width: 860px), (max-height: 520px) {
+  .ph-title { background: none; padding: 0; gap: 8px; height: auto; }
+  .ph-title input { height: 42px; padding: 0 12px; border-radius: 12px; background: var(--island-key); }
+  .ph-title .go { height: 42px; border-radius: 12px; }
+}
+/* низкий экран (телефон лёжа): пилюля компактнее, чтобы помещалась без прокрутки */
+@media (max-height: 520px) {
+  .isl-tabs button { flex-direction: row; justify-content: center; gap: 6px; padding: 6px 4px; }
+  .isl-pane-in { padding-top: 6px; }
+  .ph-modes button small { display: none; }
+  .ph-modes button { padding: 5px; }
+  .ph-zone { flex-direction: row; gap: 10px; padding: 8px 12px; margin: 6px 0; text-align: left; }
+  .ph-zone .ph-zi { margin: 0; width: 30px; height: 30px; }
+  .ph-zone small { display: none; }
+  .ph-th, .ph-add { width: 56px; height: 56px; }
+  .island.photo .isl-pane .isl-h, .island.photo .isl-pane .isl-qw, .island.photo .isl-pane .isl-empty, .island.photo .isl-pane .isl-more { display: none; }
+  .ph-title { flex-wrap: nowrap; }
+  .ph-title input { flex: 1 1 auto; } .ph-title .go { flex: none; width: auto; padding: 0 16px; }
+  .modal.am { max-height: calc(100dvh - 16px); }
+}

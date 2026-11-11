@@ -90,7 +90,7 @@ export default function PhotoPanel({ open, onDone, onWantOpen }) {
   const turn = (id) => setFiles((fs) => fs.map((f) => (f.id === id ? { ...f, turn: (f.turn + 1) % 4 } : f)))
 
   const submit = async () => {
-    if (!session) { say(t('isl.needLogin')); setLoginOpen(true); return }
+    if (!session || session.user?.is_anonymous) { say(t('ph.needLogin')); setLoginOpen(true); return }   // фото — только после входа (гостям нельзя)
     if (!files.length || busy) return
     setBusy(true); setPct(0)
     try {
