@@ -1,6 +1,8 @@
 import { useIndex } from '../data/useData'
 import { useLibrary } from '../store/library'
 import { useProgress } from '../store/progress'
+import { useSettings } from '../store/settings'
+import { useAuth } from '../store/auth'
 
 const TINTS = ['#0a84ff', '#ff9f0a', '#30b0c7', '#5e5ce6', '#ff375f', '#34c759', '#bf5af2']
 export const tint = (id) => TINTS[[...id].reduce((a, c) => a + c.charCodeAt(0), 0) % TINTS.length]
@@ -17,7 +19,10 @@ export function useVideos() {
   const { data } = useIndex()
   const { pinned, hidden, learned } = useLibrary()
   const marks = useProgress((p) => p.marks)
-  const list = (data ?? []).filter((v) => !hidden[v.id]).map((v) => ({
+  const catalog = useSettings((s) => s.catalog)
+  const uid = useAuth((s) => s.session?.user?.id)
+  const inScope = (v) => catalog === 'mine' ? !!uid && v.owner === uid : catalog === 'public' ? (v.visibility ?? 'public') === 'public' : true
+  const list = (data ?? []).filter((v) => !hidden[v.id] && inScope(v)).map((v) => ({
     ...v, pinned: !!pinned[v.id], learned: !!learned[v.id],
     done: doneOf(marks, v), total: (v.guides ?? []).length,
   }))

@@ -986,3 +986,10 @@ a.tcard:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(0,0,0,.
 .island.photo .isl-scroll { max-height: min(78dvh, 640px); }
 @media (max-width: 860px) { .island.photo .isl-scroll { max-height: calc(100dvh - 150px); } }
 .ph-title { scroll-margin-bottom: 24px; }
+
+/* Фильтр каталога: все / общие / мои */
+.cat-filter { margin: 2px 0 8px; }
+.cat-seg { height: 34px; padding: 3px; border-radius: 11px; font-size: var(--fs-cap); background: color-mix(in srgb, var(--text) 7%, transparent); box-shadow: none; }
+.cat-seg button { height: 28px; font-weight: 600; }
+.cat-filter.wide { margin: var(--s4) 0 0; max-width: 340px; }
+.cat-filter.wide .cat-seg { height: 38px; font-size: var(--fs-sub); } .cat-filter.wide .cat-seg button { height: 32px; }

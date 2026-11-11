@@ -3,6 +3,7 @@ import { useSettings } from '../store/settings'
 import { useT } from '../i18n'
 import { useSettingsMenu } from './SettingsMenu'
 import VideoRow from './VideoRow'
+import CatalogFilter from './CatalogFilter'
 import { useVideos } from '../lib/videos'
 import { useTopicsCount, useLaterCount } from '../data/aggregate'
 import { IBook, IBookmark, ICheckSm, IStack, IPlus, ISidebar, IGear, IPlaySm } from './Icons'
@@ -34,6 +35,7 @@ export default function Sidebar({ onAdd }) {
 
       <div className="side-card">
         <div className="side-title"><span>{t('videos')}</span><span className="count">{videos.length}</span></div>
+        <CatalogFilter />
         {videos.map((v) => <VideoRow key={v.id} v={v} />)}
         <button className="row add tap" data-open-island onClick={onAdd} title={t('addVideo')}><span className="emoji"><IPlus /></span><span className="name">{t('addVideo')}</span></button>
       </div>

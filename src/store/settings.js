@@ -15,6 +15,8 @@ export const useSettings = create(
       setSeenGuide: () => set({ seenGuide: true }),
       setTheme: (theme) => set({ theme }),
       setLang: (lang) => set({ lang }),
+      catalog: 'all',                         // какие конспекты показывать: all (все доступные) | public (общий каталог) | mine (только мои)
+      setCatalog: (catalog) => set({ catalog }),
       noteLang: {},                           // язык конспекта для каждого видео отдельно (не язык интерфейса)
       setNoteLang: (id, l) => set((s) => ({ noteLang: { ...s.noteLang, [id]: l } })),
       toggleSidebar: () => set((s) => ({ sidebarCollapsed: !s.sidebarCollapsed })),

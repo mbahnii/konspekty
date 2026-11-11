@@ -7,6 +7,7 @@ import { useQueue } from '../store/ui'
 import { useTopicsCount, useLaterCount } from '../data/aggregate'
 import { useSettingsMenu } from '../components/SettingsMenu'
 import VideoRow, { coverOf } from '../components/VideoRow'
+import CatalogFilter from '../components/CatalogFilter'
 import { IBack, IBook, IBookmark, ICheckSm, IGear, IForward, IPlaySm } from '../components/Icons'
 import { useNav } from '../store/nav'
 import { useArriveOf, useArrive } from '../store/arrive'
@@ -94,6 +95,7 @@ export default function Home({ onBack }) {
         </div>
         <div className="side-card m-card">
           <div className="side-title"><span>{t('videos')}</span><span className="count">{videos.length}</span></div>
+          <CatalogFilter />
           {videos.map((v) => <VideoRow key={v.id} v={v} big />)}
         </div>
       </div>
@@ -102,6 +104,8 @@ export default function Home({ onBack }) {
       <div className="d-only">
         <PageHead title={t('app')} sub={t('home.sub', { n: videos.filter((v) => v.ready).length, q: queue.length + videos.filter((v) => !v.ready).length })} onBack={onBack} />
         {loaded && !videos.length && <div className="empty"><b>{t('empty')}</b>{t('home.empty')}</div>}
+        <CatalogFilter wide />
+        {loaded && videos.length === 0 && <div className="empty"><b>{t('cat.emptyT')}</b>{t('cat.empty')}</div>}
         <div className="grid-cards" ref={gridRef}>{videos.map((v) => <VideoCard key={v.id} v={v} />)}</div>
       </div>
     </div>

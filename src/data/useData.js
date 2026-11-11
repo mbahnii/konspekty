@@ -30,11 +30,14 @@ export { fileUrl } from '../lib/files.js'
 
 async function fromDb(url) {
   if (url === './data/index.json') {
-    const { data, error } = await supabase.from('notes').select('item').order('updated_at', { ascending: false })
+    // owner/visibility есть после применения accounts.sql; пока колонок нет — читаем как раньше (все конспекты общие)
+    let res = await supabase.from('notes').select('item,owner,visibility').order('updated_at', { ascending: false })
+    if (res.error) res = await supabase.from('notes').select('item').order('updated_at', { ascending: false })
+    const { data, error } = res
     if (error || !data?.length) throw error || new Error('empty')
     FROM_DB.clear()
     data.forEach((r) => FROM_DB.add(r.item.id))
-    return data.map((r) => r.item)
+    return data.map((r) => ({ ...r.item, owner: r.owner ?? null, visibility: r.visibility ?? 'public' }))
   }
   if (url === './data/topics.json') {
     const { data, error } = await supabase.from('site').select('value').eq('key', 'topics').maybeSingle()

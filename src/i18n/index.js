@@ -206,6 +206,8 @@ const K = {
   'au.rate': ['Забагато спроб. Зачекайте хвилину', 'Слишком много попыток. Подождите минуту', 'Too many attempts. Wait a minute'],
   'au.off': ['Цей спосіб входу ще не налаштовано', 'Этот способ входа ещё не настроен', 'This sign-in method is not set up yet'],
   'au.codeBad': ['Невірний або прострочений код', 'Неверный или просроченный код', 'Wrong or expired code'], 'au.fail': ['Не вдалося. Спробуйте ще раз', 'Не удалось. Попробуйте ещё раз', 'Something went wrong. Try again'],
+  'cat.all': ['Усі', 'Все', 'All'], 'cat.public': ['Загальні', 'Общие', 'Shared'], 'cat.mine': ['Мої', 'Мои', 'Mine'],
+  'cat.emptyT': ['Тут поки порожньо', 'Здесь пока пусто', 'Nothing here yet'], 'cat.empty': ['Змініть фільтр або додайте відео.', 'Смените фильтр или добавьте видео.', 'Change the filter or add a video.'],
   'q.step': ['крок {a} з {b}', 'шаг {a} из {b}', 'step {a} of {b}'],
   'r.notes': ['Конспект', 'Конспект', 'Notes'],
   'r.term': ['Термін', 'Термин', 'Term'],
