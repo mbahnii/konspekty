@@ -5,6 +5,7 @@ import App from './App'
 import './styles/tokens.css'
 import './styles/design.css'
 import './app.css'
+import './styles/glass.css'
 
 document.documentElement.classList.add('no-anim')
 requestAnimationFrame(() => requestAnimationFrame(() => document.documentElement.classList.remove('no-anim')))

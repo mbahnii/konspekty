@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
 import { useT } from '../i18n'
 import { IFilm } from './Icons'
-import { fmt, framesFor, frameUrl } from '../lib/time'
+import { fmt, framesFor, frameUrl, isPhotos, stamp } from '../lib/time'
 
 // «Плёнка» видео: отрезки с кадрами, подсказка с 6 кадрами (всегда целиком на экране)
 export default function Timeline({ id, summary, meta, current, onPick }) {
@@ -11,8 +11,10 @@ export default function Timeline({ id, summary, meta, current, onPick }) {
   const hideT = useRef(0)
   const hide = (delay = 0) => { clearTimeout(hideT.current); hideT.current = setTimeout(() => tip.current?.classList.remove('show'), delay) }
   const secs = summary.sections
+  const photos = isPhotos(meta)
+  const lab = (x) => stamp(meta, x, t('ph.page'))
   const total = secs[secs.length - 1].end
-  const step = total > 3600 ? 600 : total > 900 ? 120 : 60
+  const step = photos ? 60 * Math.max(1, Math.ceil(total / 60 / 12)) : total > 3600 ? 600 : total > 900 ? 120 : 60
   const marks = []
   for (let x = 0; x < total; x += step) if (x / total < 0.9) marks.push(x)
 
@@ -27,7 +29,7 @@ export default function Timeline({ id, summary, meta, current, onPick }) {
     const el = tip.current, fr = s.skip ? [] : framesFor(meta, s)
     const first = !el.classList.contains('show')
     el.innerHTML = `<div class="tt"><b></b><span class="h"></span></div>` + (fr.length ? `<div class="grid">${fr.map((f) => `<img src="${frameUrl(id, f, true)}" alt="">`).join('')}</div>` : '')
-    el.querySelector('b').textContent = `${fmt(s.t)} · ${s.title}`
+    el.querySelector('b').textContent = `${lab(s.t)} · ${s.title}`
     el.querySelector('.h').textContent = (s.hint || '') + (s.skip ? t('tl.skipped') : '')
     const r = e.currentTarget.getBoundingClientRect(), w = el.offsetWidth, h = el.offsetHeight, gap = 10
     const below = r.bottom + gap + h <= innerHeight - 8
@@ -52,8 +54,8 @@ export default function Timeline({ id, summary, meta, current, onPick }) {
         })}
       </div>
       <div className="tl-scale">
-        {marks.map((x) => <span key={x} style={{ left: `${(x / total) * 100}%` }}>{fmt(x)}</span>)}
-        <span style={{ left: '100%' }}>{fmt(total)}</span>
+        {marks.map((x) => <span key={x} style={{ left: `${(x / total) * 100}%` }}>{lab(x)}</span>)}
+        {!photos && <span style={{ left: '100%' }}>{fmt(total)}</span>}
       </div>
       {createPortal(<div className="tip" ref={tip} />, document.body)}
     </div>

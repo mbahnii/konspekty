@@ -50,6 +50,22 @@ export function MenuProvider({ children }) {
         {st.items.map((it, i) => {
           if (it === '-') return <hr key={i} />
           if (it.header) return <div key={i} className="mh">{it.header}</div>
+          if (it.swatches) return (
+            <div key={i} className="mi-row" style={{ '--d': i }}>
+              {it.swatches.map((c) => (
+                <button key={c.id} className={`sw ${c.on ? 'on' : ''} ${c.id === 'none' ? 'none' : ''}`} style={{ '--c': c.color }} aria-label={c.label} title={c.label}
+                  onClick={(e) => { e.stopPropagation(); close(); it.onPick(c.id) }} />
+              ))}
+            </div>
+          )
+          if (it.emojis) return (
+            <div key={i} className="mi-row emo" style={{ '--d': i }}>
+              {it.emojis.map((x) => (
+                <button key={x.id} className={`em ${x.on ? 'on' : ''}`} aria-label={x.id}
+                  onClick={(e) => { e.stopPropagation(); close(); it.onPick(x.id) }}>{x.id === 'none' ? '∅' : x.id}</button>
+              ))}
+            </div>
+          )
           return (
             <button key={i} className={`mi ${it.danger ? 'danger' : ''}`} style={{ '--d': i }}
               onClick={(e) => { e.stopPropagation(); close(); it.onSelect?.() }}>

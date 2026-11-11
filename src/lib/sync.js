@@ -12,7 +12,7 @@ import { knownIds } from './videos'
 // иначе берём то, что в облаке.
 const SPECS = {
   progress: { store: useProgress, get: (s) => ({ marks: s.marks }), set: (v) => ({ marks: v.marks ?? {} }) },
-  library: { store: useLibrary, get: (s) => ({ learned: s.learned, pinned: s.pinned, hidden: s.hidden }), set: (v) => ({ learned: v.learned ?? {}, pinned: v.pinned ?? {}, hidden: v.hidden ?? {} }) },
+  library: { store: useLibrary, get: (s) => ({ learned: s.learned, pinned: s.pinned, hidden: s.hidden, tags: s.tags }), set: (v) => ({ learned: v.learned ?? {}, pinned: v.pinned ?? {}, hidden: v.hidden ?? {}, tags: v.tags ?? {} }) },
 }
 const META = 'konspekty-sync-meta'
 const loadMeta = () => { try { return JSON.parse(localStorage.getItem(META)) ?? {} } catch { return {} } }
@@ -51,7 +51,7 @@ async function syncQueue() {
   }
   const pending = q.items.filter((x) => x.pending)
   if (pending.length) {
-    const { error } = await supabase.from('queue').upsert(pending.map((x) => ({ id: x.id, url: x.url, kind: x.kind, note: JSON.stringify({ title: x.title, channel: x.channel, vid: x.vid, translate: x.tr }) })), { onConflict: 'id' })
+    const { error } = await supabase.from('queue').upsert(pending.map((x) => ({ id: x.id, url: x.url, kind: x.kind, note: JSON.stringify({ title: x.title, channel: x.channel, vid: x.vid, translate: x.tr, photos: x.photos, mode: x.mode, guest: x.guest }) })), { onConflict: 'id' })
     if (error) throw error
     // «звонок» ноутбуку: worker держит открытое соединение и сразу проверяет очередь (без ожидания)
     const bell = supabase.channel('wake-' + user().id)

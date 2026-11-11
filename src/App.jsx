@@ -19,6 +19,8 @@ import { initAuth } from './store/auth'
 import { useNav } from './store/nav'
 import { initSync } from './lib/sync'
 
+const LIST_PAGES = ['/', '/topics', '/learned', '/later']        // здесь фон «оживает» на весь экран
+
 export default function App() {
   const { theme, lang, sidebarCollapsed } = useSettings()
   const [island, setIsland] = useState(false)
@@ -57,7 +59,7 @@ export default function App() {
 
   return (
     <MenuProvider>
-      <Glow center={loc.pathname === '/guide'} />
+      <Glow mode={loc.pathname === '/guide' ? 'center' : LIST_PAGES.includes(loc.pathname) ? 'alive' : 'calm'} />
       <div className={`shell ${sidebarCollapsed ? 'mini' : ''}`}>
         <Sidebar onAdd={(e) => { e.stopPropagation(); setIsland(true) }} />
         <Routes>

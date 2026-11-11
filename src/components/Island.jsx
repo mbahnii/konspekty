@@ -8,13 +8,17 @@ import { useLibrary } from '../store/library'
 import { useAuth, setLoginOpen } from '../store/auth'
 import Segmented from './Segmented'
 import { QueueRing, StageLabel, ringColor, ringPct } from './QueueRing'
+import PhotoPanel from './PhotoPanel'
+import { accountsOn } from '../lib/accounts'
+import { supabase } from '../lib/supabase'
 import { flyToList } from '../lib/fly'
-import { IPlus, IExpand, ICollapse, ISearch, ISystem, ISun, IMoon, ITrash } from './Icons'
+import { IPhoto, IPlus, IExpand, ICollapse, ISearch, ISystem, ISun, IMoon, ITrash } from './Icons'
 
 // Сколько показываем «готово» и «скоро зникне», прежде чем видео улетит в список
 const DONE_MS = 1500
 const LEAVE_MS = 15000                                   // сколько после «готово» висит обратный отсчёт, прежде чем видео улетит в список
-const STAGE = { download: 1, 'waiting-summary': 2, summary: 2, translate: 2, published: 3 }
+const STAGE = { download: 1, ocr: 1, pack: 1, 'waiting-summary': 2, summary: 2, translate: 2, published: 3 }
+const short = (label) => label.replace(/^(st|stage)\./, 'sh.')          // короткая подпись для телефона
 
 // Этап задачи очереди → номер шага кольца, вид кольца и подпись
 function phaseOf(it, seen, now) {
@@ -29,7 +33,8 @@ function phaseOf(it, seen, now) {
   if (!s || s.stale) return { gone: true, quiet: true }      // уже было готово до открытия сайта — не показываем
   const t = now - s.doneAt
   if (t < DONE_MS) return { k: 4, mode: 'done', label: 'st.done' }
-  if (t < DONE_MS + LEAVE_MS) return { k: 4, mode: 'leaving', label: 'st.leaving' }
+  // остаток отсчёта считаем по настоящим часам, а не по анимации: после сна экрана или закрытия панели он не «залипает»
+  if (t < DONE_MS + LEAVE_MS) return { k: 4, mode: 'leaving', label: 'st.leaving', frac: 1 - (t - DONE_MS) / LEAVE_MS }
   return { gone: true }
 }
 
@@ -69,7 +74,9 @@ export default function Island({ open, setOpen }) {
   const t = useT()
   const nav = useNavigate()
   const say = useToast((s) => s.say)
-  const { items, sync, add, remove, setSync } = useQueue()
+  const { items: allItems, sync, add, remove, setSync } = useQueue()
+  // задачи «удалить видео» в очереди не показываем (строка видео просто плавно уходит); видно только ошибку
+  const items = allItems.filter((it) => (it.kind ?? 'add') !== 'delete' || it.status === 'error')
   const session = useAuth((s) => s.session)
   const { wide, square, toggle } = useIslandPrefs()
   const { theme, lang, setTheme, setLang } = useSettings()
@@ -77,6 +84,7 @@ export default function Island({ open, setOpen }) {
   const [q, setQ] = useState('')
   const [confirm, setConfirm] = useState(null)
   const seenAlive = useRef(new Set())
+  const [photoOpen, setPhotoOpen] = useState(false)
   const box = useRef(null), input = useRef(null)
   const all = useAllSummaries(open)
   const prev = usePreview(url)
@@ -150,7 +158,7 @@ export default function Island({ open, setOpen }) {
     return () => { document.removeEventListener('click', onDoc); document.removeEventListener('keydown', onKey) }
   }, [setOpen])
 
-  const submit = () => {
+  const submit = async () => {
     if (!prev.valid) {
       say(t('isl.badLink'))
       box.current.animate([{ translate: '0' }, { translate: '-6px' }, { translate: '6px' }, { translate: '0' }], { duration: 280 })
@@ -158,8 +166,15 @@ export default function Island({ open, setOpen }) {
     }
     if (dup) { say(t(dup)); box.current.animate([{ translate: '0' }, { translate: '-6px' }, { translate: '6px' }, { translate: '0' }], { duration: 280 }); return }
     useLibrary.getState().setFlag('hidden', prev.id, false)   // если это видео раньше удаляли — снова показывать
-    add(url.trim(), 'add', { title: prev.title, channel: prev.channel, vid: prev.id }); setUrl('')
-    if (!session) { say(t('isl.needLogin')); setLoginOpen(true) } else say(t('isl.queued'))
+    // Гость (если включены аккаунты): тихий анонимный вход Supabase, видео уходит в общий каталог (1 в день, локальная модель)
+    let guest = !!session?.user?.is_anonymous
+    if (!session && accountsOn()) {
+      const { error } = await supabase.auth.signInAnonymously()
+      if (error) { say(t('au.off')); setLoginOpen(true); return }
+      guest = true
+    }
+    add(url.trim(), 'add', { title: prev.title, channel: prev.channel, vid: prev.id, guest }); setUrl('')
+    if (!session && !accountsOn()) { say(t('isl.needLogin')); setLoginOpen(true) } else say(t('isl.queued'))
   }
 
   const lq = q.trim().toLowerCase()
@@ -184,6 +199,8 @@ export default function Island({ open, setOpen }) {
               onKeyDown={(e) => e.key === 'Enter' && submit()} />
             <button className="go tap" onClick={submit}>{t('isl.go')}</button>
           </div>
+          <button className={`isl-photobtn tap ${photoOpen ? 'on' : ''}`} onClick={() => setPhotoOpen(!photoOpen)} aria-expanded={photoOpen}><IPhoto />{t('ph.btn')}</button>
+          <div className={`isl-ph ${photoOpen ? 'show' : ''}`}><div><PhotoPanel open={open && photoOpen} onDone={() => setPhotoOpen(false)} /></div></div>
           <div className={`isl-prev ${prev.shown ? 'show' : ''}`}><div>
             <div className="prev">
               {p.id && <img src={`https://i.ytimg.com/vi/${p.id}/mqdefault.jpg`} alt="" />}
@@ -199,9 +216,9 @@ export default function Island({ open, setOpen }) {
             const kindTag = it.tr ? `${t('q.translate')} ${it.tr.toUpperCase()} · ` : it.kind && it.kind !== 'add' ? `${t(`q.${it.kind}`)} · ` : ''
             return (
               <div key={it.id} className={`isl-qw ${leaving[it.id] || removing[it.id] ? 'out' : ''} ${firstIds.current.has(it.id) ? '' : 'enter'}`}><div>
-                <div className={`isl-q ${confirm === it.id ? 'conf' : ''} m-${ph.mode}`} style={{ '--sc': ringColor(ph.k, ph.mode), '--prog': ringPct(ph.k, ph.mode) / 100, '--leave': `${LEAVE_MS}ms` }}>
+                <div className={`isl-q ${confirm === it.id ? 'conf' : ''} m-${ph.mode}`} style={{ '--sc': ringColor(ph.k, ph.mode), '--prog': ringPct(ph.k, ph.mode, ph.frac) / 100 }}>
                   <div className="rc">
-                    {it.vid ? <img src={`https://i.ytimg.com/vi/${it.vid}/mqdefault.jpg`} alt="" /> : <span className="noimg" />}
+                    {it.vid && !String(it.vid).startsWith('ph-') ? <img src={`https://i.ytimg.com/vi/${it.vid}/mqdefault.jpg`} alt="" /> : <span className="noimg">{it.photos && <IPhoto />}</span>}
                     <div className="qt">
                       <b>{kindTag}{it.title || shortUrl(it.url)}</b>
                       <span className="qsub">
@@ -210,7 +227,7 @@ export default function Island({ open, setOpen }) {
                         <small className="qurl">{shortUrl(it.url)}</small>
                       </span>
                     </div>
-                    <QueueRing k={ph.k} mode={ph.mode} leaveMs={LEAVE_MS} ringRef={(el) => { ringEls.current[it.id] = el }} />
+                    <QueueRing k={ph.k} mode={ph.mode} frac={ph.frac} ringRef={(el) => { ringEls.current[it.id] = el }} />
                     <button className="trash" aria-label={t('m.delete')} title={t('m.delete')} onClick={() => setConfirm(confirm === it.id ? null : it.id)}><ITrash /></button>
                   </div>
                   <button className="del" onClick={() => drop(it.id)}>{t('isl.confirm')}</button>
@@ -238,8 +255,8 @@ export default function Island({ open, setOpen }) {
           <span className="isl-status" ref={statusEl} style={{ '--sc': leadPh ? ringColor(leadPh.k, leadPh.mode) : 'transparent' }}>
             <span className={`chip ${lead ? '' : 'idle'}`}>
               {lead
-                ? <>{shown.length > 1 && <i className="cnt">{shown.length}</i>}<StageLabel text={t(leadPh.label)} className={`st-${leadPh.mode}`} /></>
-                : t('isl.empty')}
+                ? <>{shown.length > 1 && <i className="cnt">{shown.length}</i>}<StageLabel text={t(leadPh.label)} className={`lg st-${leadPh.mode}`} /><StageLabel text={t(short(leadPh.label))} className={`sh st-${leadPh.mode}`} /></>
+                : <><span className="lg">{t('isl.empty')}</span><span className="sh">{t('sh.idle')}</span></>}
             </span>
           </span>
           <span className={`sync ${sync}`} title={t(`sync.${sync}`)} role={sync === 'nologin' ? 'button' : undefined} onClick={sync === 'nologin' ? (e) => { e.stopPropagation(); setLoginOpen(true) } : undefined} />

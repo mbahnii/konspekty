@@ -14,7 +14,7 @@
   --surface-hover: #efeef1;
   --text: #010001;            /* основной текст (ваш $black1) */
   --text-2: #6e6e73;          /* второстепенный */
-  --text-3: #a1a1a6;          /* подсказки, неактивное */
+  --text-3: #7c7c82;          /* подсказки, неактивное */
   --separator: rgba(0, 0, 0, 0.06);
   --accent: #0760fb;          /* ваш $blue1 */
   --accent-soft: #f0f4ff;     /* ваш $blue2 */
@@ -85,7 +85,7 @@
     --surface-hover: #323236;
     --text: #f5f5f7;
     --text-2: #98989f;
-    --text-3: #636366;
+    --text-3: #8e8e93;
     --separator: rgba(255, 255, 255, 0.08);
     --accent: #2f7bff;
     --accent-soft: rgba(47, 123, 255, 0.16);
@@ -111,7 +111,7 @@
   --surface-hover: #323236;
   --text: #f5f5f7;
   --text-2: #98989f;
-  --text-3: #636366;
+  --text-3: #8e8e93;
   --separator: rgba(255, 255, 255, 0.08);
   --accent: #2f7bff;
   --accent-soft: rgba(47, 123, 255, 0.16);

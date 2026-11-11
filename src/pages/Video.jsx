@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { createContext, useContext, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { useVideo } from '../data/useData'
 import { useT } from '../i18n'
@@ -11,25 +11,30 @@ import { LANGS } from '../i18n'
 import { useProgress, stepOn } from '../store/progress'
 import Segmented from '../components/Segmented'
 import Timeline from '../components/Timeline'
+import MiniTimeline from '../components/MiniTimeline'
 import Rail from '../components/Rail'
 import Pending from './Pending'
 import { useVideoMenu } from '../components/VideoMenu'
 import { useIndex } from '../data/useData'
 import { IChevDown, IMore, IPlay, IClock, IYt, ILink, IPrint, ICopy, IOk, ICheck, ISearch, IBack } from '../components/Icons'
 import { Md, inline } from '../lib/md'
-import { fmt, ytLink, framesFor, frameUrl } from '../lib/time'
+import { fmt, ytLink, framesFor, frameUrl, isPhotos, stamp as pageStamp } from '../lib/time'   // не «stamp»: это имя занято переменной ссылки ?n=
 
 const TABS = ['main', 'notes', 'guides', 'terms', 'later']
 
-const Tc = ({ id, t }) => (
-  <a className="tc tap" href={ytLink(id, t)} target="_blank" rel="noreferrer" onClick={(e) => e.stopPropagation()}><IPlay />{fmt(t)}</a>
-)
+const PhotosCtx = createContext(false)   // материал из фото: вместо времени — «стор. N», ссылок на YouTube нет
+const Tc = ({ id, t }) => {
+  const photos = useContext(PhotosCtx)
+  const tr = useT()
+  if (photos) return <span className="tc page">{pageStamp({ source: 'photos' }, t, tr('ph.page'))}</span>
+  return <a className="tc tap" href={ytLink(id, t)} target="_blank" rel="noreferrer" onClick={(e) => e.stopPropagation()}><IPlay />{fmt(t)}</a>
+}
 
 // Полоса вкладок получает фон, только когда прилипла к верху (иначе сквозь неё просвечивает свечение)
 function useStuck() {
   const ref = useRef(null)
   useEffect(() => {
-    const on = () => { const el = ref.current; if (el) el.classList.toggle('stuck', el.getBoundingClientRect().top <= 9) }
+    const on = () => { const el = ref.current; if (el) el.classList.toggle('stuck', el.getBoundingClientRect().top <= 1) }
     on(); addEventListener('scroll', on, { passive: true }); addEventListener('resize', on)
     return () => { removeEventListener('scroll', on); removeEventListener('resize', on) }
   })
@@ -97,6 +102,7 @@ export default function Video({ onBack }) {
   const words = JSON.stringify(summary.sections.filter((s) => !s.skip).map((s) => s.body)).split(/\s+/).length
   const readMin = Math.max(1, Math.round(words / 180))
   const url = meta.url
+  const photos = isPhotos(meta)
   const copyLink = () => { navigator.clipboard?.writeText(url); say(t('toast.linkCopied')) }
 
   const filterMenu = (e) => { e.stopPropagation(); menu.open(e.currentTarget, [
@@ -129,7 +135,7 @@ export default function Video({ onBack }) {
   const secOf = (tm) => (summary.sections.find((s) => tm >= s.t && tm < s.end) ?? summary.sections[0]).id
 
   return (
-    <>
+    <PhotosCtx.Provider value={photos}>
       <main>
         <div className="wrap">
           <div className="head">
@@ -143,16 +149,19 @@ export default function Video({ onBack }) {
           </div>
 
           <div className="meta">
-            <a className="chip accent tap" href={url} target="_blank" rel="noreferrer"><IPlay /> {t('watch')}</a>
+            {!photos && <a className="chip accent tap" href={url} target="_blank" rel="noreferrer"><IPlay /> {t('watch')}</a>}
             <span className="chip">{meta.channel}</span>
-            <span className="chip"><IClock /> {fmt(meta.duration)} · {t('read', { n: readMin })}</span>
+            <span className="chip"><IClock /> {photos ? `${meta.pages} ${t('ph.page')}` : fmt(meta.duration)} · {t('read', { n: readMin })}</span>
             <span className="chip">{t(`level.${summary.level}`)}</span>
           </div>
 
           <div className="sticky" ref={stickyRef}>
-            <Segmented items={items} value={tab} onChange={(v) => { go(v); const top = document.querySelector('.sticky')?.offsetTop ?? 0; if (scrollY > top) scrollTo({ top }) }} />
-            <Timeline id={id} summary={summary} meta={meta} current={current} onPick={goto} />
+            <div className="plate">
+              <Segmented items={items} value={tab} onChange={(v) => { go(v); const top = document.querySelector('.sticky')?.offsetTop ?? 0; if (scrollY > top) scrollTo({ top }) }} />
+              <MiniTimeline secs={summary.sections} current={current} onPick={goto} />
+            </div>
           </div>
+          <Timeline id={id} summary={summary} meta={meta} current={current} onPick={goto} />
 
           <section className="panel on" key={tab}>
             {tab === 'main' && (
@@ -177,9 +186,9 @@ export default function Video({ onBack }) {
                   <h2>{s.title} <Tc id={id} t={s.t} />{s.adv && <span className="badge adv">{t('advanced')}</span>}{s.skip && <span className="badge">{t('skipped')}</span>}</h2>
                   <div className="body"><Md text={s.body} /></div>
                   {fr.length > 0 && <div className="frames">{fr.map((f) => (
-                    <a key={f.t} className="frame" href={ytLink(id, f.t)} target="_blank" rel="noreferrer">
+                    <a key={f.t} className="frame" href={photos ? frameUrl(id, f) : ytLink(id, f.t)} target="_blank" rel="noreferrer">
                       <div className="img"><img loading="lazy" src={frameUrl(id, f)} alt="" /><div className="play"><span><IPlay /></span></div></div>
-                      <figcaption>{fmt(f.t)}</figcaption></a>
+                      <figcaption>{pageStamp(meta, f.t, t('ph.page'))}</figcaption></a>
                   ))}</div>}
                   {s.note && <div className="note"><div className="who">✦ {t('claudeNote')}</div>{inline(s.note)}</div>}
                 </article>
@@ -193,8 +202,8 @@ export default function Video({ onBack }) {
           </section>
         </div>
       </main>
-      <Rail id={id} tab={tab} summary={summary} current={current} onGoto={goto} onTab={go} />
-    </>
+      <Rail id={id} tab={tab} summary={summary} current={current} onGoto={goto} onTab={go} photos={photos} />
+    </PhotosCtx.Provider>
   )
 }
 

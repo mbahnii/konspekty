@@ -1,6 +1,6 @@
 import { useT } from '../i18n'
 import { useProgress, stepOn, guideDone } from '../store/progress'
-import { fmt } from '../lib/time'
+import { fmt, pageNo } from '../lib/time'
 import { inline } from '../lib/md'
 
 const Ring = ({ done, total }) => (
@@ -8,7 +8,7 @@ const Ring = ({ done, total }) => (
 )
 
 // Правая колонка — зависит от вкладки
-export default function Rail({ id, tab, summary, current, onGoto, onTab }) {
+export default function Rail({ id, tab, summary, current, onGoto, onTab, photos }) {
   const t = useT()
   const marks = useProgress((p) => p.marks)
   const gs = summary.guides
@@ -30,7 +30,7 @@ export default function Rail({ id, tab, summary, current, onGoto, onTab }) {
   else if (tab === 'notes') body = (
     <div className="side-card"><div className="side-title"><span>{t('rail.toc')}</span></div>
       <nav className="toc">{summary.sections.map((s) => (
-        <a key={s.id} href={`#sec-${s.id}`} className={`${s.skip ? 'skip' : ''} ${s.id === current ? 'on' : ''}`} onClick={(e) => { e.preventDefault(); onGoto(s.id) }}><span className="tm">{fmt(s.t)}</span>{s.title}</a>
+        <a key={s.id} href={`#sec-${s.id}`} className={`${s.skip ? 'skip' : ''} ${s.id === current ? 'on' : ''}`} onClick={(e) => { e.preventDefault(); onGoto(s.id) }}><span className="tm">{photos ? `${t('ph.page')} ${pageNo(s.t)}` : fmt(s.t)}</span>{s.title}</a>
       ))}</nav></div>
   )
   else if (tab === 'guides') body = (

@@ -1,0 +1,37 @@
+/* ЕДИНОЕ «СТЕКЛО»: одна прозрачность (--glass-a) для всех полупрозрачных плашек сайта —
+   боковые карточки, карточки видео и конспектов, прилипающее меню, всплывающие меню, окна и пилюля.
+   Хотите стекло прозрачнее или плотнее — меняйте только --glass-a. */
+:root { --glass-a: 70%; --glass-base: #ffffff; --glass-base-island: #0b0b0d; --glass-line: rgba(0, 0, 0, .07); --glass-hi: rgba(255, 255, 255, .55); }
+:root[data-theme="dark"] { --glass-a: 62%; --glass-base: #2c2c2e; --glass-base-island: #48484c; --glass-line: rgba(255, 255, 255, .09); --glass-hi: rgba(255, 255, 255, .07); }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --glass-a: 62%; --glass-base: #2c2c2e; --glass-base-island: #48484c; --glass-line: rgba(255, 255, 255, .09); --glass-hi: rgba(255, 255, 255, .07); }
+}
+:root {
+  --glass: color-mix(in srgb, var(--glass-base) var(--glass-a), transparent);
+  --glass-island: color-mix(in srgb, var(--glass-base-island) var(--glass-a), transparent);
+  --glass-edge: inset 0 0 0 1px var(--glass-line), inset 0 1px 0 var(--glass-hi);
+  --material: var(--glass);                 /* старое имя: меню, подсказки, окна */
+  --island-glass: var(--glass-island);
+}
+:root[data-theme="dark"], :root[data-theme="light"] { --material: var(--glass); --island-glass: var(--glass-island); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --material: var(--glass); --island-glass: var(--glass-island); } }
+
+/* где применяется (с размытием фона) */
+.side-card, .vcard, .empty, .sticky.stuck .plate {
+  background: var(--glass); -webkit-backdrop-filter: var(--blur); backdrop-filter: var(--blur); box-shadow: var(--glass-edge);
+}
+/* большие текстовые карточки конспекта: тот же тон, но без размытия (их много, телефон не должен греться) */
+.card { background: var(--glass); box-shadow: var(--glass-edge); }
+.vcard { transition: transform 300ms var(--ease-out), box-shadow 300ms var(--ease-out), background-color 300ms var(--ease-out); }
+a.vcard:hover { box-shadow: var(--glass-edge), 0 8px 28px rgba(0, 0, 0, .12); }
+.menu, .tip, .modal { box-shadow: var(--shadow-pop), var(--glass-edge); }
+
+/* прилипшее меню должно читаться поверх текста — плотнее общего стекла */
+:root { --glass-strong: color-mix(in srgb, var(--glass-base) 88%, transparent); }
+.sticky.stuck .plate { background: var(--glass-strong); }
+.sticky .plate { transition: background-color var(--t-mid) var(--ease-out), box-shadow var(--t-mid) var(--ease-out), padding-left 360ms var(--ease-out); }
+/* телефон: слева в плашке место под кнопку «назад», как в навигации iOS */
+@media (max-width: 860px) {
+  .sticky.stuck .plate { padding-left: 54px; }
+  .sticky.stuck .badge-n { display: none; }
+}

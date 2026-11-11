@@ -10,6 +10,8 @@ import VideoRow, { coverOf } from '../components/VideoRow'
 import { IBack, IBook, IBookmark, ICheckSm, IGear, IForward, IPlaySm } from '../components/Icons'
 import { useNav } from '../store/nav'
 import { useArriveOf, useArrive } from '../store/arrive'
+import { useLibrary } from '../store/library'
+import { TAG_COLORS } from '../components/VideoMenu'
 
 export const PageHead = ({ title, sub, onBack }) => {
   const t = useT()
@@ -26,10 +28,11 @@ export function VideoCard({ v }) {
   const t = useT()
   const pct = v.total ? Math.round((v.done / v.total) * 100) : 0
   const arr = useArriveOf(v.id)
+  const tag = useLibrary((s) => s.tags[v.id])
   if (arr === 'hidden') return null
   const inner = (
     <>
-      <div className="cover" style={{ backgroundImage: `url("${coverOf(v)}")` }} />
+      <div className="cover" style={{ backgroundImage: `url("${coverOf(v)}")` }}>{(tag?.c || tag?.e) && <span className="vtag-badge">{tag.e && <span>{tag.e}</span>}{tag.c && <i style={{ '--c': TAG_COLORS[tag.c] }} />}</span>}</div>
       <b>{v.title}</b>
       <div className="sub">{v.ready ? <>{v.learned ? `✓ ${t('nav.learned')}` : t('rail.done', { a: v.done, b: v.total }) + ' · ' + t('tab.guides').toLowerCase()}</> : t('processing')}</div>
       {v.ready && <div className="bar"><i style={{ width: `${v.learned ? 100 : pct}%` }} /></div>}

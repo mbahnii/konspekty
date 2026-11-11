@@ -14,14 +14,14 @@ export const ringColor = (k, mode) => mode === 'error' ? 'hsl(4 100% 62%)' : mod
   : mode === 'done' || mode === 'leaving' ? stepColor(STEPS - 1) : stepColor(k)
 
 // сколько процентов заполнено: то же число ведёт и кольцо, и свечение за строкой
-export const ringPct = (k, mode) => mode === 'error' || mode === 'done' ? 100 : mode === 'leaving' ? 0 : PCT[Math.min(k, STEPS - 1)]
+export const ringPct = (k, mode, frac = 0) => mode === 'error' || mode === 'done' ? 100 : mode === 'leaving' ? Math.max(0, Math.min(1, frac)) * 100 : PCT[Math.min(k, STEPS - 1)]
 
-export function QueueRing({ k = 0, mode = 'run', size = 28, leaveMs = 0, ringRef }) {
+export function QueueRing({ k = 0, mode = 'run', size = 28, frac = 0, ringRef }) {
   const leaving = mode === 'leaving'
-  const pct = ringPct(k, mode)
+  const pct = ringPct(k, mode, frac)
   const color = ringColor(k, mode)
   // отсчёт: линия линейно убывает за leaveMs (тот же круг, без второго кольца)
-  const fillStyle = { '--p': pct, ...(leaving && leaveMs ? { transition: `--p ${leaveMs}ms linear, stroke 400ms ease` } : null) }
+  const fillStyle = { '--p': pct, ...(leaving ? { transition: '--p 260ms linear, stroke 400ms ease' } : null) }
   return (
     <svg ref={ringRef} className={`qring ${mode}`} width={size} height={size} viewBox="0 0 36 36" aria-hidden="true" style={{ '--c': color }}>
       <circle className="trk" cx="18" cy="18" r="14.5" pathLength="100" />

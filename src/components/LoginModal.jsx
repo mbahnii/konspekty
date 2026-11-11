@@ -2,9 +2,14 @@ import { useEffect, useState } from 'react'
 import { useAuth, setLoginOpen, signIn, signOut } from '../store/auth'
 import { useT } from '../i18n'
 import { useToast } from '../store/ui'
+import { accountsOn } from '../lib/accounts'
+import AuthModal from './AuthModal'
 
 // Окно входа для синхронизации. Всегда в DOM: открывается и закрывается одной и той же анимацией.
-export default function LoginModal() {
+// Новая форма (вход, регистрация, Google/GitHub/Telegram) включается флагом accountsOn(); по умолчанию — прежний вход по паролю
+export default function LoginModal() { return accountsOn() ? <AuthModal /> : <OldLogin /> }
+
+function OldLogin() {
   const t = useT()
   const say = useToast((s) => s.say)
   const { session, loginOpen } = useAuth()

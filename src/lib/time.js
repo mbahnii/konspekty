@@ -5,6 +5,10 @@ export function fmt(sec) {
   const p = (n) => String(n).padStart(2, '0')
   return h ? `${h}:${p(m)}:${p(r)}` : `${m}:${p(r)}`
 }
+// Материал из фото: «страница N» вместо времени (страница i стоит на i·60 с)
+export const isPhotos = (m) => m?.source === 'photos'
+export const pageNo = (sec) => Math.floor(sec / 60) + 1
+export const stamp = (m, sec, pageWord = 'p.') => (isPhotos(m) ? `${pageWord} ${pageNo(sec)}` : fmt(sec))
 export const ytLink = (id, t) => `https://www.youtube.com/watch?v=${id}&t=${Math.floor(t)}s`
 
 // Кадры раздела: от начала до конца, максимум 6 (равномерно)

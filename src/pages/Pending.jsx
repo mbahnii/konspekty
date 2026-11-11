@@ -21,7 +21,7 @@ export default function Pending({ v, onBack }) {
       <div className="meta">
         <a className="chip accent tap" href={v.url} target="_blank" rel="noreferrer"><IPlay /> {t('watch')}</a>
         {v.channel && <span className="chip">{v.channel}</span>}
-        <span className="chip"><IClock /> {fmt(v.duration)}</span>
+        <span className="chip"><IClock /> {v.source === 'photos' ? `${v.pages} ${t('ph.page')}` : fmt(v.duration)}</span>
       </div>
       <div className="pend-cover" style={{ backgroundImage: `url("${coverOf(v)}")` }} />
       <div className="card pend"><span className="tile lg" style={{ '--tile': 'var(--warning)' }}><IHourglass /></span><div><h3>{t('pend.title')}</h3><p>{t('pend.text')}</p></div></div>
