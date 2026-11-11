@@ -137,11 +137,12 @@ export default function Video({ onBack }) {
     }
     setNoteLang(id, l)
   }
-  const moreMenu = (e) => { e.stopPropagation(); const v = index?.find((x) => x.id === id) ?? { id, url, ready: true }; const items = videoMenu(v); menu.open(e.currentTarget, [
-    ...items.slice(1, -2), { icon: <IPrint />, label: t('print'), onSelect: () => print() },
+  const moreMenu = (e) => { e.stopPropagation(); const v = index?.find((x) => x.id === id) ?? { id, url, ready: true }; const items = videoMenu(v); const del = items.filter((x) => x && x.danger); const body = items.filter((x) => !(x && x.danger)); while (body.at(-1) === '-') body.pop()
+    menu.open(e.currentTarget, [
+    ...body.slice(1), { icon: <IPrint />, label: t('print'), onSelect: () => print() },
     '-', { header: t('m.noteLang') },
     ...Object.keys(LANGS).map((l) => ({ tick: noteLang === l, label: LANGS[l], onSelect: () => pickLang(l) })),
-    ...items.slice(-2),
+    ...(del.length ? ['-', ...del] : []),
   ], { alignRight: true }) }
 
   // страницы фото-конспекта: по одному снимку на страницу

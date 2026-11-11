@@ -34,6 +34,16 @@ async function shrink(file, turn = 0) {
   return new Promise((ok, no) => c.toBlob((b) => (b ? ok(b) : no(new Error('toBlob'))), 'image/jpeg', 0.86))
 }
 
+// Крошечная квадратная миниатюра первой страницы (≈4 КБ): ездит в заметке задачи, чтобы в очереди было видно, что за фото
+async function smallThumb(blob) {
+  const bmp = await createImageBitmap(blob)
+  const S = 96, k = S / Math.min(bmp.width, bmp.height)
+  const c = document.createElement('canvas'); c.width = S; c.height = S
+  const g = c.getContext('2d'); g.drawImage(bmp, (S - bmp.width * k) / 2, (S - bmp.height * k) / 2, bmp.width * k, bmp.height * k)
+  bmp.close?.()
+  return c.toDataURL('image/jpeg', 0.7)
+}
+
 export default function PhotoPanel({ open, onDone, onWantOpen }) {
   const t = useT()
   const say = useToast((s) => s.say)
@@ -100,6 +110,7 @@ export default function PhotoPanel({ open, onDone, onWantOpen }) {
       const uid = session.user.id
       const pid = 'ph-' + crypto.randomUUID().replace(/-/g, '').slice(0, 9)
       const paths = []
+      let first = null
       for (let i = 0; i < files.length; i++) {
         let blob
         try { blob = await shrink(files[i].file, files[i].turn) } catch { throw new Error(`${t('ph.cantRead')}: ${files[i].file.name}`) }
@@ -111,11 +122,12 @@ export default function PhotoPanel({ open, onDone, onWantOpen }) {
           await new Promise((r) => setTimeout(r, 700 * (a + 1)))
         }
         if (err) throw err
+        if (i === 0) first = blob
         paths.push(path); setPct(((i + 1) / files.length) * 100)
       }
       const share = shareDefault()
       const name = title.trim() || `${t('ph.default')} ${new Date().toLocaleDateString()}`
-      add(`photos:${pid}`, 'add', { title: name, channel: t('ph.channel'), vid: pid, photos: paths, mode, share })
+      add(`photos:${pid}`, 'add', { title: name, channel: t('ph.channel'), vid: pid, photos: paths, mode, share, thumb: first ? await smallThumb(first).catch(() => undefined) : undefined, autoname: !title.trim() })
       say(t(share ? 'isl.queuedPub' : 'isl.queuedMine'))
       setFiles((fs) => { fs.forEach((f) => URL.revokeObjectURL(f.url)); return [] }); setTitle('')      // отправили — очищаем, чтобы повторное нажатие не создало дубликат
       onDone?.()

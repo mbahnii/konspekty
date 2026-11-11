@@ -262,9 +262,9 @@ export default function Island({ open, setOpen }) {
           <div key={it.id} className={`isl-qw ${leaving[it.id] || removing[it.id] ? 'out' : ''} ${firstIds.current.has(it.id) ? '' : 'enter'}`}><div>
             <div className={`isl-q ${confirm === it.id ? 'conf' : ''} m-${ph.mode}`} style={{ '--sc': ringColor(ph.k, ph.mode), '--prog': ringPct(ph.k, ph.mode, ph.frac) / 100 }}>
               <div className="rc">
-                {it.vid && !String(it.vid).startsWith('ph-') ? <img src={`https://i.ytimg.com/vi/${it.vid}/mqdefault.jpg`} alt="" /> : <span className="noimg">{it.photos && <IPhoto />}</span>}
+                {it.thumb ? <img className="qthumb" src={it.thumb} alt="" /> : it.vid && !String(it.vid).startsWith('ph-') ? <img src={`https://i.ytimg.com/vi/${it.vid}/mqdefault.jpg`} alt="" /> : <span className="noimg">{it.photos && <IPhoto />}</span>}
                 <div className="qt">
-                  <b>{kindTag}{it.title || shortUrl(it.url)}</b>
+                  <b key={it.title} className="qtitle">{kindTag}{it.title || shortUrl(it.url)}</b>
                   <span className="qsub">
                     <StageLabel text={t(ph.label)} className={`st-${ph.mode}`} />
                     {step && <span className="qstep">{step}</span>}

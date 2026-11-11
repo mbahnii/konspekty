@@ -35,3 +35,15 @@
 .pf-save.on { grid-template-rows: 1fr; opacity: 1; transition-delay: 0ms, calc(120ms * var(--mo)); }
 .pf-save > div { min-height: 0; overflow: hidden; display: flex; justify-content: flex-end; }
 .pf-save .nf-btn { margin-top: var(--s3); } .pf-save .nf-btn:disabled { opacity: .4; pointer-events: none; }
+
+/* страница администратора */
+.ad-list { padding: var(--s2) var(--s4); }
+.ad-row { display: flex; align-items: center; gap: var(--s3); padding: 10px 0; border-top: 1px solid var(--separator); }
+.ad-row:first-child { border-top: 0; }
+.ad-t { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.ad-t b { font-size: var(--fs-body); font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ad-t small { color: var(--text-3); font-size: var(--fs-cap); }
+.ad-b { height: 34px; padding: 0 12px; border-radius: var(--r-md); background: var(--surface-2); color: var(--text-2); font-size: var(--fs-cap); font-weight: 600; white-space: nowrap; display: inline-flex; align-items: center; gap: 6px; transition: background-color calc(200ms * var(--mo)) var(--ease-out), color calc(200ms * var(--mo)) var(--ease-out); }
+.ad-b svg { width: 16px; height: 16px; }
+.ad-b.del { color: var(--danger); } .ad-b.del.sure { background: var(--danger); color: #fff; }
+.ad-empty { color: var(--text-3); padding: var(--s4) 0; }

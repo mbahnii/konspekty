@@ -34,7 +34,7 @@ async function fromDb(url) {
     let res = await supabase.from('notes').select('item,owner,visibility').order('updated_at', { ascending: false })
     if (res.error) res = await supabase.from('notes').select('item').order('updated_at', { ascending: false })
     const { data, error } = res
-    if (error || !data?.length) throw error || new Error('empty')
+    if (error) throw error              // пустой список — тоже настоящий ответ (база главная), а не повод показывать старую копию
     FROM_DB.clear()
     data.forEach((r) => FROM_DB.add(r.item.id))
     return data.map((r) => ({ ...r.item, owner: r.owner ?? null, visibility: r.visibility ?? 'public' }))
@@ -54,9 +54,16 @@ async function fromDb(url) {
   throw new Error('static')
 }
 
-// Сначала база (до 6 секунд), при любой ошибке — GitHub
+// База — главный источник. Запасная копия с GitHub — ТОЛЬКО когда нет сети (в ней могут быть чужие/устаревшие записи).
+// Если сеть есть, а база не ответила — ошибка и повтор (см. useJson), но не «тихо подсунутая» старая копия.
 export const load = (url) => {
-  if (!cache.has(url)) cache.set(url, withTimeout(fromDb(url), 6000).catch(() => STATIC(url)))
+  if (!cache.has(url)) {
+    cache.set(url, withTimeout(fromDb(url), 12000).catch((e) => {
+      if (e?.message === 'static' || e?.message === 'empty') return STATIC(url)       // этого в базе нет по задумке (файл не из базы / нет «Огляд тем»)
+      if (typeof navigator !== 'undefined' && navigator.onLine === false) return STATIC(url)   // офлайн — запасная копия
+      cache.delete(url); throw e
+    }))
+  }
   return cache.get(url)
 }
 
@@ -67,10 +74,15 @@ function useJson(url) {
     if (!url) return
     let alive = true
     // при обновлении старые данные остаются на экране, пока не придут новые — ничего не мигает
+    let retry = 0
     load(url)
       .then((data) => alive && setSt({ data, error: null, url }))
-      .catch((error) => alive && setSt((s) => (s.url === url && s.data ? s : { data: null, error, url })))
-    return () => { alive = false }
+      .catch((error) => {
+        if (!alive) return
+        setSt((s) => (s.url === url && s.data ? s : { data: null, error, url }))
+        retry = setTimeout(() => refreshData(3000), 4000)            // база не ответила — пробуем снова, пока не получится
+      })
+    return () => { alive = false; clearTimeout(retry) }
   }, [url, v])
   return st.url === url ? st : { data: null, error: null }
 }

@@ -11,6 +11,7 @@ import Topics from './pages/Topics'
 import Learned from './pages/Learned'
 import Later from './pages/Later'
 import Profile from './pages/Profile'
+import Admin from './pages/Admin'
 import Guide from './pages/Guide'
 import Glow from './components/Glow'
 import LoginModal from './components/LoginModal'
@@ -73,6 +74,7 @@ export default function App() {
           <Route path="/later" element={page(Later)} />
           <Route path="/guide" element={page(Guide)} />
           <Route path="/profile" element={page(Profile)} />
+          <Route path="/admin" element={page(Admin)} />
           <Route path="/v/:id/:tab?" element={<Video onBack={back} />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

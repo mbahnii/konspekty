@@ -1,3 +1,4 @@
+import { queueRow } from './queueRow'
 import { supabase } from './supabase'
 import { useAuth } from '../store/auth'
 import { useProgress } from '../store/progress'
@@ -51,7 +52,7 @@ async function syncQueue() {
   }
   const pending = q.items.filter((x) => x.pending)
   if (pending.length) {
-    const { error } = await supabase.from('queue').upsert(pending.map((x) => ({ id: x.id, url: x.url || (x.vid ? `photos:${x.vid}` : ''), kind: x.kind, note: JSON.stringify({ title: x.title, channel: x.channel, vid: x.vid, translate: x.tr, photos: x.photos, mode: x.mode, guest: x.guest, share: x.share }) })), { onConflict: 'id' })
+    const { error } = await supabase.from('queue').upsert(pending.map(queueRow), { onConflict: 'id' })
     if (error) throw error
     // «звонок» ноутбуку: worker держит открытое соединение и сразу проверяет очередь (без ожидания)
     const bell = supabase.channel('wake-' + user().id)
@@ -66,7 +67,7 @@ async function syncQueue() {
   const mine = cur.items.filter((x) => x.pending && !pending.some((p) => p.id === x.id))   // добавлено, пока шёл запрос
   useQueue.setState({
     removed: cur.removed.filter((id) => !q.removed.includes(id)),
-    items: [...data.map((r) => { let n = {}; try { n = JSON.parse(r.note) ?? {} } catch { /* ignore */ } return { id: r.id, url: r.url, kind: r.kind, status: r.status, stage: n.stage, at: Date.parse(r.created_at), upd: Date.parse(r.updated_at), title: n.title, channel: n.channel, vid: n.vid, tr: n.translate } }), ...mine],
+    items: [...data.map((r) => { let n = {}; try { n = JSON.parse(r.note) ?? {} } catch { /* ignore */ } return { id: r.id, url: r.url, kind: r.kind, status: r.status, stage: n.stage, at: Date.parse(r.created_at), upd: Date.parse(r.updated_at), title: n.title, channel: n.channel, vid: n.vid, tr: n.translate, thumb: n.thumb, photos: n.photos?.length ? n.photos : undefined } }), ...mine],
   })
   if (newlyDone) {                      // видео опубликовано — показать его в списке сразу
     // новое видео не показываем в списке сразу: сначала из очереди «прилетит» шарик (lib/fly.js)

@@ -11,6 +11,9 @@ const readJson = (p) => JSON.parse(fs.readFileSync(p, 'utf8'))
 fs.rmSync(OUT, { recursive: true, force: true, maxRetries: 10, retryDelay: 300 })   // повтор при ENOTEMPTY (гонка с другим процессом)
 fs.mkdirSync(path.join(OUT, 'v'), { recursive: true })
 
+// Личные конспекты в публичную копию на GitHub не попадают (владелец и видимость — в worker/.owners.json)
+let owners = {}
+try { owners = readJson(path.resolve(here, '../../worker/.owners.json')) } catch { /* файла нет — все общие */ }
 const index = []
 for (const name of fs.readdirSync(SRC)) {
   try {
@@ -18,6 +21,7 @@ for (const name of fs.readdirSync(SRC)) {
   const metaP = path.join(dir, 'meta.json')
   if (!fs.statSync(dir).isDirectory() || !fs.existsSync(metaP)) continue
   const meta = readJson(metaP)
+  if (owners[meta.id]?.visibility === 'private') continue
   const sumP = path.join(dir, 'summary.json')
   const summary = fs.existsSync(sumP) ? readJson(sumP) : null
   const item = {
