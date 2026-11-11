@@ -13,7 +13,8 @@ import { runQueueDemo } from '../lib/demoQueue'
 import { IPlus, IExpand, ICollapse, ISearch, ISystem, ISun, IMoon, ITrash } from './Icons'
 
 // Сколько показываем «готово» и «скоро зникне», прежде чем видео улетит в список
-const DONE_MS = 1500, LEAVE_MS = 15000
+const DONE_MS = 1500
+const LEAVE_MS = import.meta.env.DEV && /[?&]fast=1/.test(location.search) ? 2500 : 15000   // для проверки на локальной копии: ?demo=queue&fast=1
 const STAGE = { download: 1, 'waiting-summary': 2, summary: 2, translate: 2, published: 3 }
 
 // Этап задачи очереди → номер шага кольца, вид кольца и подпись

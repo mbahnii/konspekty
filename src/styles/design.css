@@ -780,8 +780,9 @@ a.tcard:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(0,0,0,.
 
 /* фон строки очереди: цветное размытое свечение под кольцом (цвет = цвет этапа, плавно перетекает) */
 .isl-q { --sc: transparent; transition: --sc 700ms var(--ease-out), background-color 240ms var(--ease-out), transform 420ms var(--ease-out), filter 420ms var(--ease-out); isolation: isolate; }
-.isl-q::before { content: ""; position: absolute; z-index: -1; right: 26px; top: 50%; width: 150px; height: 110px; transform: translate(0, -50%);
-  background: radial-gradient(closest-side, color-mix(in srgb, var(--sc) 62%, transparent), transparent); filter: blur(12px); opacity: .55; pointer-events: none; transition: opacity 400ms var(--ease-out); }
+.isl-q::before { content: ""; position: absolute; z-index: -1; right: -34px; top: 0; bottom: 0; width: 200px;
+  background: radial-gradient(closest-side, color-mix(in srgb, var(--sc) 55%, transparent) 0%, color-mix(in srgb, var(--sc) 22%, transparent) 55%, transparent 100%);
+  filter: blur(8px); opacity: .8; pointer-events: none; transition: opacity 400ms var(--ease-out); }
 .isl-q.m-run::before { animation: qglow 2.4s ease-in-out infinite; }
 @keyframes qglow { 50% { opacity: .85; } }
 .isl-q.conf::before { opacity: 0; }
