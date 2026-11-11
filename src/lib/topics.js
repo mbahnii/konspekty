@@ -1,6 +1,7 @@
 // Человеческие названия тем (slug из summary.json → uk / ru / en)
 const N = {
   music: ['Музика', 'Музыка', 'Music'],
+  apple: ['Apple і техніка', 'Apple и техника', 'Apple & hardware'],
   cats: ['Коти', 'Коты', 'Cats'],
   setup: ['Встановлення і старт', 'Установка и старт', 'Setup'],
   genshin: ['Genshin Impact', 'Genshin Impact', 'Genshin Impact'],

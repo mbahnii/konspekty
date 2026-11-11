@@ -843,26 +843,55 @@ a.tcard:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(0,0,0,.
 .isl-ph { display: grid; grid-template-rows: 0fr; opacity: 0; transition: grid-template-rows .5s var(--ease-island), opacity 300ms var(--ease-out); }
 .isl-ph.show { grid-template-rows: 1fr; opacity: 1; }
 .isl-ph > div { overflow: hidden; min-height: 0; }
-.ph { padding: 8px 0 4px; }
+.ph { position: relative; padding: 8px 0 4px; }
+.isl-ph > div { margin: -6px; padding: 6px; }                       /* поля, чтобы рамки и тени не обрезались */
 .ph-modes { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; padding: 3px; border-radius: 14px; background: var(--island-key); }
 .ph-modes button { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 8px 6px; border-radius: 11px; font-weight: 600; color: color-mix(in srgb, var(--island-text) 70%, transparent); transition: background-color 240ms var(--ease-out), color 240ms var(--ease-out); }
 .ph-modes button small { font-weight: 500; font-size: var(--fs-cap); opacity: .75; }
 .ph-modes button.on { background: color-mix(in srgb, var(--island-text) 20%, transparent); color: var(--island-text); }
-.ph-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(64px, 1fr)); gap: 8px; margin: 10px 0; }
-.ph-th, .ph-add { position: relative; aspect-ratio: 1; border-radius: 12px; background: var(--island-key) center / cover no-repeat; animation: qin 420ms var(--ease-out) both; }
-.ph-th i { position: absolute; left: 5px; bottom: 5px; min-width: 20px; height: 20px; padding: 0 5px; border-radius: 10px; background: rgba(0,0,0,.55); color: #fff; font: 600 11px/20px var(--font, inherit); font-style: normal; text-align: center; }
-.ph-th button { position: absolute; right: 4px; top: 4px; width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; background: rgba(0,0,0,.55); color: #fff; opacity: 0; transform: scale(.8); transition: opacity 200ms var(--ease-out), transform 240ms var(--ease-pop); }
-.ph-th button svg { width: 14px; height: 14px; }
-.ph-th:hover button, .ph-th:focus-within button { opacity: 1; transform: none; }
-@media (hover: none) { .ph-th button { opacity: 1; transform: none; } }
-.ph-add { display: grid; place-items: center; background: transparent; box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--island-text) 30%, transparent); color: color-mix(in srgb, var(--island-text) 70%, transparent); animation: none; transition: background-color 200ms var(--ease-out), transform 240ms var(--ease-pop); }
-.ph-add svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; }
-@media (hover: hover) { .ph-add:hover { background: var(--island-key); transform: scale(1.04); } }
+
+/* зона «перетащи сюда» */
+.ph-zone { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; width: 100%; margin: 10px 0; padding: 22px 14px; border-radius: 16px; text-align: center;
+  box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--island-text) 28%, transparent); background: color-mix(in srgb, var(--island-text) 4%, transparent);
+  background-image: repeating-linear-gradient(135deg, transparent 0 10px, color-mix(in srgb, var(--island-text) 3%, transparent) 10px 20px);
+  transition: background-color 240ms var(--ease-out), box-shadow 240ms var(--ease-out), transform 300ms var(--ease-pop); }
+.ph-zone b { font-weight: 600; } .ph-zone small { color: color-mix(in srgb, var(--island-text) 62%, transparent); font-size: var(--fs-cap); }
+@media (hover: hover) { .ph-zone:hover { background-color: var(--island-key); box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--accent) 70%, transparent); } }
+.ph-zi { width: 44px; height: 44px; border-radius: 14px; display: grid; place-items: center; margin-bottom: 4px; background: var(--island-key); color: var(--island-text); }
+.ph-zi svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.ph-zi.big { width: 64px; height: 64px; border-radius: 20px; background: var(--accent); color: #fff; } .ph-zi.big svg { width: 30px; height: 30px; }
+
+/* сетка миниатюр */
+.ph-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(76px, 1fr)); gap: 10px; margin: 10px 0; padding: 2px; }
+.ph-th, .ph-add { position: relative; aspect-ratio: 1; border-radius: 14px; overflow: hidden; background: var(--island-key); animation: qin 420ms var(--ease-out) both; }
+.ph-img { position: absolute; inset: 0; background: center / cover no-repeat; transition: transform 380ms var(--ease-pop); }
+.ph-th i { position: absolute; left: 6px; top: 6px; min-width: 20px; height: 20px; padding: 0 6px; border-radius: 10px; background: rgba(0,0,0,.6); color: #fff; font: 600 11px/20px var(--font, inherit); font-style: normal; text-align: center; }
+.ph-act { position: absolute; left: 4px; right: 4px; bottom: 4px; display: flex; justify-content: space-between; opacity: 0; transform: translateY(6px); transition: opacity 200ms var(--ease-out), transform 260ms var(--ease-out); }
+.ph-act button { width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; background: rgba(0,0,0,.62); color: #fff; font-size: 15px; line-height: 1; transition: transform 200ms var(--ease-pop), opacity 200ms; }
+.ph-act button:disabled { opacity: .3; pointer-events: none; }
+.ph-x { position: absolute; right: 4px; top: 4px; width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; background: rgba(0,0,0,.62); color: #fff; opacity: 0; transform: scale(.8); transition: opacity 200ms var(--ease-out), transform 240ms var(--ease-pop); }
+.ph-x svg { width: 13px; height: 13px; }
+.ph-th:hover .ph-act, .ph-th:focus-within .ph-act, .ph-th:hover .ph-x, .ph-th:focus-within .ph-x { opacity: 1; transform: none; }
+@media (hover: none) { .ph-act, .ph-x { opacity: 1; transform: none; } .ph-act button { width: 32px; height: 32px; } }
+@media (hover: hover) { .ph-act button:hover, .ph-x:hover { transform: scale(1.12); } }
+.ph-add { display: grid; place-items: center; background: transparent; box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--island-text) 30%, transparent); color: color-mix(in srgb, var(--island-text) 70%, transparent); animation: none; transition: background-color 200ms var(--ease-out), box-shadow 200ms var(--ease-out); }
+.ph-add svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; }
+@media (hover: hover) { .ph-add:hover { background: var(--island-key); box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--accent) 70%, transparent); } }
+.ph-cam { width: 100%; height: 40px; margin-bottom: 8px; border-radius: 12px; background: var(--island-key); font-weight: 600; }
+
+/* оверлей «отпустите, чтобы добавить» поверх панели, пока файлы над окном */
+.ph-drop { position: absolute; inset: -4px; z-index: 3; border-radius: 18px; display: grid; place-items: center; text-align: center; pointer-events: none;
+  background: color-mix(in srgb, var(--accent) 30%, transparent); -webkit-backdrop-filter: blur(10px) saturate(1.3); backdrop-filter: blur(10px) saturate(1.3);
+  box-shadow: inset 0 0 0 2px var(--accent); opacity: 0; transform: scale(.97); transition: opacity 220ms var(--ease-out), transform 320ms var(--ease-pop); }
+.ph.over .ph-drop { opacity: 1; transform: none; }
+.ph-drop > div { display: flex; flex-direction: column; align-items: center; gap: 8px; font-weight: 600; }
+.ph.over .ph-drop .ph-zi { animation: phbob 900ms ease-in-out infinite; }
+@keyframes phbob { 50% { transform: translateY(-5px); } }
 .ph-title { margin-top: 2px; }
 .ph-title .go:disabled { opacity: .45; pointer-events: none; }
 .ph-bar { height: 3px; margin-top: 8px; border-radius: 2px; background: var(--island-key); overflow: hidden; }
 .ph-bar i { display: block; height: 100%; border-radius: 2px; background: var(--success); transition: width 300ms var(--ease-out); }
-@media (prefers-reduced-motion: reduce) { .isl-ph, .ph-th, .ph-bar i { transition-duration: 1ms !important; animation: none; } }
+@media (prefers-reduced-motion: reduce) { .isl-ph, .ph-th, .ph-bar i, .ph-drop, .ph-img { transition-duration: 1ms !important; animation: none !important; } }
 
 /* отметка страницы у материала из фото (не ссылка) */
 .tc.page { cursor: default; }
@@ -947,3 +976,13 @@ a.tcard:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(0,0,0,.
   .island .isl-status .slabel.lg { display: none; }
   .island .isl-status .slabel.sh { display: grid; }
 }
+
+/* перетаскивание: содержимое панели уходит в тень, поверх остаётся только «Відпустіть, щоб додати» */
+.ph-modes, .ph-zone, .ph-grid, .ph-title, .ph-cam { transition: opacity 220ms var(--ease-out), filter 220ms var(--ease-out), background-color 240ms var(--ease-out), box-shadow 240ms var(--ease-out), transform 300ms var(--ease-pop); }
+.ph.over .ph-modes, .ph.over .ph-zone, .ph.over .ph-grid, .ph.over .ph-title, .ph.over .ph-cam { opacity: .08; filter: blur(3px); }
+.ph-drop { background: color-mix(in srgb, var(--accent) 22%, var(--island-glass, #1c1c1e)); }
+
+/* панель фото открыта — пилюля может быть выше, чтобы кнопка «Надіслати» всегда была в поле зрения */
+.island.photo .isl-scroll { max-height: min(78dvh, 640px); }
+@media (max-width: 860px) { .island.photo .isl-scroll { max-height: calc(100dvh - 150px); } }
+.ph-title { scroll-margin-bottom: 24px; }

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useT } from '../i18n'
 import { useSettings } from '../store/settings'
@@ -85,6 +85,7 @@ export default function Island({ open, setOpen }) {
   const [confirm, setConfirm] = useState(null)
   const seenAlive = useRef(new Set())
   const [photoOpen, setPhotoOpen] = useState(false)
+  const wantPhotos = useCallback(() => { setOpen(true); setPhotoOpen(true) }, [setOpen])      // файлы тащат над окном — открываем пилюлю с панелью фото
   const box = useRef(null), input = useRef(null)
   const all = useAllSummaries(open)
   const prev = usePreview(url)
@@ -192,7 +193,7 @@ export default function Island({ open, setOpen }) {
   const shortUrl = (u) => u.replace(/^https?:\/\/(www\.)?/, '')
   return (
     <div className="island-dock">
-      <div ref={box} className={`island ${open ? 'open' : ''} ${wide ? 'wide' : ''} ${square ? 'square' : ''}`}>
+      <div ref={box} className={`island ${open ? 'open' : ''} ${wide ? 'wide' : ''} ${square ? 'square' : ''} ${photoOpen ? 'photo' : ''}`}>
         <div className="isl-panel"><div className="isl-inner"><div className="isl-scroll">
           <div className="isl-link">
             <input ref={input} value={url} onChange={(e) => setUrl(e.target.value)} placeholder={t('isl.link')} inputMode="url" autoCapitalize="off" autoCorrect="off"
@@ -200,7 +201,7 @@ export default function Island({ open, setOpen }) {
             <button className="go tap" onClick={submit}>{t('isl.go')}</button>
           </div>
           <button className={`isl-photobtn tap ${photoOpen ? 'on' : ''}`} onClick={() => setPhotoOpen(!photoOpen)} aria-expanded={photoOpen}><IPhoto />{t('ph.btn')}</button>
-          <div className={`isl-ph ${photoOpen ? 'show' : ''}`}><div><PhotoPanel open={open && photoOpen} onDone={() => setPhotoOpen(false)} /></div></div>
+          <div className={`isl-ph ${photoOpen ? 'show' : ''}`}><div><PhotoPanel open={open && photoOpen} onDone={() => setPhotoOpen(false)} onWantOpen={wantPhotos} /></div></div>
           <div className={`isl-prev ${prev.shown ? 'show' : ''}`}><div>
             <div className="prev">
               {p.id && <img src={`https://i.ytimg.com/vi/${p.id}/mqdefault.jpg`} alt="" />}
