@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react'
 import { useAuth, setLoginOpen, signIn, signOut } from '../store/auth'
 import { supabase } from '../lib/supabase'
-import { TELEGRAM_BOT_ID } from '../lib/accounts'
+import { TELEGRAM_BOT } from '../lib/accounts'
 import { useT } from '../i18n'
 import { useToast } from '../store/ui'
 import Segmented from './Segmented'
+import { QueueRing } from './QueueRing'
 
 // Вход и регистрация: почта + пароль (с кодом из письма), Google, GitHub, Telegram.
 // Всегда в DOM: открывается и закрывается одной анимацией. Включается флагом (lib/accounts.js).
@@ -70,13 +71,25 @@ export default function AuthModal() {
     setBusy(false); if (error) fail(error); else { say(t('au.sent')); setStep('form') }
   }
 
-  // Telegram — стандартный вход: переходим на oauth.telegram.org, там подтверждение в приложении Telegram, потом Telegram возвращает на сайт
-  // (см. main.jsx и store/auth.js: данные проверяет функция Supabase «telegram-auth»).
+  // Telegram: открываем бота (t.me/<бот>?start=<код>), человек жмёт «Start», бот присылает сайту ключ входа
+  // через Realtime-канал tg-login-<код> (функция Supabase «telegram-auth»). Запасной путь — кнопка-ссылка в чате с ботом.
+  const [tgWait, setTgWait] = useState(null)        // { code, ch } пока ждём подтверждения в Telegram
+  const stopTg = () => setTgWait((w) => { if (w?.ch) supabase.removeChannel(w.ch); clearTimeout(w?.timer); return null })
   const telegram = () => {
-    setErr(''); setBusy(true)
-    const back = location.origin + location.pathname
-    location.href = `https://oauth.telegram.org/auth?bot_id=${TELEGRAM_BOT_ID}&origin=${encodeURIComponent(location.origin)}&request_access=write&return_to=${encodeURIComponent(back)}`
+    setErr('')
+    const code = [...crypto.getRandomValues(new Uint8Array(16))].map((b) => b.toString(16).padStart(2, '0')).join('')
+    const link = `https://t.me/${TELEGRAM_BOT}?start=${code}`
+    const ch = supabase.channel(`tg-login-${code}`).on('broadcast', { event: 'login' }, async ({ payload }) => {
+      const r = await supabase.auth.verifyOtp({ token_hash: payload?.token_hash, type: 'magiclink' })
+      stopTg()
+      if (r.error) fail(r.error); else { say(t('login.ok')); setLoginOpen(false) }
+    }).subscribe()
+    const timer = setTimeout(stopTg, 10 * 60 * 1000)
+    setTgWait({ code, ch, link, timer })
+    window.open(link, '_blank', 'noopener')           // на телефоне откроется приложение Telegram
   }
+  useEffect(() => { if (!loginOpen) stopTg() }, [loginOpen]) // eslint-disable-line
+  useEffect(() => { if (session) stopTg() }, [session])     // eslint-disable-line
   const oauthPick = (provider) => {                  // каждый раз даём выбрать аккаунт, а не входим молча в прошлый
     setErr('')
     supabase.auth.signInWithOAuth({ provider, options: { redirectTo: location.origin + location.pathname, queryParams: { prompt: 'select_account' } } })
@@ -94,6 +107,15 @@ export default function AuthModal() {
             <p className="modal-sub">{t('login.as', { email: session.user.email })}</p>
             <button className="modal-btn tap" onClick={async () => { await signOut(); say(t('login.out')) }}>{t('login.signout')}</button>
           </>
+        ) : tgWait ? (
+          <div className="am-step am-tg" key="tg">
+            <span className="am-tg-ic">{ICON.telegram}</span>
+            <h3>{t('au.tgTitle')}</h3>
+            <p className="modal-sub">{t('au.tgSub')}</p>
+            <div className="am-tg-wait"><QueueRing k={2} mode="run" size={22} /><span>{t('au.tgWait')}</span></div>
+            <a className="modal-btn primary tap" href={tgWait.link} target="_blank" rel="noopener noreferrer">{t('au.tgOpen')}</a>
+            <button className="am-link tap" onClick={stopTg}>{t('au.back')}</button>
+          </div>
         ) : step === 'code' ? (
           <div className="am-step" key="code">
             <h3>{t('au.codeTitle')}</h3>
