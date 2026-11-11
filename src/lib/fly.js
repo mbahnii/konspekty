@@ -37,12 +37,15 @@ export async function flyToList(vid, srcEl) {
   const finish = () => { setArrive(vid, 'go'); setTimeout(() => state() === 'go' && setArrive(vid, null), 1100) }
   if (document.hidden || reduce()) { finish(); return }
 
-  const els = await waitTargets(vid)
-  if (state() === 'hidden') setArrive(vid, 'wait')          // список раздвигает место (CSS-переход высоты)
-  const cover = els.map((el) => el.querySelector('.av, .cover')).find((c) => c && inView(c.getBoundingClientRect()))
-  if (!cover || !src || !src.width) { await sleep(state() === 'wait' ? 380 : 0); finish(); return }
-
-  await sleep(60)                                            // кадр на то, чтобы строка начала раскрываться
+  await waitTargets(vid)                                     // хотя бы одно место для видео уже есть на экране
+  if (state() === 'hidden') {
+    setArrive(vid, 'wait')                                   // готовим место: строка раскрывается, карточки сдвигаются
+    await sleep(340)                                         // даём месту открыться — только потом летим
+  }
+  const els = targets(vid)                                   // после этого на экране могла появиться и карточка на главной
+  const covers = els.map((el) => el.querySelector('.cover, .av')).filter((c) => c && inView(c.getBoundingClientRect()))
+  const cover = covers.find((c) => c.classList.contains('cover')) || covers[0]   // на главной летим к большой карточке
+  if (!cover || !src || !src.width) { finish(); return }
   const d = cover.getBoundingClientRect()                    // место посадки (строка уже стоит на своём месте)
   const S = 30
   const sx = src.left + src.width / 2, sy = src.top + src.height / 2
@@ -74,6 +77,6 @@ export async function flyToList(vid, srcEl) {
 
   await ax.finished.catch(() => {})
   finish()                                                   // обложка и текст появляются на месте шарика
-  orbX.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 220, easing: 'ease-out', fill: 'forwards' })
+  orbX.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 320, easing: 'ease-out', fill: 'forwards' })
     .finished.catch(() => {}).then(() => orbX.remove())
 }

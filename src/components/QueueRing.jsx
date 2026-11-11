@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useState } from 'react'
 
 // Кольцо прогресса очереди. Одна линия с закруглёнными концами:
 //   в очереди → скачивается → пишется конспект → публикуется → готово (галочка) → обратный отсчёт до «улёта».
@@ -9,11 +9,14 @@ const PCT = [12, 36, 62, 86, 100]
 const HUES = [16, 34, 50, 84, 138]
 export const stepColor = (k) => `hsl(${HUES[Math.max(0, Math.min(STEPS - 1, k))]} 86% 54%)`
 
+// цвет кольца и свечения за строкой: по этапу
+export const ringColor = (k, mode) => mode === 'error' ? 'hsl(4 100% 62%)' : mode === 'local' ? 'hsl(0 0% 62%)'
+  : mode === 'done' || mode === 'leaving' ? stepColor(STEPS - 1) : stepColor(k)
+
 export function QueueRing({ k = 0, mode = 'run', size = 28, leaveMs = 0, ringRef }) {
   const leaving = mode === 'leaving'
   const pct = mode === 'error' || mode === 'done' ? 100 : leaving ? 0 : PCT[Math.min(k, STEPS - 1)]
-  const color = mode === 'error' ? 'var(--danger)' : mode === 'local' ? 'color-mix(in srgb, var(--island-text) 40%, transparent)'
-    : mode === 'done' || leaving ? stepColor(STEPS - 1) : stepColor(k)
+  const color = ringColor(k, mode)
   // отсчёт: линия линейно убывает за leaveMs (тот же круг, без второго кольца)
   const fillStyle = { '--p': pct, ...(leaving && leaveMs ? { transition: `--p ${leaveMs}ms linear, stroke 400ms ease` } : null) }
   return (
@@ -30,11 +33,8 @@ export function QueueRing({ k = 0, mode = 'run', size = 28, leaveMs = 0, ringRef
 // Строка-«барабан»: старая подпись уезжает вверх и гаснет, новая выкатывается снизу
 export function StageLabel({ text, className = '' }) {
   const [st, setSt] = useState({ cur: text, prev: null, n: 0 })
-  const first = useRef(true)
-  useEffect(() => {
-    if (first.current) { first.current = false; return }
-    setSt((s) => (s.cur === text ? s : { cur: text, prev: s.cur, n: s.n + 1 }))
-  }, [text])
+  // текст сменился — сразу, в этом же кадре, запускаем уход старого и выезд нового (без мигания)
+  if (st.cur !== text) setSt({ cur: text, prev: st.cur, n: st.n + 1 })
   return (
     <span className={`slabel ${className}`}>
       {st.prev !== null && <span key={`p${st.n}`} className="out">{st.prev}</span>}

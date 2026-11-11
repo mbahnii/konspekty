@@ -277,8 +277,9 @@ a.chip:hover, button.chip:hover { background: var(--surface-hover); color: var(-
   color: var(--island-text); box-shadow: var(--shadow-island); font-size: var(--fs-sub); font-weight: 500;
   transition: width .55s var(--ease-island), border-radius .55s var(--ease-island), transform 360ms var(--ease-out), box-shadow 360ms var(--ease-out);
 }
-.island.wide { --w: 400px; }
+.island.wide { --w: 388px; }
 .island.open { --w: clamp(320px, 36vw, 460px); --r: 24px; }
+.island.open.wide { --w: clamp(500px, 61vw, 780px); }          /* «шире»: примерно в 1,7 раза */
 .island.square { --r: 12px; }
 @media (hover: hover) { .island:not(.open):hover { transform: scale(1.03); box-shadow: 0 16px 60px rgba(0,0,0,.32); } }
 .island:not(.open):active { transform: scale(.98); }
@@ -380,13 +381,15 @@ a.chip:hover, button.chip:hover { background: var(--surface-hover); color: var(-
   .tl-bar { height: 34px; }
   /* Пилюля поменьше */
   .island-dock { bottom: max(14px, env(safe-area-inset-bottom)); padding: 0 12px; }
-  .island, .island.wide { --w: 196px; --r: 22px; }
+  .island { --w: 196px; --r: 22px; }
+  .island.wide { --w: 268px; }
   .island.square { --r: 12px; }
   .island.open { --w: clamp(260px, calc((100vw - 32px) * .8), 400px); --r: 20px; }   /* 80% ширины контента */
+  .island.open.wide { --w: calc(100vw - 32px); }                                      /* «шире»: на всю ширину контента */
   .isl-bar { height: 44px; padding: 5px; gap: 4px; }
   .isl-main { height: 34px; padding: 0 8px; font-size: 13px; }
   .isl-btn { width: 34px; height: 34px; }
-  .isl-btn.wide-btn { display: none; }
+  .island:not(.open) .isl-btn:not(.wide-btn) { display: none; }       /* закрытая на телефоне: только «шире» */
 }
 .m-only { display: none; }
 @media (max-width: 860px) { .m-only { display: block; } .d-only { display: none; } }
@@ -551,13 +554,15 @@ a.tcard:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(0,0,0,.
 /* Телефон в горизонтальном положении: маленькая высота — пилюля тоже компактная */
 @media (max-height: 520px) {
   .island-dock { bottom: 10px; }
-  .island, .island.wide { --w: 196px; --r: 22px; }
+  .island { --w: 196px; --r: 22px; }
+  .island.wide { --w: 268px; }
   .island.square { --r: 12px; }
   .island.open { --w: clamp(260px, calc((100vw - 32px) * .8), 400px); --r: 20px; }   /* 80% ширины контента */
+  .island.open.wide { --w: calc(100vw - 32px); }                                      /* «шире»: на всю ширину контента */
   .isl-bar { height: 44px; padding: 5px; gap: 4px; }
   .isl-main { height: 34px; padding: 0 8px; font-size: 13px; }
   .isl-btn { width: 34px; height: 34px; }
-  .isl-btn.wide-btn { display: none; }
+  .island:not(.open) .isl-btn:not(.wide-btn) { display: none; }       /* закрытая на телефоне: только «шире» */
   .isl-scroll { max-height: 55vh; }
   main { padding-bottom: 80px; }
 }
@@ -646,7 +651,8 @@ a.tcard:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(0,0,0,.
    Очередь: кольцо прогресса, подпись этапа, «улетает в список» (раунд 7)
    ===================================================================== */
 @property --p { syntax: '<number>'; inherits: false; initial-value: 0; }
-@property --w { syntax: '<number>'; inherits: false; initial-value: 0; }
+@property --wob { syntax: '<number>'; inherits: false; initial-value: 0; }
+@property --sc { syntax: '<color>'; inherits: true; initial-value: transparent; }
 
 /* строка очереди: сворачивается при уходе, раскрывается при появлении */
 .isl-qw { display: grid; grid-template-rows: 1fr; transition: grid-template-rows 460ms var(--ease-out), opacity 320ms var(--ease-out); }
@@ -666,7 +672,7 @@ a.tcard:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(0,0,0,.
 .isl-q .noimg { background: var(--island-key); }
 .isl-q .qt { gap: 2px; }
 .isl-q .qsub { display: flex; align-items: baseline; gap: 6px; min-width: 0; font-size: var(--fs-cap); line-height: 16px; }
-.isl-q .qstep { flex: none; color: color-mix(in srgb, var(--island-text) 40%, transparent); font-variant-numeric: tabular-nums; }
+.isl-q .qstep { flex: none; color: color-mix(in srgb, var(--island-text) 62%, transparent); font-variant-numeric: tabular-nums; }
 .isl-q .qstep::before { content: "·"; margin-right: 6px; }
 .isl-q .qurl { display: none; min-width: 0; }
 .island.wide .isl-q .qurl { display: block; }
@@ -688,15 +694,15 @@ a.tcard:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(0,0,0,.
 .qring circle { fill: none; stroke-width: 3.4; }
 .qring .trk { stroke: color-mix(in srgb, var(--island-text) 13%, transparent); }
 .qring .fill {
-  --p: 0; --w: 0;
+  --p: 0; --wob: 0;
   stroke: var(--c); stroke-linecap: round;
-  stroke-dasharray: calc(max(.01, min(100, var(--p) + var(--w))) * 1px) 200px;
+  stroke-dasharray: calc(max(.01, min(100, var(--p) + var(--wob))) * 1px) 200px;
   transform: rotate(-90deg); transform-origin: 18px 18px;
-  transition: --p 820ms var(--ease-pop), stroke 600ms var(--ease-out);
+  transition: --p 760ms var(--ease-spring), stroke 600ms var(--ease-out);
 }
 /* этап идёт: кончик линии мягко качается вперёд-назад */
 .qring.run .fill { animation: qwob 1.9s ease-in-out infinite; }
-@keyframes qwob { 0%, 100% { --w: -3.5; } 50% { --w: 2.5; } }
+@keyframes qwob { 0%, 100% { --wob: -3.5; } 50% { --wob: 2.5; } }
 .qring .dot { fill: var(--c); stroke: none; transform-origin: 18px 18px; animation: qdot 1.6s ease-in-out infinite; transition: fill 600ms var(--ease-out); }
 @keyframes qdot { 50% { transform: scale(.5); opacity: .5; } }
 .qring.local .dot { animation: none; }
@@ -722,13 +728,8 @@ a.tcard:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(0,0,0,.
 .isl-q.conf .del { opacity: 1; transform: none; }
 .isl-q .del:hover { filter: brightness(1.1); } .isl-q .del:active { transform: scale(.94); }
 
-/* широкая пилюля — и закрытая, и раскрытая */
-.island.open.wide { --w: clamp(440px, 52vw, 640px); }
-@media (max-width: 860px) { .island.open.wide { --w: clamp(260px, calc(100vw - 24px), 560px); } }
 
 /* мини-кольцо в закрытой пилюле: видно ход обработки, не открывая очередь */
-.isl-mini { position: relative; display: grid; place-items: center; flex: none; animation: slin 360ms var(--ease-out) both; }
-.isl-mini i { position: absolute; right: -5px; top: -4px; min-width: 15px; height: 15px; padding: 0 4px; border-radius: 8px; background: var(--accent); color: #fff; font: 600 10px/15px var(--font, inherit); font-style: normal; text-align: center; }
 
 /* шарик, который летит из очереди в список */
 .fly-x { position: fixed; z-index: 1000; pointer-events: none; will-change: transform; }
@@ -740,6 +741,7 @@ a.tcard:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(0,0,0,.
 .vwrap > div { min-height: 0; overflow: hidden; margin: -4px -10px; padding: 4px 10px; }   /* поля — чтобы не обрезать подсветку и тень */
 .vwrap.closed { grid-template-rows: 0fr; }
 .vwrap.closed > div { margin: 0 -10px; padding: 0 10px; }
+.vcard[data-arrive="wait"] { opacity: 0; }
 [data-arrive="wait"] .av, [data-arrive="wait"] .cover, [data-arrive="wait"] .vt > *, [data-arrive="wait"] > b, [data-arrive="wait"] .sub, [data-arrive="wait"] .bar { opacity: 0; }
 [data-arrive="go"] { animation: arrflash 1100ms var(--ease-out); }
 [data-arrive="go"] .av, [data-arrive="go"] .cover { animation: arrcover 620ms var(--ease-pop) both; }
@@ -748,11 +750,46 @@ a.tcard:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(0,0,0,.
 [data-arrive="go"] .vt > :nth-child(2), [data-arrive="go"] .sub { animation-delay: 170ms; }
 [data-arrive="go"] .bar { animation-delay: 240ms; }
 [data-arrive="go"].vcard { animation: arrcard 620ms var(--ease-pop) both; }
-@keyframes arrcover { from { transform: scale(.55); opacity: 0; filter: blur(3px); } 60% { opacity: 1; filter: none; } }
+@keyframes arrcover { from { transform: scale(.86); opacity: 0; filter: blur(2px); } 55% { opacity: 1; filter: none; } }
 @keyframes arrtext { from { transform: translateY(12px); opacity: 0; filter: blur(2px); } }
 @keyframes arrflash { 0% { background: color-mix(in srgb, var(--success) 22%, transparent); } 100% { background: transparent; } }
 @keyframes arrcard { from { transform: scale(.92); opacity: 0; } }
 @media (prefers-reduced-motion: reduce) {
-  .qring .comet, .qring .dot, .qring.run .fill, .qring.done { animation: none; }
-  .slabel .in, .slabel .out, [data-arrive] *, [data-arrive] { animation-duration: 1ms !important; }
+  .qring .dot, .qring.run .fill, .qring.done, .qring .ok, .isl-qw.enter, .isl-qw.enter .isl-q { animation: none !important; }
+  .qring .ok { stroke-dashoffset: 0; }
+  .isl-qw, .isl-q, .qring, .qring .fill,   .slabel .in, .slabel .out, [data-arrive] *, [data-arrive] { animation-duration: 1ms !important; }
 }
+
+/* корзина: область нажатия 44×44, круг остаётся 32 */
+.isl-q .trash { position: relative; }
+.isl-q .trash::before { content: ""; position: absolute; inset: -6px; }
+/* телефон: подпись этапа крупнее */
+@media (max-width: 860px) {
+  .isl-q .qsub, .slabel { font-size: 13px; line-height: 18px; }
+  .slabel { height: 18px; }
+}
+
+/* закрытая пилюля в режиме «шире»: чуть больше места — показываем короткий статус очереди (без колец: видео может быть много) */
+.isl-status { flex: 0 1 auto; min-width: 0; max-width: 0; opacity: 0; overflow: hidden; display: flex; align-items: center; justify-content: flex-end; gap: 6px; white-space: nowrap;
+  font-size: var(--fs-cap); font-weight: 500; color: color-mix(in srgb, var(--island-text) 72%, transparent); pointer-events: none;
+  transition: max-width .55s var(--ease-island), opacity 320ms var(--ease-out); }
+.island.wide:not(.open) .isl-status { max-width: 170px; opacity: 1; transition-delay: 0s, 160ms; }
+.isl-status .slabel { font-size: var(--fs-cap); }
+.isl-status .cnt { flex: none; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 9px; background: var(--accent); color: #fff; font: 600 11px/18px var(--font, inherit); text-align: center; animation: slin 420ms var(--ease-out) both; }
+.isl-status .idle { color: color-mix(in srgb, var(--island-text) 58%, transparent); }
+
+/* фон строки очереди: цветное размытое свечение под кольцом (цвет = цвет этапа, плавно перетекает) */
+.isl-q { --sc: transparent; transition: --sc 700ms var(--ease-out), background-color 240ms var(--ease-out), transform 420ms var(--ease-out), filter 420ms var(--ease-out); isolation: isolate; }
+.isl-q::before { content: ""; position: absolute; z-index: -1; right: 26px; top: 50%; width: 150px; height: 110px; transform: translate(0, -50%);
+  background: radial-gradient(closest-side, color-mix(in srgb, var(--sc) 62%, transparent), transparent); filter: blur(12px); opacity: .55; pointer-events: none; transition: opacity 400ms var(--ease-out); }
+.isl-q.m-run::before { animation: qglow 2.4s ease-in-out infinite; }
+@keyframes qglow { 50% { opacity: .85; } }
+.isl-q.conf::before { opacity: 0; }
+
+/* читаемость: подписи и вспомогательный текст контрастнее */
+.isl-h { color: color-mix(in srgb, var(--island-text) 64%, transparent); font-size: 12px; letter-spacing: .05em; padding: 16px 6px 8px; }
+.isl-row .st, .prev .pt small, .qt small, .isl-q .st { color: color-mix(in srgb, var(--island-text) 66%, transparent); }
+.island input::placeholder { color: color-mix(in srgb, var(--island-text) 62%, transparent); }
+.isl-row { min-height: 42px; }
+.isl-scroll { padding: 12px 12px 6px; }
+@media (prefers-reduced-motion: reduce) { .isl-q.m-run::before { animation: none; } .isl-status { transition-duration: 1ms !important; } }

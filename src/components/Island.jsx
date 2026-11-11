@@ -7,7 +7,7 @@ import { useAllSummaries, useIndex } from '../data/useData'
 import { useLibrary } from '../store/library'
 import { useAuth, setLoginOpen } from '../store/auth'
 import Segmented from './Segmented'
-import { QueueRing, StageLabel } from './QueueRing'
+import { QueueRing, StageLabel, ringColor } from './QueueRing'
 import { flyToList } from '../lib/fly'
 import { runQueueDemo } from '../lib/demoQueue'
 import { IPlus, IExpand, ICollapse, ISearch, ISystem, ISun, IMoon, ITrash } from './Icons'
@@ -105,11 +105,12 @@ export default function Island({ open, setOpen }) {
   const [leaving, setLeaving] = useState({})               // id → true: строка сворачивается (видео улетело)
   const flown = useRef(new Set())
   const ringEls = useRef({})
-  const barRing = useRef(null)
+  const statusEl = useRef(null)
   const phases = Object.fromEntries(items.map((it) => [it.id, phaseOf(it, seen.current, now)]))
   // «ушедшая» строка остаётся на экране, пока из неё вылетает шарик и она сворачивается
   const shown = items.filter((it) => { const ph = phases[it.id]; return !ph.gone || leaving[it.id] || (!ph.quiet && !flown.current.has(it.id)) })
   const lead = shown.find((it) => !leaving[it.id])
+  const leadPh = lead ? (phases[lead.id].gone ? { k: 4, mode: 'leaving', label: 'st.leaving' } : phases[lead.id]) : null
 
   // этап «скоро зникне» закончился → шарик летит в список, строка очереди сворачивается
   useEffect(() => {
@@ -120,7 +121,8 @@ export default function Island({ open, setOpen }) {
       if (ph.quiet) continue
       const vid = it.vid || ytId(it.url)
       if ((it.kind ?? 'add') === 'add' && !it.tr && vid) {
-        const src = open ? ringEls.current[it.id] : barRing.current
+        // откуда летит шарик: из кольца в открытой очереди, из статуса в широкой закрытой пилюле, иначе — из кнопки «+»
+        const src = open ? ringEls.current[it.id] : (statusEl.current && wide ? statusEl.current : box.current?.querySelector('.isl-main svg'))
         flyToList(vid, src)
       }
       setLeaving((s) => ({ ...s, [it.id]: true }))
@@ -198,7 +200,7 @@ export default function Island({ open, setOpen }) {
             const kindTag = it.tr ? `${t('q.translate')} ${it.tr.toUpperCase()} · ` : it.kind && it.kind !== 'add' ? `${t(`q.${it.kind}`)} · ` : ''
             return (
               <div key={it.id} className={`isl-qw ${leaving[it.id] || removing[it.id] ? 'out' : ''} ${firstIds.current.has(it.id) ? '' : 'enter'}`}><div>
-                <div className={`isl-q ${confirm === it.id ? 'conf' : ''} m-${ph.mode}`} style={{ '--sc': ph.mode === 'error' ? 'var(--danger)' : undefined }}>
+                <div className={`isl-q ${confirm === it.id ? 'conf' : ''} m-${ph.mode}`} style={{ '--sc': ringColor(ph.k, ph.mode) }}>
                   <div className="rc">
                     {it.vid ? <img src={`https://i.ytimg.com/vi/${it.vid}/mqdefault.jpg`} alt="" /> : <span className="noimg" />}
                     <div className="qt">
@@ -234,9 +236,11 @@ export default function Island({ open, setOpen }) {
 
         <div className="isl-bar">
           <button className="isl-main" onClick={(e) => { e.stopPropagation(); setOpen(!open) }}><IPlus />{t('addVideo')}</button>
-          {lead && !open && (() => { const ph = phases[lead.id].gone ? { k: 4, mode: 'leaving', label: 'st.leaving' } : phases[lead.id]; return (
-            <span className="isl-mini" title={t(ph.label)}><QueueRing k={ph.k} mode={ph.mode} size={24} leaveMs={LEAVE_MS} ringRef={barRing} />{shown.length > 1 && <i>{shown.length}</i>}</span>
-          ) })()}
+          <span className="isl-status" ref={statusEl}>
+            {lead
+              ? <>{shown.length > 1 && <i className="cnt">{shown.length}</i>}<StageLabel text={t(leadPh.label)} className={`st-${leadPh.mode}`} /></>
+              : <span className="idle">{t('isl.empty')}</span>}
+          </span>
           <span className={`sync ${sync}`} title={t(`sync.${sync}`)} role={sync === 'nologin' ? 'button' : undefined} onClick={sync === 'nologin' ? (e) => { e.stopPropagation(); setLoginOpen(true) } : undefined} />
           <button className={`isl-btn ${square ? 'on' : ''}`} title={t('isl.corners')} onClick={(e) => { e.stopPropagation(); toggle('square') }}>
             <span className={`shape sq ${square ? 'off' : ''}`} /><span className={`shape round ${square ? '' : 'off'}`} />

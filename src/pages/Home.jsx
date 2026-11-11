@@ -1,3 +1,4 @@
+import { useLayoutEffect, useRef } from 'react'
 import { Link, NavLink, useNavigate } from 'react-router-dom'
 import { useT } from '../i18n'
 import { hello } from '../lib/hello'
@@ -8,7 +9,7 @@ import { useSettingsMenu } from '../components/SettingsMenu'
 import VideoRow, { coverOf } from '../components/VideoRow'
 import { IBack, IBook, IBookmark, ICheckSm, IGear, IForward, IPlaySm } from '../components/Icons'
 import { useNav } from '../store/nav'
-import { useArriveOf } from '../store/arrive'
+import { useArriveOf, useArrive } from '../store/arrive'
 
 export const PageHead = ({ title, sub, onBack }) => {
   const t = useT()
@@ -37,6 +38,27 @@ export function VideoCard({ v }) {
   return <Link className="vcard tap" data-vid={v.id} data-arrive={arr || undefined} to={`/v/${v.id}`} style={v.ready ? undefined : { opacity: .75 }}>{inner}</Link>
 }
 
+// Плавное перестроение сетки: когда карточек становится больше (или порядок меняется), остальные
+// не прыгают, а скользят на новые места (приём FLIP). Новая карточка при этом ещё невидима — место готовится заранее.
+function useFlip(ref, deps) {
+  const prev = useRef(new Map())
+  useLayoutEffect(() => {
+    const box = ref.current
+    if (!box) return
+    const b = box.getBoundingClientRect()
+    const next = new Map()
+    for (const el of box.children) if (el.dataset.vid) { const r = el.getBoundingClientRect(); next.set(el.dataset.vid, { el, x: r.left - b.left, y: r.top - b.top }) }
+    const calm = matchMedia('(prefers-reduced-motion: reduce)').matches
+    if (!calm) for (const [id, n] of next) {
+      const p = prev.current.get(id)
+      if (p && (Math.abs(p.x - n.x) > 1 || Math.abs(p.y - n.y) > 1)) {
+        n.el.animate([{ transform: `translate(${p.x - n.x}px, ${p.y - n.y}px)` }, { transform: 'none' }], { duration: 520, easing: 'cubic-bezier(.32,.72,0,1)' })
+      }
+    }
+    prev.current = new Map([...next].map(([id, n]) => [id, { x: n.x, y: n.y }]))
+  }, deps) // eslint-disable-line
+}
+
 const Tile = ({ color, children }) => <span className="tile" style={{ '--tile': color }}>{children}</span>
 
 export default function Home({ onBack }) {
@@ -49,6 +71,9 @@ export default function Home({ onBack }) {
   const settings = useSettingsMenu()
   const topics = useTopicsCount(), later = useLaterCount()
   const learned = videos.filter((v) => v.learned).length
+  const gridRef = useRef(null)
+  const arrivals = useArrive((s) => s.st)
+  useFlip(gridRef, [videos.map((v) => v.id).join(','), JSON.stringify(arrivals)])
 
   return (
     <div className="wrap">
@@ -74,7 +99,7 @@ export default function Home({ onBack }) {
       <div className="d-only">
         <PageHead title={t('app')} sub={t('home.sub', { n: videos.filter((v) => v.ready).length, q: queue.length + videos.filter((v) => !v.ready).length })} onBack={onBack} />
         {loaded && !videos.length && <div className="empty"><b>{t('empty')}</b>{t('home.empty')}</div>}
-        <div className="grid-cards">{videos.map((v) => <VideoCard key={v.id} v={v} />)}</div>
+        <div className="grid-cards" ref={gridRef}>{videos.map((v) => <VideoCard key={v.id} v={v} />)}</div>
       </div>
     </div>
   )

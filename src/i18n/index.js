@@ -164,7 +164,7 @@ const K = {
   'st.queued': ['у черзі', 'в очереди', 'queued'],
   'st.processing': ['обробляється', 'обрабатывается', 'processing'],
   'st.done': ['готово', 'готово', 'done'],
-  'st.leaving': ['скоро зникне з черги', 'скоро исчезнет из очереди', 'leaving the queue soon'],
+  'st.leaving': ['зникне з черги', 'уйдёт из очереди', 'leaving queue'],
   'q.step': ['крок {a} з {b}', 'шаг {a} из {b}', 'step {a} of {b}'],
   'r.notes': ['Конспект', 'Конспект', 'Notes'],
   'r.term': ['Термін', 'Термин', 'Term'],
