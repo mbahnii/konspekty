@@ -20,6 +20,6 @@ export const useProgress = create(
 
 export const stepOn = (marks, videoId, g, i) => {
   const k = `${videoId}/${g.id}/${i}`
-  return k in marks ? marks[k] : !!g.done_already
+  return marks && k in marks ? marks[k] : !!g.done_already
 }
-export const guideDone = (marks, videoId, g) => g.steps.every((_, i) => stepOn(marks, videoId, g, i))
+export const guideDone = (marks, videoId, g) => (g.steps?.length ?? 0) > 0 && g.steps.every((_, i) => stepOn(marks, videoId, g, i))   // инструкция без шагов выполненной не считается

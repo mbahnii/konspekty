@@ -7,7 +7,7 @@ const idx = { uk: 0, ru: 1, en: 2 }
 const K = {
   draft: ['Конспект зроблено локальною нейромережею ({m}) — можливі неточності. Щоб покращити, попросіть Claude переписати.', 'Конспект сделан локальной нейросетью ({m}) — возможны неточности. Чтобы улучшить, попросите Claude переписать.', 'Notes made by a local AI model ({m}) — may contain mistakes. Ask Claude to rewrite for better quality.'],
   version: ['версія', 'версия', 'version'],
-  'login.none': ['не увійшли', 'не вошли', 'not signed in'],
+
   'stage.published': ['публікується', 'публикуется', 'publishing'],
   'stage.summary': ['пишеться конспект', 'пишется конспект', 'writing notes'],
   'stage.waiting-summary': ['чекає конспект', 'ждёт конспект', 'waiting for notes'],
@@ -37,7 +37,7 @@ const K = {
   'login.as': ['Ви увійшли як {email}', 'Вы вошли как {email}', 'Signed in as {email}'],
   'login.sub': ['Увійдіть, щоб позначки й черга збігалися на телефоні й ноутбуці.', 'Войдите, чтобы отметки и очередь были одинаковые на телефоне и ноутбуке.', 'Sign in to share progress and queue between your phone and laptop.'],
   'login.title': ['Синхронізація', 'Синхронизация', 'Sync'],
-  'login.menuOn': ['Синхронізація ввімкнена', 'Синхронизация включена', 'Sync is on'],
+
   'login.menuOff': ['Увійти для синхронізації', 'Войти для синхронизации', 'Sign in to sync'],
   'later.empty': ['Тут з’являться теми, відкладені «на потім».', 'Здесь появятся темы, отложенные «на потом».', 'Postponed topics will show up here.'],
   'later.sub': ['Корисне на пізніше з усіх відео.', 'Полезное на потом из всех видео.', 'Saved for later from all videos.'],
@@ -96,11 +96,11 @@ const K = {
   'guide.8.d': ['Введіть слово в «Пошук у конспектах» — знайдеться потрібний розділ, термін чи крок.', 'Введите слово в «Поиск по конспектам» — найдётся нужный раздел, термин или шаг.', 'Type a word in “Search notes” to find the right section, term or step.'],
   'guide.9.t': ['Видалення з черги', 'Удаление из очереди', 'Remove from queue'],
   'guide.9.d': ['Кошик біля відео в черзі прибирає його, поки обробка не почалась.', 'Корзина рядом с видео в очереди убирает его, пока обработка не началась.', 'The bin next to a queued video removes it before processing starts.'],
-  'nav.learn': ['Бібліотека', 'Библиотека', 'Library'],
+
   'nav.topics': ['Огляд тем', 'Обзор тем', 'Topics'],
   'nav.learned': ['Вивчено', 'Изучено', 'Learned'],
   'nav.later': ['На потім', 'На потом', 'Later'],
-  'soon': ['Незабаром', 'Скоро', 'Coming soon'],
+
   videos: ['Відео', 'Видео', 'Videos'],
   addVideo: ['Додати відео', 'Добавить видео', 'Add video'],
   addShort: ['Додати', 'Добавить', 'Add'],
@@ -117,7 +117,7 @@ const K = {
   'hello.morning': ['Доброго ранку', 'Доброе утро', 'Good morning'],
   'hello.day': ['Добрий день', 'Добрый день', 'Good afternoon'],
   'hello.evening': ['Добрий вечір', 'Добрый вечер', 'Good evening'],
-  'hello.home': ['Оберіть відео в списку ліворуч.', 'Выберите видео в списке слева.', 'Choose a video from the list.'],
+
   back: ['Відео', 'Видео', 'Videos'],
   'filter.all': ['Усі розділи', 'Все разделы', 'All sections'],
   'filter.clean': ['Без пропущеного', 'Без пропущенного', 'Without skipped'],
@@ -153,14 +153,13 @@ const K = {
   'tl.skipped': [' (пропущено)', ' (пропущено)', ' (skipped)'],
   'isl.link': ['Посилання на YouTube', 'Ссылка на YouTube', 'YouTube link'],
   'isl.go': ['Додати', 'Добавить', 'Add'],
-  'isl.expand': ['Розгорнути', 'Развернуть', 'Expand'],
-  'isl.collapse': ['Згорнути', 'Свернуть', 'Collapse'],
+
   'isl.queue': ['Черга', 'Очередь', 'Queue'],
   'isl.empty': ['Черга порожня', 'Очередь пуста', 'Queue is empty'],
-  'isl.search': ['Пошук у конспектах', 'Поиск по конспектам', 'Search notes'],
+
   'isl.searchPh': ['Пошук', 'Поиск', 'Search'],
   'isl.none': ['Нічого не знайдено', 'Ничего не найдено', 'Nothing found'],
-  'isl.themeLang': ['Вигляд', 'Оформление', 'Appearance'],
+
   'isl.badLink': ['Потрібне посилання на YouTube', 'Нужна ссылка на YouTube', 'A YouTube link is needed'],
   'isl.queued': ['Додано в чергу', 'Добавлено в очередь', 'Added to queue'],
   'isl.queuedPub': ['Додано в чергу · буде у спільних', 'Добавлено в очередь · будет в общих', 'Queued · will be shared'], 'isl.queuedMine': ['Додано в чергу · буде у моїх', 'Добавлено в очередь · будет в моих', 'Queued · will be private'],
@@ -182,22 +181,22 @@ const K = {
   'sh.error': ['помилка', 'ошибка', 'error'], 'sh.local': ['не надіслано', 'не отправлено', 'not sent'], 'sh.ocr': ['читає', 'читает', 'reading'], 'sh.pack': ['збір', 'сборка', 'packing'],
   'co.note': ['Примітка', 'Примечание', 'Note'], 'co.tip': ['Порада', 'Совет', 'Tip'], 'co.remember': ['Запам’ятай', 'Запомни', 'Remember'],
   'co.warning': ['Типова помилка', 'Типичная ошибка', 'Common mistake'], 'co.danger': ['Увага', 'Внимание', 'Careful'], 'co.example': ['Приклад', 'Пример', 'Example'],
-  'ph.btn': ['Додати фото конспекту', 'Добавить фото конспекта', 'Add notes from photos'],
-  'ph.print': ['Друкований текст', 'Печатный текст', 'Printed text'], 'ph.printHint': ['швидко', 'быстро', 'fast'],
-  'ph.hand': ['Рукописний', 'Рукописный', 'Handwriting'], 'ph.handHint': ['довше', 'дольше', 'slower'],
-  'ph.pick': ['Вибрати фото', 'Выбрать фото', 'Choose photos'], 'ph.titlePh': ['Назва (необов’язково)', 'Название (необязательно)', 'Title (optional)'],
-  'ph.go': ['Надіслати ({n})', 'Отправить ({n})', 'Send ({n})'], 'ph.default': ['Фото', 'Фото', 'Photos'], 'ph.channel': ['Фото', 'Фото', 'Photos'],
+
+  'ph.print': ['Друкований текст', 'Печатный текст', 'Printed text'],
+  'ph.hand': ['Рукописний', 'Рукописный', 'Handwriting'],
+'ph.titlePh': ['Назва (необов’язково)', 'Название (необязательно)', 'Title (optional)'],
+'ph.default': ['Фото', 'Фото', 'Photos'], 'ph.channel': ['Фото', 'Фото', 'Photos'],
   'ph.fail': ['Не вдалося завантажити фото', 'Не удалось загрузить фото', 'Could not upload the photos'],
   'ph.zone': ['Перетягніть фото сюди', 'Перетащите фото сюда', 'Drop photos here'], 'ph.zoneSub': ['або натисніть, щоб вибрати · можна вставити з буфера (⌘V)', 'или нажмите, чтобы выбрать · можно вставить из буфера (⌘V)', 'or click to choose · you can also paste (⌘V)'],
-  'ph.zoneTouch': ['Вибрати фото', 'Выбрать фото', 'Choose photos'], 'ph.zoneTouchSub': ['з галереї або зробіть знімок', 'из галереи или сделайте снимок', 'from the gallery, or take a picture'],
+
   'ph.camera': ['Зробити фото', 'Сделать фото', 'Take a photo'], 'ph.release': ['Відпустіть, щоб додати', 'Отпустите, чтобы добавить', 'Release to add'],
-  'ph.left': ['Лівіше', 'Левее', 'Move left'], 'ph.right': ['Правіше', 'Правее', 'Move right'], 'ph.rotate': ['Повернути', 'Повернуть', 'Rotate'],
+'ph.rotate': ['Повернути', 'Повернуть', 'Rotate'],
   'ph.notImg': ['Це не зображення', 'Это не изображение', 'That is not an image'], 'ph.skipped': ['Пропущено файлів: {n} (не зображення)', 'Пропущено файлов: {n} (не изображения)', 'Skipped {n} file(s): not images'],
   'ph.max': ['Максимум {n} фото за раз', 'Максимум {n} фото за раз', 'Up to {n} photos at a time'], 'ph.cantRead': ['Не вдалося прочитати', 'Не удалось прочитать', 'Could not read'],
   'ph.page': ['стор.', 'стр.', 'p.'],
   'ph.pages': ['Сторінки', 'Страницы', 'Pages'], 'm.photos': ['Фото сторінок', 'Фото страниц', 'Page photos'], 'tab.pages': ['Фото', 'Фото', 'Photos'], 'ph.openPage': ['Відкрити фото', 'Открыть фото', 'Open photo'],
   'ph.up': ['Вище', 'Выше', 'Move up'], 'ph.down': ['Нижче', 'Ниже', 'Move down'], 'ph.addMore': ['Додати ще фото', 'Добавить ещё фото', 'Add more photos'],
-  'ph.tapHint': ['Торкніться фото, щоб відкрити його', 'Нажмите на фото, чтобы открыть', 'Tap a photo to open it'],
+
   'pv.close': ['Закрити', 'Закрыть', 'Close'], 'pv.prev': ['Попереднє фото', 'Предыдущее фото', 'Previous photo'], 'pv.next': ['Наступне фото', 'Следующее фото', 'Next photo'],
   'pv.zoom': ['Збільшити', 'Увеличить', 'Zoom'], 'pv.orig': ['Відкрити оригінал', 'Открыть оригинал', 'Open original'],
   'tag.title': ['Мітка', 'Метка', 'Label'], 'tag.none': ['Без мітки', 'Без метки', 'No label'],
@@ -205,7 +204,7 @@ const K = {
   'au.inTitle': ['З поверненням', 'С возвращением', 'Welcome back'], 'au.upTitle': ['Створити акаунт', 'Создать аккаунт', 'Create an account'],
   'au.or': ['або поштою', 'или по почте', 'or with email'], 'au.nickname': ['Нікнейм', 'Никнейм', 'Username'],
   'au.create': ['Створити акаунт', 'Создать аккаунт', 'Create account'], 'au.forgot': ['Забули пароль?', 'Забыли пароль?', 'Forgot password?'],
-  'au.show': ['Показати', 'Показать', 'Show'], 'au.hide': ['Сховати', 'Скрыть', 'Hide'], 'au.soon': ['скоро', 'скоро', 'soon'],
+  'au.show': ['Показати', 'Показать', 'Show'], 'au.hide': ['Сховати', 'Скрыть', 'Hide'],
   'au.guest': ['Без акаунта можна додати 1 відео на день — воно потрапить у спільний каталог.', 'Без аккаунта можно добавить 1 видео в день — оно попадёт в общий каталог.', 'Without an account you can add 1 video a day — it goes to the shared catalog.'],
   'au.hi': ['Привіт, {name}', 'Привет, {name}', 'Hi, {name}'],
   'au.codeTitle': ['Введіть код з листа', 'Введите код из письма', 'Enter the code from the email'],
@@ -228,8 +227,7 @@ const K = {
   'isl.more': ['і ще {n} у черзі', 'и ещё {n} в очереди', 'and {n} more in the queue'], 'isl.searchHint': ['Шукайте за розділами, термінами й інструкціями всіх конспектів.', 'Ищите по разделам, терминам и инструкциям всех конспектов.', 'Search sections, terms and guides across all notes.'],
   'isl.theme': ['Тема', 'Тема', 'Theme'], 'isl.lang': ['Мова інтерфейсу', 'Язык интерфейса', 'Interface language'],
   'ph.needLogin': ['Фото можна надіслати після входу (Google, GitHub, Telegram або пошта)', 'Фото можно отправить после входа (Google, GitHub, Telegram или почта)', 'Sign in to send photos (Google, GitHub, Telegram or email)'],
-  'ph.printNote': ['macOS читає текст сам: швидко, найкраще для друку й чітких скриншотів.', 'macOS читает текст сам: быстро, лучше всего для печати и чётких скриншотов.', 'macOS reads the text itself: fast, best for print and clear screenshots.'],
-  'ph.handNote': ['Модель на ноутбуці читає почерк: приблизно 40 секунд на сторінку.', 'Модель на ноутбуке читает почерк: примерно 40 секунд на страницу.', 'A model on the laptop reads handwriting: about 40 seconds per page.'],
+
   'ph.gallery': ['З галереї', 'Из галереи', 'From gallery'], 'ph.send': ['Надіслати {n} фото', 'Отправить {n} фото', 'Send {n} photo(s)'], 'ph.addFirst': ['Додайте фото', 'Добавьте фото', 'Add photos first'],
   'q.step': ['крок {a} з {b}', 'шаг {a} из {b}', 'step {a} of {b}'],
   'r.notes': ['Конспект', 'Конспект', 'Notes'],
@@ -259,7 +257,7 @@ const K = {
 
 export function translate(lang, key, vars) {
   let s = K[key]?.[idx[lang] ?? 0] ?? key
-  if (vars) for (const [k, v] of Object.entries(vars)) s = s.replace(`{${k}}`, v)
+  if (vars) for (const [k, v] of Object.entries(vars)) s = s.split(`{${k}}`).join(String(v))
   return s
 }
 

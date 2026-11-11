@@ -10,11 +10,12 @@ import '../styles/rich.css'
 
 const HL = { y: 'y', g: 'g', r: 'r', b: 'b', p: 'p' }
 // Границы условий (?<![\w…]) нужны, чтобы «C++», «a = b», «2*3*4» не принимались за разметку
-const INLINE = /(\*\*[^*]+\*\*|`[^`]+`|(?<![=\w])==(?:[grbpy]:)?(?=\S)[^=]+?(?<=\S)==(?![=\w])|(?<![\w+])\+\+(?=\S)[^+]+?(?<=\S)\+\+(?![\w+])|\[\[[^\]]+\]\]|(?<![\w*])\*(?=[^\s*])[^*]+?(?<=[^\s*])\*(?![\w*]))/g
+const INLINE = /(\*\*[^*]+\*\*|`[^`]+`|(?<![=\w])==(?![grbpy]:==)(?:[grbpy]:)?(?=\S)[^=]+?(?<=\S)==(?![=\w])|(?<![\w+])\+\+(?=\S)[^+]+?(?<=\S)\+\+(?![\w+])|\[\[[^\]]+\]\]|(?<![\w*])\*(?=[^\s*])[^*]+?(?<=[^\s*])\*(?![\w*]))/g
 
 export function inline(text) {
   return String(text ?? '').split(INLINE).map((p, i) => {
     if (!p) return null
+    if (i % 2 === 0) return <Fragment key={i}>{p}</Fragment>      // при split с одной скобкой чётные куски — обычный текст (даже если похож на разметку: «==abc», «**abc»)
     if (p.startsWith('**') && p.length > 4) return <b key={i}>{inline(p.slice(2, -2))}</b>
     if (p.startsWith('`')) return <code key={i}>{p.slice(1, -1)}</code>
     if (p.startsWith('==')) {

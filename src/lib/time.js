@@ -1,15 +1,15 @@
 import { fileUrl } from './files.js'
 export function fmt(sec) {
-  sec = Math.max(0, Math.round(sec))
+  sec = Number.isFinite(sec) ? Math.max(0, Math.floor(sec)) : 0
   const h = Math.floor(sec / 3600), m = Math.floor((sec % 3600) / 60), r = sec % 60
   const p = (n) => String(n).padStart(2, '0')
   return h ? `${h}:${p(m)}:${p(r)}` : `${m}:${p(r)}`
 }
 // Материал из фото: «страница N» вместо времени (страница i стоит на i·60 с)
 export const isPhotos = (m) => m?.source === 'photos'
-export const pageNo = (sec) => Math.floor(sec / 60) + 1
+export const pageNo = (sec) => (Number.isFinite(sec) ? Math.max(1, Math.floor(sec / 60) + 1) : 1)
 export const stamp = (m, sec, pageWord = 'p.') => (isPhotos(m) ? `${pageWord} ${pageNo(sec)}` : fmt(sec))
-export const ytLink = (id, t) => `https://www.youtube.com/watch?v=${id}&t=${Math.floor(t)}s`
+export const ytLink = (id, t) => `https://www.youtube.com/watch?v=${id}&t=${Number.isFinite(t) ? Math.max(0, Math.floor(t)) : 0}s`
 
 // Кадры раздела: от начала до конца, максимум 6 (равномерно)
 export function framesFor(meta, s, max = 6) {

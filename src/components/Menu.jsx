@@ -60,7 +60,7 @@ export function MenuProvider({ children }) {
             </div>
           )
           if (it.emojis) return (
-            <div key={i} className="mi-row emo" style={{ '--d': i }}>
+            <div key={i} className="mi-row" style={{ '--d': i }}>
               {it.emojis.map((x) => (
                 <button key={x.id} className={`em ${x.on ? 'on' : ''}`} aria-label={x.id}
                   onClick={(e) => { e.stopPropagation(); close(); it.onPick(x.id) }}>{x.id === 'none' ? '∅' : x.id}</button>

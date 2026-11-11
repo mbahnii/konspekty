@@ -8,7 +8,7 @@
     "dev": "node scripts/build-data.mjs && vite",
     "build": "vite build",
     "preview": "vite preview",
-    "test": "node --test tests/unit.test.mjs tests/integration.test.mjs"
+    "test": "node --test tests/unit.test.mjs tests/integration.test.mjs tests/lib.test.mjs tests/rich.test.mjs tests/i18n.test.mjs tests/css.test.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.119.0",
