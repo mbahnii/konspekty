@@ -9,4 +9,4 @@ export const accountsOn = () => {
   } catch { return false }
 }
 // Имя бота Telegram без @ (создаётся у @BotFather). Пока пусто — кнопка «Telegram» неактивна.
-export const TELEGRAM_BOT = ''
+export const TELEGRAM_BOT = 'konspekty_notes_bot'
