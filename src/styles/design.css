@@ -645,46 +645,86 @@ a.tcard:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(0,0,0,.
 /* =====================================================================
    Очередь: кольцо прогресса, подпись этапа, «улетает в список» (раунд 7)
    ===================================================================== */
-.isl-qw { display: grid; grid-template-rows: 1fr; transition: grid-template-rows 480ms var(--ease-out), opacity 300ms var(--ease-out); }
+@property --p { syntax: '<number>'; inherits: false; initial-value: 0; }
+@property --w { syntax: '<number>'; inherits: false; initial-value: 0; }
+
+/* строка очереди: сворачивается при уходе, раскрывается при появлении */
+.isl-qw { display: grid; grid-template-rows: 1fr; transition: grid-template-rows 460ms var(--ease-out), opacity 320ms var(--ease-out); }
 .isl-qw > div { min-height: 0; overflow: hidden; }
 .isl-qw.out { grid-template-rows: 0fr; opacity: 0; }
-.isl-q .noimg { width: 48px; aspect-ratio: 16/9; border-radius: 6px; flex: none; background: var(--island-key); }
-.isl-q .qstage { flex: none; width: 116px; display: flex; flex-direction: column; align-items: center; gap: 3px; }
-.isl-q .trash { opacity: .55; }
-.isl-q .rc:hover .trash, .isl-q .trash:focus-visible { opacity: 1; }
-@media (hover: none) { .isl-q .trash { opacity: .8; } }
+.isl-qw.out .isl-q { transform: scale(.96); filter: blur(3px); }
+.isl-qw.enter { animation: qrows 520ms var(--ease-out) both; }
+.isl-qw.enter .isl-q { animation: qin 560ms var(--ease-out) both; }
+@keyframes qrows { from { grid-template-rows: 0fr; } }
+@keyframes qin { from { opacity: 0; transform: translateY(10px) scale(.95); filter: blur(6px); } }
 
-.qring { display: block; overflow: visible; flex: none; }
-.qring circle { fill: none; stroke-width: 3.2; }
-.qring .trk { stroke: color-mix(in srgb, var(--island-text) 14%, transparent); }
-.qring .fill {
-  stroke: var(--c); stroke-linecap: round; stroke-dasharray: 100; transform: rotate(-90deg); transform-origin: 18px 18px;
-  /* «прыжок» на следующий этап — с пружинкой; цвет плавно теплеет к зелёному */
-  transition: stroke-dashoffset 760ms var(--ease-pop), stroke 600ms var(--ease-out);
-}
-.qring.run .fill { animation: qbreath 1.6s ease-in-out infinite; }
-.qring .comet { stroke: #fff; stroke-linecap: round; stroke-dasharray: 9 91; opacity: .55; transform-origin: 18px 18px; animation: qspin 1.35s linear infinite; mix-blend-mode: overlay; }
-.qring .dot { fill: var(--c); stroke: none; transform-origin: 18px 18px; animation: qdot 1.6s ease-in-out infinite; transition: fill 600ms var(--ease-out); }
-.qring .count { stroke: color-mix(in srgb, var(--c) 55%, transparent); stroke-width: 2; stroke-dasharray: 100; stroke-dashoffset: 0; transform: rotate(-90deg) scaleX(-1); transform-origin: 18px 18px; animation: qdrain linear forwards; }
-.qring .ok { fill: none; stroke: var(--c); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 100; stroke-dashoffset: 100; animation: qdraw 520ms 160ms var(--ease-out) forwards; }
-.qring.leaving .ok { stroke-dashoffset: 0; animation: none; transform: scale(.78); transform-origin: 18px 18px; }
-.qring .err { fill: none; stroke: var(--danger); stroke-width: 3.2; stroke-linecap: round; }
-.qring.done { animation: qpop 620ms var(--ease-pop); transform-origin: center; }
-.qring.local .dot, .qring.local .comet { display: none; }
-@keyframes qspin { to { transform: rotate(360deg); } }
-@keyframes qbreath { 50% { filter: drop-shadow(0 0 3px var(--c)); } }
-@keyframes qdot { 50% { transform: scale(.55); opacity: .55; } }
-@keyframes qdrain { to { stroke-dashoffset: 100; } }
-@keyframes qdraw { to { stroke-dashoffset: 0; } }
-@keyframes qpop { 0% { transform: scale(1); } 40% { transform: scale(1.18); } 100% { transform: scale(1); } }
+/* всё в одну линию по центру: превью · название и этап · кольцо · корзина */
+.isl-q { transition: background-color 240ms var(--ease-out), transform 420ms var(--ease-out), filter 420ms var(--ease-out); }
+.isl-q .rc { align-items: center; gap: 12px; padding: 8px 6px 8px 8px; min-height: 56px; }
+@media (hover: hover) { .isl-q:hover { background: color-mix(in srgb, var(--island-text) 7%, transparent); } }
+.isl-q img, .isl-q .noimg { width: 56px; height: 32px; aspect-ratio: auto; border-radius: 7px; box-shadow: 0 0 0 1px color-mix(in srgb, var(--island-text) 10%, transparent); }
+.isl-q .noimg { background: var(--island-key); }
+.isl-q .qt { gap: 2px; }
+.isl-q .qsub { display: flex; align-items: baseline; gap: 6px; min-width: 0; font-size: var(--fs-cap); line-height: 16px; }
+.isl-q .qstep { flex: none; color: color-mix(in srgb, var(--island-text) 40%, transparent); font-variant-numeric: tabular-nums; }
+.isl-q .qstep::before { content: "·"; margin-right: 6px; }
+.isl-q .qurl { display: none; min-width: 0; }
+.island.wide .isl-q .qurl { display: block; }
+.island.wide .isl-q .qurl::before { content: "·"; margin-right: 6px; }
 
-/* подпись этапа: старая уезжает вниз и гаснет, новая выезжает сверху */
-.slabel { display: grid; max-width: 100%; font-size: 11px; line-height: 1.2; color: color-mix(in srgb, var(--island-text) 62%, transparent); text-align: center; }
+/* подпись этапа — «барабан»: старая уходит вверх, новая выкатывается снизу */
+.slabel { display: grid; flex: 0 1 auto; min-width: 0; height: 16px; overflow: hidden; font-size: var(--fs-cap); line-height: 16px; font-weight: 500; color: color-mix(in srgb, var(--island-text) 72%, transparent); }
 .slabel > span { grid-area: 1 / 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.slabel .in { animation: slin 460ms var(--ease-out) both; }
-.slabel .out { animation: slout 380ms var(--ease-out) both; pointer-events: none; }
-@keyframes slin { from { opacity: 0; transform: translateY(-9px); filter: blur(3px); } }
-@keyframes slout { to { opacity: 0; transform: translateY(9px); filter: blur(3px); } }
+.slabel .in { animation: slin 520ms var(--ease-out) both; }
+.slabel .out { animation: slout 420ms var(--ease-out) both; pointer-events: none; }
+.slabel.st-done, .slabel.st-leaving { color: var(--success); }
+.slabel.st-error { color: #ff6b62; }
+@keyframes slin { from { opacity: 0; transform: translateY(100%); filter: blur(3px); } }
+@keyframes slout { to { opacity: 0; transform: translateY(-100%); filter: blur(3px); } }
+
+/* кольцо: одна линия с круглыми концами */
+.qring { display: block; overflow: visible; flex: none; transition: transform 300ms var(--ease-out); }
+.isl-q:hover .qring { transform: scale(1.08); }
+.qring circle { fill: none; stroke-width: 3.4; }
+.qring .trk { stroke: color-mix(in srgb, var(--island-text) 13%, transparent); }
+.qring .fill {
+  --p: 0; --w: 0;
+  stroke: var(--c); stroke-linecap: round;
+  stroke-dasharray: calc(max(.01, min(100, var(--p) + var(--w))) * 1px) 200px;
+  transform: rotate(-90deg); transform-origin: 18px 18px;
+  transition: --p 820ms var(--ease-pop), stroke 600ms var(--ease-out);
+}
+/* этап идёт: кончик линии мягко качается вперёд-назад */
+.qring.run .fill { animation: qwob 1.9s ease-in-out infinite; }
+@keyframes qwob { 0%, 100% { --w: -3.5; } 50% { --w: 2.5; } }
+.qring .dot { fill: var(--c); stroke: none; transform-origin: 18px 18px; animation: qdot 1.6s ease-in-out infinite; transition: fill 600ms var(--ease-out); }
+@keyframes qdot { 50% { transform: scale(.5); opacity: .5; } }
+.qring.local .dot { animation: none; }
+.qring .ok { fill: none; stroke: var(--c); stroke-width: 3.2; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 100; stroke-dashoffset: 100; transform-origin: 18px 18px; animation: qdraw 520ms 140ms var(--ease-out) forwards; transition: transform 500ms var(--ease-out); }
+.qring.leaving .ok { stroke-dashoffset: 0; animation: none; transform: scale(.82); }
+.qring .err { fill: none; stroke: var(--danger); stroke-width: 3.4; stroke-linecap: round; }
+.qring.done { animation: qpop 640ms var(--ease-pop); transform-origin: center; }
+@keyframes qdraw { to { stroke-dashoffset: 0; } }
+@keyframes qpop { 40% { transform: scale(1.16); } }
+
+/* корзина: спокойная, краснеет при наведении; «Видалити» выезжает с пружинкой */
+.isl-q .trash { width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; flex: none; opacity: 1;
+  color: color-mix(in srgb, var(--island-text) 50%, transparent); background: transparent;
+  transition: background-color 220ms var(--ease-out), color 220ms var(--ease-out), transform 260ms var(--ease-pop), opacity 220ms var(--ease-out); }
+.isl-q .trash svg { width: 17px; height: 17px; }
+@media (hover: hover) { .isl-q .trash:hover { background: rgba(255,69,58,.16); color: #ff6b62; transform: scale(1.08); } }
+.isl-q .trash:active { transform: scale(.86); }
+.isl-q.conf .trash { opacity: 0; transform: scale(.6); }
+.isl-q .rc { transition: transform 420ms var(--ease-out); }
+.isl-q.conf .rc { transform: translateX(-92px); }
+.isl-q .del { width: 84px; top: 10px; bottom: 10px; right: 6px; border-radius: 12px; transform: translateX(24px) scale(.85); opacity: 0;
+  transition: opacity 260ms var(--ease-out), transform 460ms var(--ease-pop), filter 200ms var(--ease-out); }
+.isl-q.conf .del { opacity: 1; transform: none; }
+.isl-q .del:hover { filter: brightness(1.1); } .isl-q .del:active { transform: scale(.94); }
+
+/* широкая пилюля — и закрытая, и раскрытая */
+.island.open.wide { --w: clamp(440px, 52vw, 640px); }
+@media (max-width: 860px) { .island.open.wide { --w: clamp(260px, calc(100vw - 24px), 560px); } }
 
 /* мини-кольцо в закрытой пилюле: видно ход обработки, не открывая очередь */
 .isl-mini { position: relative; display: grid; place-items: center; flex: none; animation: slin 360ms var(--ease-out) both; }

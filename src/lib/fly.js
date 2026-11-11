@@ -40,7 +40,6 @@ export async function flyToList(vid, srcEl) {
   const els = await waitTargets(vid)
   if (state() === 'hidden') setArrive(vid, 'wait')          // список раздвигает место (CSS-переход высоты)
   const cover = els.map((el) => el.querySelector('.av, .cover')).find((c) => c && inView(c.getBoundingClientRect()))
-  if (import.meta.env.DEV) (window.__fly ||= []).push({ vid, els: els.length, cover: !!cover, src: src && Math.round(src.width), srcConnected: !!srcEl?.isConnected, st: state() })
   if (!cover || !src || !src.width) { await sleep(state() === 'wait' ? 380 : 0); finish(); return }
 
   await sleep(60)                                            // кадр на то, чтобы строка начала раскрываться
@@ -58,12 +57,12 @@ export async function flyToList(vid, srcEl) {
   Object.assign(orbX.style, { left: `${sx - S / 2}px`, top: `${sy - S / 2}px` })
   orbY.appendChild(orb); orbX.appendChild(orbY); document.body.appendChild(orbX)
 
-  const dur = Math.min(950, Math.max(680, Math.hypot(tx - sx, ty - sy) * 0.9))
+  const dur = Math.min(1050, Math.max(760, Math.hypot(tx - sx, ty - sy) * 0.95))
   const up = ty < sy
   const ax = orbX.animate([{ transform: 'translateX(0)' }, { transform: `translateX(${tx - sx}px)` }],
-    { duration: dur, easing: 'cubic-bezier(.45, 0, .25, 1)', fill: 'forwards' })
+    { duration: dur, easing: 'cubic-bezier(.65, 0, .35, 1)', fill: 'forwards' })
   orbY.animate([{ transform: 'translateY(0)' }, { transform: `translateY(${ty - sy}px)` }],
-    { duration: dur, easing: up ? 'cubic-bezier(.2, .7, .3, 1)' : 'cubic-bezier(.6, 0, .8, .3)', fill: 'forwards' })
+    { duration: dur, easing: up ? 'cubic-bezier(.12, .7, .3, 1)' : 'cubic-bezier(.7, 0, .85, .3)', fill: 'forwards' })
   // старт: кольцо «вспыхивает» и становится миниатюрой; в полёте — лёгкий шлейф; в конце — форма обложки
   orb.animate([
     { width: `${S}px`, height: `${S}px`, borderRadius: '50%', transform: 'translate(0,0) scale(.6)', opacity: 0, filter: 'blur(4px) saturate(1.4)', boxShadow: '0 0 0 2px var(--success), 0 0 24px 6px color-mix(in srgb, var(--success) 70%, transparent)' },

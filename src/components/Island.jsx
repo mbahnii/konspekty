@@ -13,7 +13,7 @@ import { runQueueDemo } from '../lib/demoQueue'
 import { IPlus, IExpand, ICollapse, ISearch, ISystem, ISun, IMoon, ITrash } from './Icons'
 
 // Сколько показываем «готово» и «скоро зникне», прежде чем видео улетит в список
-const DONE_MS = 1400, LEAVE_MS = 4200
+const DONE_MS = 1500, LEAVE_MS = 15000
 const STAGE = { download: 1, 'waiting-summary': 2, summary: 2, translate: 2, published: 3 }
 
 // Этап задачи очереди → номер шага кольца, вид кольца и подпись
@@ -29,7 +29,7 @@ function phaseOf(it, seen, now) {
   if (!s || s.stale) return { gone: true, quiet: true }      // уже было готово до открытия сайта — не показываем
   const t = now - s.doneAt
   if (t < DONE_MS) return { k: 4, mode: 'done', label: 'st.done' }
-  if (t < DONE_MS + LEAVE_MS) return { k: 5, mode: 'leaving', label: 'st.leaving' }
+  if (t < DONE_MS + LEAVE_MS) return { k: 4, mode: 'leaving', label: 'st.leaving' }
   return { gone: true }
 }
 
@@ -98,6 +98,10 @@ export default function Island({ open, setOpen }) {
   }
   const anyDone = items.some((it) => it.status === 'done')
   const now = useClock(anyDone)
+  const [removing, setRemoving] = useState({})             // id → true: строку удалили корзиной, она сворачивается
+  const firstIds = useRef(null)                             // задачи, которые были при открытии сайта, — без анимации появления
+  if (firstIds.current === null) firstIds.current = new Set(items.map((x) => x.id))
+  const drop = (id) => { setConfirm(null); setRemoving((s) => ({ ...s, [id]: true })); setTimeout(() => { remove(id); setRemoving((s) => { const n = { ...s }; delete n[id]; return n }) }, 420) }
   const [leaving, setLeaving] = useState({})               // id → true: строка сворачивается (видео улетело)
   const flown = useRef(new Set())
   const ringEls = useRef({})
@@ -189,20 +193,26 @@ export default function Island({ open, setOpen }) {
           <div className="isl-h">{t('isl.queue')}</div>
           {!session && <div className="isl-warn"><span>{t('isl.nologin')}</span><button className="tap" onClick={(e) => { e.stopPropagation(); setLoginOpen(true) }}>{t('login.go')}</button></div>}
           {shown.length ? shown.map((it) => {
-            const ph = phases[it.id].gone ? { k: 5, mode: 'leaving', label: 'st.leaving' } : phases[it.id]
+            const ph = phases[it.id].gone ? { k: 4, mode: 'leaving', label: 'st.leaving' } : phases[it.id]
+            const step = ph.mode === 'run' || ph.mode === 'done' ? t('q.step', { a: Math.min(ph.k + 1, 5), b: 5 }) : null
+            const kindTag = it.tr ? `${t('q.translate')} ${it.tr.toUpperCase()} · ` : it.kind && it.kind !== 'add' ? `${t(`q.${it.kind}`)} · ` : ''
             return (
-              <div key={it.id} className={`isl-qw ${leaving[it.id] ? 'out' : ''}`}><div>
-                <div className={`isl-q ${confirm === it.id ? 'conf' : ''}`}>
+              <div key={it.id} className={`isl-qw ${leaving[it.id] || removing[it.id] ? 'out' : ''} ${firstIds.current.has(it.id) ? '' : 'enter'}`}><div>
+                <div className={`isl-q ${confirm === it.id ? 'conf' : ''} m-${ph.mode}`} style={{ '--sc': ph.mode === 'error' ? 'var(--danger)' : undefined }}>
                   <div className="rc">
-                    {it.vid ? <img src={`https://i.ytimg.com/vi/${it.vid}/default.jpg`} alt="" /> : <span className="noimg" />}
-                    <div className="qt"><b>{it.tr ? `${t('q.translate')} ${it.tr.toUpperCase()} · ` : it.kind && it.kind !== 'add' ? `${t(`q.${it.kind}`)} · ` : ''}{it.title || shortUrl(it.url)}</b><small>{shortUrl(it.url)}</small></div>
-                    <div className="qstage" title={t(ph.label)}>
-                      <QueueRing k={ph.k} mode={ph.mode} leaveMs={LEAVE_MS} ringRef={(el) => { ringEls.current[it.id] = el }} />
-                      <StageLabel text={t(ph.label)} />
+                    {it.vid ? <img src={`https://i.ytimg.com/vi/${it.vid}/mqdefault.jpg`} alt="" /> : <span className="noimg" />}
+                    <div className="qt">
+                      <b>{kindTag}{it.title || shortUrl(it.url)}</b>
+                      <span className="qsub">
+                        <StageLabel text={t(ph.label)} className={`st-${ph.mode}`} />
+                        {step && <span className="qstep">{step}</span>}
+                        <small className="qurl">{shortUrl(it.url)}</small>
+                      </span>
                     </div>
-                    <button className="trash" title={t('m.delete')} onClick={() => setConfirm(confirm === it.id ? null : it.id)}><ITrash /></button>
+                    <QueueRing k={ph.k} mode={ph.mode} leaveMs={LEAVE_MS} ringRef={(el) => { ringEls.current[it.id] = el }} />
+                    <button className="trash" aria-label={t('m.delete')} title={t('m.delete')} onClick={() => setConfirm(confirm === it.id ? null : it.id)}><ITrash /></button>
                   </div>
-                  <button className="del" onClick={() => { remove(it.id); setConfirm(null) }}>{t('isl.confirm')}</button>
+                  <button className="del" onClick={() => drop(it.id)}>{t('isl.confirm')}</button>
                 </div>
               </div></div>
             )
@@ -224,8 +234,8 @@ export default function Island({ open, setOpen }) {
 
         <div className="isl-bar">
           <button className="isl-main" onClick={(e) => { e.stopPropagation(); setOpen(!open) }}><IPlus />{t('addVideo')}</button>
-          {lead && !open && (() => { const ph = phases[lead.id].gone ? { k: 5, mode: 'leaving' } : phases[lead.id]; return (
-            <span className="isl-mini" title={t(ph.label || 'st.leaving')}><QueueRing k={ph.k} mode={ph.mode} size={24} ringRef={barRing} />{shown.length > 1 && <i>{shown.length}</i>}</span>
+          {lead && !open && (() => { const ph = phases[lead.id].gone ? { k: 4, mode: 'leaving', label: 'st.leaving' } : phases[lead.id]; return (
+            <span className="isl-mini" title={t(ph.label)}><QueueRing k={ph.k} mode={ph.mode} size={24} leaveMs={LEAVE_MS} ringRef={barRing} />{shown.length > 1 && <i>{shown.length}</i>}</span>
           ) })()}
           <span className={`sync ${sync}`} title={t(`sync.${sync}`)} role={sync === 'nologin' ? 'button' : undefined} onClick={sync === 'nologin' ? (e) => { e.stopPropagation(); setLoginOpen(true) } : undefined} />
           <button className={`isl-btn ${square ? 'on' : ''}`} title={t('isl.corners')} onClick={(e) => { e.stopPropagation(); toggle('square') }}>

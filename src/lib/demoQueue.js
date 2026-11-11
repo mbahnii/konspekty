@@ -10,6 +10,8 @@ export function runQueueDemo() {
   const id = 'demo-' + Date.now()
   const base = { id, url: `https://youtu.be/${vid}`, kind: 'add', at: Date.now(), title: 'Демо: проходження всіх етапів', vid, demo: true }
   const put = (patch) => useQueue.setState((s) => ({ items: [...s.items.filter((x) => x.id !== id), { ...base, ...patch, upd: Date.now() }] }))
+  // второе видео появляется через 3 с — видно анимацию появления новой строки
+  setTimeout(() => useQueue.setState((s) => ({ items: [...s.items, { id: id + 'b', url: 'https://youtu.be/dQw4w9WgXcQ', kind: 'add', at: Date.now(), title: 'Демо: друге відео в черзі', vid: 'dQw4w9WgXcQ', demo: true, status: 'queued', upd: Date.now() }] })), 3000)
   const steps = [
     [0, { status: 'queued' }],
     [2600, { status: 'processing', stage: 'download' }],
