@@ -132,7 +132,7 @@ export default function Video({ onBack }) {
     if (l !== origLang && !original.tr?.[l]) {
       if (!useAuth.getState().session) { say(t('toast.trLogin')); return }
       const busy = queueItems.some((x) => x.vid === id && x.tr === l && (x.status === 'queued' || x.status === 'processing'))
-      if (!busy) queueAdd(url, 'reprocess', { title: meta.title, vid: id, tr: l })
+      if (!busy) queueAdd(url || `photos:${id}`, 'reprocess', { title: meta.title, vid: id, tr: l })
       say(t('toast.translating'))
     }
     setNoteLang(id, l)

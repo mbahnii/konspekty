@@ -36,7 +36,8 @@ export default function Profile({ onBack }) {
     try {
       if (name.trim() !== (acc?.name || '')) { const { error } = await supabase.auth.updateUser({ data: { display_name: name.trim() } }); if (error) throw error }
       if (nick !== nick0) {
-        const { error } = await supabase.from('profiles').update({ nickname: nick || null }).eq('id', uid)
+        const { data: upd, error } = await supabase.from('profiles').update({ nickname: nick || null }).eq('id', uid).select('id')
+        if (!error && !upd?.length) { say(t('au.fail')); setBusy(false); return }       // строки профиля нет — не говорим «Збережено»
         if (error) { say(t(/duplicate|unique/i.test(error.message) ? 'pf.taken' : 'pf.badNick')); setBusy(false); return }
         setNick0(nick)
       }

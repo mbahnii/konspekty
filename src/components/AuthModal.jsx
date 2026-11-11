@@ -112,9 +112,9 @@ export default function AuthModal() {
   return (
     <div className={`modal-back ${loginOpen ? 'show' : ''}`} onClick={() => setLoginOpen(false)}>
       <div className="modal am" onClick={(e) => e.stopPropagation()} role="dialog" aria-hidden={!loginOpen}>
-        {session ? (
+        {session && !session.user?.is_anonymous ? (
           <>
-            <h3>{t('au.hi', { name: session.user.user_metadata?.nickname || session.user.email?.split('@')[0] })}</h3>
+            <h3>{t('au.hi', { name: session.user.user_metadata?.nickname || session.user.user_metadata?.display_name || session.user.email?.split('@')[0] || '' })}</h3>
             <p className="modal-sub">{t('login.as', { email: session.user.email })}</p>
             <button className="modal-btn tap" onClick={async () => { await signOut(); say(t('login.out')) }}>{t('login.signout')}</button>
           </>

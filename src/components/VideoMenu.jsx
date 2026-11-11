@@ -43,6 +43,6 @@ export function useVideoMenu() {
     { icon: <IPin />, label: t(lib.pinned[v.id] ? 'm.unpin' : 'm.pin'), onSelect: () => lib.toggle('pinned', v.id) },
     !photo && { icon: <IRedo />, label: t('m.redo'), onSelect: () => { add(v.url, 'reprocess', { title: v.title, vid: v.id }); say(t('toast.redo')) } },
     '-',
-    { icon: <ITrash />, label: t('m.delete'), danger: true, onSelect: () => { lib.setFlag('hidden', v.id, true); add(v.url, 'delete', { title: v.title, vid: v.id }); say(t('toast.deleted')); nav('/') } },
+    { icon: <ITrash />, label: t('m.delete'), danger: true, onSelect: () => { lib.setFlag('hidden', v.id, true); add(v.url || `photos:${v.id}`, 'delete', { title: v.title, vid: v.id }); say(t('toast.deleted')); nav('/') } },
   ].filter(Boolean) }
 }

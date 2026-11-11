@@ -83,7 +83,7 @@ export default function PhotoPanel({ open, onDone, onWantOpen }) {
   }, [pick, onWantOpen])
 
   useEffect(() => () => live.current.forEach((f) => URL.revokeObjectURL(f.url)), [])
-  useEffect(() => { if (!open) { setFiles((fs) => { fs.forEach((f) => URL.revokeObjectURL(f.url)); return [] }); setTitle(''); setBusy(false); setLook(null) } }, [open])
+  useEffect(() => { if (!open) { setBusy(false); setLook(null) } }, [open])      // выбранные фото при закрытии пилюли не пропадают: случайный клик мимо не должен их стирать
 
   // добавили фото — прокручиваем так, чтобы кнопка «Надіслати» была видна (на телефоне она иначе уходит под край)
   useEffect(() => { if (files.length) { const id = setTimeout(() => titleRow.current?.scrollIntoView({ block: 'nearest', behavior: 'smooth' }), 120); return () => clearTimeout(id) } }, [files.length])
@@ -116,7 +116,9 @@ export default function PhotoPanel({ open, onDone, onWantOpen }) {
       const share = shareDefault()
       const name = title.trim() || `${t('ph.default')} ${new Date().toLocaleDateString()}`
       add(`photos:${pid}`, 'add', { title: name, channel: t('ph.channel'), vid: pid, photos: paths, mode, share })
-      say(t(share ? 'isl.queuedPub' : 'isl.queuedMine')); onDone?.()
+      say(t(share ? 'isl.queuedPub' : 'isl.queuedMine'))
+      setFiles((fs) => { fs.forEach((f) => URL.revokeObjectURL(f.url)); return [] }); setTitle('')      // отправили — очищаем, чтобы повторное нажатие не создало дубликат
+      onDone?.()
     } catch (e) {
       console.warn('photo upload', e); say(String(e?.message || '').startsWith(t('ph.cantRead')) ? e.message : t('ph.fail'))
     } finally { setBusy(false) }
