@@ -1195,3 +1195,42 @@ a.tcard:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(0,0,0,.
 .ph-bar { height: 3px; border-radius: 2px; background: var(--island-key); overflow: hidden; }
 @media (max-width: 860px), (max-height: 520px) { .ph-name { font-size: 16px; } }
 @media (max-height: 520px) { .ph-hint, .ph-tile b { display: none; } .ph-tile { height: 56px; } .ph-two { grid-template-columns: 1fr 1fr; } }
+
+/* =====================================================================
+   Раунд 12: пилюля не шире контента; миниатюры фото — крупная сетка; закрытая пилюля симметрична
+   ===================================================================== */
+/* поля дока = поля контента (16px), чтобы пилюля никогда не выходила за край карточек */
+@media (max-width: 860px) {
+  .island-dock { padding: 0 var(--s5); }
+  .island.open, .island.open.wide { --w: calc(100vw - 2 * var(--s5)); }
+  .island.wide:not(.open) { --w: min(300px, calc(100vw - 2 * var(--s5))); }
+}
+/* закрытая пилюля: содержимое кнопки по центру, поэтому слева и справа пустоты поровну */
+.island:not(.open) .isl-main { justify-content: center; padding: 0 12px; }
+.island:not(.open) .isl-bar { gap: 0; }
+.island:not(.open) .isl-bar .isl-status { margin-left: auto; }
+.island:not(.open) .isl-bar .sync { margin: 0 10px; }              /* точка: по 10px с обеих сторон, и в обычной, и в «шире» */
+.island:not(.open) .isl-bar .isl-btn { margin: 0; }
+
+/* миниатюры: сетка по три в ряд, лист ~3:4, подписи-кнопки внизу одной полосой */
+.ph .ph-strip { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--g, 8px); overflow: visible; padding: 0; margin: 0 !important; scroll-snap-type: none; }
+.ph .ph-strip .ph-th, .ph .ph-strip .ph-add { width: auto; height: auto; aspect-ratio: 3 / 4; border-radius: var(--rin, 12px); }
+.ph .ph-th i { left: 6px; top: 6px; min-width: 22px; height: 22px; font-size: 12px; line-height: 22px; background: rgba(0,0,0,.55); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
+.ph .ph-x { right: 6px; top: 6px; width: 28px; height: 28px; background: rgba(0,0,0,.55); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
+.ph .ph-x svg { width: 14px; height: 14px; }
+.ph .ph-act { left: 6px; right: 6px; bottom: 6px; padding: 3px; gap: 2px; border-radius: 999px; background: rgba(0,0,0,.55); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
+.ph .ph-act button { width: 30px; height: 30px; background: transparent; font-size: 17px; }
+.ph .ph-add svg { width: 28px; height: 28px; }
+@media (hover: none) { .ph .ph-act, .ph .ph-x { opacity: 1; transform: none; } .ph .ph-act button { width: 28px; height: 28px; font-size: 16px; } }
+/* широкая пилюля — четыре в ряд; телефон лёжа (мало высоты) — квадратные и плотнее */
+@media (min-width: 861px) { .island.open.wide .ph .ph-strip { grid-template-columns: repeat(5, minmax(0, 1fr)); } }
+@media (max-height: 520px) { .ph .ph-strip { grid-template-columns: repeat(5, minmax(0, 1fr)); } .ph .ph-strip .ph-th, .ph .ph-strip .ph-add { aspect-ratio: 1; } }
+/* много фото: сетка не растягивает пилюлю — максимум две строки, дальше прокрутка внутри ленты (пилюля всегда помещается в экран) */
+.ph .ph-strip { max-height: calc((100dvh - 330px) / 1); overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; scroll-snap-type: none; }
+@media (min-width: 861px) { .ph .ph-strip { max-height: min(360px, calc(100dvh - 420px)); } }
+@media (max-width: 860px) { .ph .ph-strip { max-height: min(308px, calc(100dvh - 400px)); } }
+@media (max-height: 520px) { .ph .ph-strip { max-height: 130px; } }
+
+/* закрытая пилюля: скрытая панель не должна занимать место (верхний отступ панели сдвигал кнопки вниз) */
+.isl-inner { transition: opacity 300ms var(--ease-out), transform .55s var(--ease-island), padding-top .55s var(--ease-island); }
+.island:not(.open) .isl-inner { padding-top: 0; }
