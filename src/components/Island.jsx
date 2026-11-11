@@ -12,6 +12,7 @@ import PhotoPanel from './PhotoPanel'
 import { accountsOn } from '../lib/accounts'
 import { supabase } from '../lib/supabase'
 import { flyToList } from '../lib/fly'
+import { ms } from '../lib/motion'
 import { setArrive, useArrive } from '../store/arrive'
 import { IYt, IPhoto, IPlus, IExpand, ICollapse, ISearch, ISystem, ISun, IMoon, ITrash } from './Icons'
 
@@ -80,8 +81,11 @@ export default function Island({ open, setOpen }) {
   // задачи «удалить видео» в очереди не показываем (строка видео просто плавно уходит); видно только ошибку
   const items = allItems.filter((it) => (it.kind ?? 'add') !== 'delete' || it.status === 'error')
   const session = useAuth((s) => s.session)
-  const { wide, square, toggle } = useIslandPrefs()
-  const { theme, lang, setTheme, setLang } = useSettings()
+  const { wide, toggle } = useIslandPrefs()
+  const [sizing, setSizing] = useState(false)               // идёт смена размера «шире»: высота панели следует за содержимым без задержки
+  const sizeT = useRef(0)
+  const flipWide = () => { setSizing(true); toggle('wide'); clearTimeout(sizeT.current); sizeT.current = setTimeout(() => setSizing(false), ms(760)) }
+  const { theme, lang, setTheme, setLang, corners, setCorners, motion, setMotion } = useSettings()
   const [url, setUrl] = useState('')
   const [q, setQ] = useState('')
   const [confirm, setConfirm] = useState(null)
@@ -139,7 +143,7 @@ export default function Island({ open, setOpen }) {
   const [removing, setRemoving] = useState({})             // id → true: строку удалили корзиной, она сворачивается
   const firstIds = useRef(null)                             // задачи, которые были при открытии сайта, — без анимации появления
   if (firstIds.current === null) firstIds.current = new Set(items.map((x) => x.id))
-  const drop = (id) => { setConfirm(null); setRemoving((s) => ({ ...s, [id]: true })); setTimeout(() => { remove(id); setRemoving((s) => { const n = { ...s }; delete n[id]; return n }) }, 420) }
+  const drop = (id) => { setConfirm(null); setRemoving((s) => ({ ...s, [id]: true })); setTimeout(() => { remove(id); setRemoving((s) => { const n = { ...s }; delete n[id]; return n }) }, ms(420)) }
   const [leaving, setLeaving] = useState({})               // id → true: строка сворачивается (видео улетело)
   const flown = useRef(new Set())
   const ringEls = useRef({})
@@ -164,7 +168,7 @@ export default function Island({ open, setOpen }) {
         flyToList(vid, src)
       }
       setLeaving((s) => ({ ...s, [it.id]: true }))
-      setTimeout(() => setLeaving((s) => { const n = { ...s }; delete n[it.id]; return n }), 520)
+      setTimeout(() => setLeaving((s) => { const n = { ...s }; delete n[it.id]; return n }), ms(520))
     }
   })
 
@@ -269,7 +273,7 @@ export default function Island({ open, setOpen }) {
 
   return (
     <div className="dyn-dock" ref={dock}>
-      <div ref={box} className={`dyn ${open ? 'open' : ''} ${wide ? 'wide' : ''} ${square ? 'square' : ''}`}>
+      <div ref={box} className={`dyn ${open ? 'open' : ''} ${wide ? 'wide' : ''} ${sizing ? 'sizing' : ''}`}>
         <div className="dyn-panel" ref={panel} aria-hidden={!open}>
           <div className="dyn-inner" ref={inner}>
             <Segmented className="isl-seg isl-tabs" value={pane} onChange={pickPane}
@@ -307,8 +311,11 @@ export default function Island({ open, setOpen }) {
                   <Segmented className="isl-seg" value={lang} onChange={setLang}
                     items={[{ id: 'uk', title: 'Українська', label: 'УКР' }, { id: 'ru', title: 'Русский', label: 'РУС' }, { id: 'en', title: 'English', label: 'ENG' }]} /></div>
                 <div className="dyn-set"><span>{t('isl.corners')}</span>
-                  <Segmented className="isl-seg" value={square ? 'sq' : 'round'} onChange={(v) => (v === 'sq') !== square && toggle('square')}
-                    items={[{ id: 'round', title: t('isl.round'), label: <span className="shape round" /> }, { id: 'sq', title: t('isl.square'), label: <span className="shape sq" /> }]} /></div>
+                  <Segmented className="isl-seg" value={corners} onChange={setCorners}
+                    items={[{ id: 'round', title: t('isl.round'), label: <span className="shape round" /> }, { id: 'square', title: t('isl.square'), label: <span className="shape sq" /> }]} /></div>
+                <div className="dyn-set"><span>{t('isl.motion')}</span>
+                  <Segmented className="isl-seg" value={motion} onChange={setMotion}
+                    items={[{ id: 'min', title: t('mo.min'), label: t('mo.minS') }, { id: 'mid', title: t('mo.mid'), label: t('mo.midS') }, { id: 'max', title: t('mo.max'), label: t('mo.maxS') }]} /></div>
               </div>
             </div>
           </div>
@@ -326,7 +333,7 @@ export default function Island({ open, setOpen }) {
             </span>
           </span></span>
           <span className={`sync ${sync}`} title={t(`sync.${sync}`)} role={sync === 'nologin' ? 'button' : undefined} onClick={sync === 'nologin' ? (e) => { e.stopPropagation(); setLoginOpen(true) } : undefined} />
-          <button className={`dyn-btn ${wide ? 'on' : ''}`} title={t('isl.wide')} aria-pressed={wide} onClick={(e) => { e.stopPropagation(); toggle('wide') }}>
+          <button className={`dyn-btn ${wide ? 'on' : ''}`} title={t('isl.wide')} aria-pressed={wide} onClick={(e) => { e.stopPropagation(); flipWide() }}>
             <IExpand className={`i ${wide ? 'off' : ''}`} /><ICollapse className={`i ${wide ? '' : 'off'}`} />
           </button>
         </div>

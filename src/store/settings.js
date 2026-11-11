@@ -15,6 +15,8 @@ export const useSettings = create(
       setSeenGuide: () => set({ seenGuide: true }),
       setTheme: (theme) => set({ theme }),
       setLang: (lang) => set({ lang }),
+      corners: 'round', setCorners: (corners) => set({ corners }),   // round | square — углы по всему сайту
+      motion: 'mid', setMotion: (motion) => set({ motion }),         // min | mid | max — уровень анимаций
       catalog: 'all',                         // какие конспекты показывать: all (все доступные) | public (общий каталог) | mine (только мои)
       setCatalog: (catalog) => set({ catalog }),
       noteLang: {},                           // язык конспекта для каждого видео отдельно (не язык интерфейса)

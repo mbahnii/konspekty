@@ -14,8 +14,8 @@
 :root {
   --dyn-spring: cubic-bezier(.34, 1.26, .64, 1);
   --dyn-ease: cubic-bezier(.32, .72, 0, 1);
-  --dyn-t: 540ms;      /* смена размера */
-  --dyn-f: 240ms;      /* растворение содержимого */
+  --dyn-t: calc(540ms * var(--mo));      /* смена размера */
+  --dyn-f: calc(240ms * var(--mo));      /* растворение содержимого */
 }
 
 .dyn-dock {
@@ -23,15 +23,15 @@
   position: fixed; left: 0; right: 0; z-index: 20; padding: 0 16px;
   bottom: calc(max(14px, env(safe-area-inset-bottom)) + var(--kb, 0px));
   display: flex; justify-content: center; pointer-events: none;
-  transition: bottom 300ms var(--dyn-ease);
+  transition: bottom calc(300ms * var(--mo)) var(--dyn-ease);
 }
 
 /* ---------- каркас ---------- */
 .dyn {
   /* телефон стоя — по умолчанию */
   --w: 204px;
-  --g: 6px; --ctl: 38px; --rin: 12px; --ctl-r: var(--rin);
-  --r: calc(var(--ctl) / 2 + var(--g));
+  --g: 6px; --ctl: 38px; --rin: calc(12px * var(--k)); --ctl-r: var(--rin);
+  --r: calc((var(--ctl) / 2 + var(--g)) * var(--kp));
   --pane-max: min(44dvh, calc(var(--vvh, 100dvh) - 170px));
   pointer-events: auto; position: relative;
   width: min(var(--w), var(--cw));
@@ -41,12 +41,11 @@
   color: var(--island-text); box-shadow: var(--shadow-island);
   font-size: 13.5px; font-weight: 500;
   transition: width var(--dyn-t) var(--dyn-spring), border-radius var(--dyn-t) var(--dyn-ease),
-              transform 320ms var(--dyn-spring), box-shadow 320ms var(--dyn-ease);
+              transform calc(320ms * var(--mo)) var(--dyn-spring), box-shadow calc(320ms * var(--mo)) var(--dyn-ease);
 }
 .dyn.wide { --w: min(284px, calc(var(--cw) - 56px)); }
-.dyn.open { --w: max(292px, calc(var(--cw) * .8)); --r: 24px; }
+.dyn.open { --w: max(292px, calc(var(--cw) * .8)); --r: calc(24px * var(--k)); }
 .dyn.open.wide { --w: var(--cw); --pane-max: min(60dvh, calc(var(--vvh, 100dvh) - 170px)); }
-.dyn.square, .dyn.square.open { --r: 14px; --rin: 8px; }
 .dyn:not(.open):active { transform: scale(.96); }
 @media (hover: hover) { .dyn:not(.open):hover { transform: scale(1.025); } }
 
@@ -74,15 +73,15 @@
 
 /* ---------- открытая часть ---------- */
 .dyn-panel { height: 0; overflow: hidden; transition: height var(--dyn-t) var(--dyn-spring); }
-.dyn:not(.open) .dyn-panel { transition: height 420ms var(--dyn-ease); }
+.dyn:not(.open) .dyn-panel { transition: height calc(420ms * var(--mo)) var(--dyn-ease); }
 .dyn-inner {
   padding: var(--g) var(--g) 0;
   opacity: 0; filter: blur(8px); transform: scale(.96); transform-origin: 50% 100%;
-  transition: opacity 160ms var(--dyn-ease), filter 160ms var(--dyn-ease), transform 320ms var(--dyn-ease);
+  transition: opacity calc(160ms * var(--mo)) var(--dyn-ease), filter calc(160ms * var(--mo)) var(--dyn-ease), transform calc(320ms * var(--mo)) var(--dyn-ease);
 }
 .dyn.open .dyn-inner {
   opacity: 1; filter: none; transform: none;
-  transition: opacity var(--dyn-f) var(--dyn-ease) 80ms, filter var(--dyn-f) var(--dyn-ease) 80ms, transform var(--dyn-t) var(--dyn-spring);
+  transition: opacity var(--dyn-f) var(--dyn-ease) calc(80ms * var(--mo)), filter var(--dyn-f) var(--dyn-ease) calc(80ms * var(--mo)), transform var(--dyn-t) var(--dyn-spring);
 }
 
 /* вкладки */
@@ -93,8 +92,8 @@
 .dyn .isl-tabs.isl-seg .thumb { border-radius: calc(var(--rin) - 3px); }
 @media (max-width: 560px) {
   /* узкая открытая пилюля на телефоне: значок над подписью — подписи не обрезаются */
-  .dyn.open:not(.wide) .isl-tabs.isl-seg { height: 50px; }
-  .dyn.open:not(.wide) .isl-tabs.isl-seg button { height: 44px; flex-direction: column; gap: 2px; font-size: 10.5px; }
+  .dyn.open .isl-tabs.isl-seg { height: 50px; }
+  .dyn.open .isl-tabs.isl-seg button { height: 44px; flex-direction: column; gap: 2px; font-size: 10.5px; }
 }
 
 /* состояния (Відео / Фото / Пошук / Вигляд): одно растворяется, другое проявляется, высота меняется плавно */
@@ -103,20 +102,20 @@
   position: absolute; left: 0; right: 0; top: 0;
   opacity: 0; visibility: hidden; filter: blur(6px); transform: scale(.98); transform-origin: 50% 0;
   pointer-events: none;
-  transition: opacity 180ms var(--dyn-ease), filter 180ms var(--dyn-ease), transform 260ms var(--dyn-ease), visibility 0s linear 180ms;
+  transition: opacity calc(180ms * var(--mo)) var(--dyn-ease), filter calc(180ms * var(--mo)) var(--dyn-ease), transform calc(260ms * var(--mo)) var(--dyn-ease), visibility 0s linear calc(180ms * var(--mo));
 }
 .dyn-pane.on {
   position: relative; opacity: 1; visibility: visible; filter: none; transform: none; pointer-events: auto;
   max-height: var(--pane-max); overflow-y: auto; overscroll-behavior: contain; scrollbar-width: none;
   padding-bottom: var(--g);
-  transition: opacity 280ms var(--dyn-ease) 70ms, filter 280ms var(--dyn-ease) 70ms, transform 420ms var(--dyn-spring) 70ms, visibility 0s;
+  transition: opacity calc(280ms * var(--mo)) var(--dyn-ease) calc(70ms * var(--mo)), filter calc(280ms * var(--mo)) var(--dyn-ease) calc(70ms * var(--mo)), transform calc(420ms * var(--mo)) var(--dyn-spring) calc(70ms * var(--mo)), visibility 0s;
 }
 .dyn-pane::-webkit-scrollbar { display: none; }
 .dyn-pane > * + * { margin-top: var(--g); }
 .dyn-pane > .isl-h { margin-top: 0; }
 
 /* то, что появляется внутри (превью ссылки): высота растёт плавно, без скачка */
-.dyn-grow { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 420ms var(--dyn-ease); }
+.dyn-grow { display: grid; grid-template-rows: 0fr; transition: grid-template-rows calc(420ms * var(--mo)) var(--dyn-ease); }
 .dyn-grow.on { grid-template-rows: 1fr; transition: grid-template-rows var(--dyn-t) var(--dyn-spring); }
 .dyn-grow > div { min-height: 0; overflow: hidden; }
 .dyn-grow .prev { margin-top: 0; }
@@ -145,7 +144,7 @@
 .dyn-set .isl-seg .thumb { border-radius: calc(var(--rin) - 5px); }
 .dyn-set .isl-seg svg { width: 16px; height: 16px; }
 .dyn-set .shape { position: static; display: block; width: 14px; height: 14px; border: 2px solid currentColor; opacity: 1; transform: none; }
-.dyn-set .shape.round { border-radius: 50%; } .dyn-set .shape.sq { border-radius: 3px; }
+.dyn-set .shape.round { border-radius: 50%; } .dyn-set .shape.sq { border-radius: calc(3px * var(--k)); }
 
 /* ---------- нижняя строка (закрытая пилюля) ---------- */
 .dyn-bar { display: flex; align-items: center; gap: 4px; height: calc(var(--ctl) + 2 * var(--g)); padding: var(--g); flex: none; }
@@ -153,7 +152,7 @@
   flex: 1 1 auto; min-width: 0; height: var(--ctl);
   display: flex; align-items: center; gap: 8px; padding: 0 10px 0 12px;
   border-radius: calc(var(--r) - var(--g)); white-space: nowrap; font-weight: 600; text-align: left;
-  transition: background-color 200ms var(--dyn-ease), border-radius var(--dyn-t) var(--dyn-ease);
+  transition: background-color calc(200ms * var(--mo)) var(--dyn-ease), border-radius var(--dyn-t) var(--dyn-ease);
 }
 .dyn-main:hover { background: var(--island-key); }
 .dyn-main svg { width: 18px; height: 18px; flex: none; transition: transform var(--dyn-t) var(--dyn-spring); }
@@ -162,9 +161,9 @@
 
 /* статус в закрытой «шире»: ширина появляется плавно, текст проявляется после */
 .dyn-col { display: grid; grid-template-columns: 0fr; opacity: 0; flex: none;
-  transition: grid-template-columns 420ms var(--dyn-ease), opacity 160ms var(--dyn-ease); }
+  transition: grid-template-columns calc(420ms * var(--mo)) var(--dyn-ease), opacity calc(160ms * var(--mo)) var(--dyn-ease); }
 .dyn-col.on { grid-template-columns: 1fr; opacity: 1;
-  transition: grid-template-columns var(--dyn-t) var(--dyn-spring), opacity 260ms var(--dyn-ease) 140ms; }
+  transition: grid-template-columns var(--dyn-t) var(--dyn-spring), opacity calc(260ms * var(--mo)) var(--dyn-ease) calc(140ms * var(--mo)); }
 .dyn-col > span { min-width: 0; overflow: hidden; display: flex; }
 .dyn .isl-status { display: flex; max-width: none; opacity: 1; margin: 0; transform: none; }
 .dyn .isl-status .chip { white-space: nowrap; }
@@ -174,11 +173,11 @@
   position: relative; flex: none; width: var(--ctl); height: var(--ctl);
   display: grid; place-items: center; border-radius: calc(var(--r) - var(--g));
   background: var(--island-key); color: var(--island-text);
-  transition: background-color 220ms var(--dyn-ease), transform 220ms var(--dyn-spring), border-radius var(--dyn-t) var(--dyn-ease);
+  transition: background-color calc(220ms * var(--mo)) var(--dyn-ease), transform calc(220ms * var(--mo)) var(--dyn-spring), border-radius var(--dyn-t) var(--dyn-ease);
 }
 .dyn-btn:hover { background: color-mix(in srgb, var(--island-text) 22%, transparent); }
 .dyn-btn:active { transform: scale(.88); }
-.dyn-btn svg.i { position: absolute; width: 18px; height: 18px; transition: opacity 200ms var(--dyn-ease), transform 380ms var(--dyn-spring); }
+.dyn-btn svg.i { position: absolute; width: 18px; height: 18px; transition: opacity calc(200ms * var(--mo)) var(--dyn-ease), transform calc(380ms * var(--mo)) var(--dyn-spring); }
 .dyn-btn svg.i.off { opacity: 0; transform: scale(.4) rotate(-90deg); }
 
 /* фото внутри пилюли: список не выталкивает кнопку «Надіслати» за край */
@@ -191,10 +190,10 @@
   .dyn, .dyn *, .dyn-dock { transition-duration: 1ms !important; transition-delay: 0s !important; }
 }
 @media (max-width: 560px) {
-  .dyn.open:not(.wide) .ph-lab small { display: none; }
-  .dyn.open:not(.wide) .ph-row { grid-template-columns: 44px minmax(0, 1fr) auto; gap: 8px; padding: 5px; }
-  .dyn.open:not(.wide) .ph-pic { width: 44px; height: 56px; }
-  .dyn.open:not(.wide) .ph-ctl { gap: 3px; } .dyn.open:not(.wide) .ph-ctl button { width: 34px; height: 34px; }
+  .dyn.open .ph-lab small { display: none; }
+  .dyn.open .ph-row { grid-template-columns: 44px minmax(0, 1fr) auto; gap: 8px; padding: 5px; }
+  .dyn.open .ph-pic { width: 44px; height: 56px; }
+  .dyn.open .ph-ctl { gap: 3px; } .dyn.open .ph-ctl button { width: 34px; height: 34px; }
 }
 
 /* строки фото — компактные везде: на ноутбуке в обычной пилюле видно ~5 страниц */
@@ -205,3 +204,13 @@
 /* подпись кнопки: на телефоне короткая («Додати»), чтобы в «шире» помещался статус очереди */
 .dyn-lab .sh { display: none; }
 @media (max-width: 560px) { .dyn-lab .lg { display: none; } .dyn-lab .sh { display: inline; } }
+
+/* пружина пилюли по уровню анимаций */
+html[data-motion="min"] { --dyn-spring: var(--dyn-ease); }
+html[data-motion="max"] { --dyn-spring: cubic-bezier(.3, 1.6, .5, 1); }
+
+/* «шире» в открытой пилюле: ширина и высота меняются одним движением — панель повторяет содержимое кадр в кадр, лимиты высоты тоже плавные */
+.dyn.sizing .dyn-panel { transition: none; }
+.dyn-pane.on { transition: opacity calc(280ms * var(--mo)) var(--dyn-ease) calc(70ms * var(--mo)), filter calc(280ms * var(--mo)) var(--dyn-ease) calc(70ms * var(--mo)), transform calc(420ms * var(--mo)) var(--dyn-spring) calc(70ms * var(--mo)), max-height var(--dyn-t) var(--dyn-ease), visibility 0s; }
+.dyn .ph .ph-list ol { transition: max-height var(--dyn-t) var(--dyn-ease); }
+.dyn .isl-tabs.isl-seg, .dyn .isl-tabs.isl-seg button { transition: height var(--dyn-t) var(--dyn-ease), background-color calc(240ms * var(--mo)) var(--dyn-ease), color calc(240ms * var(--mo)) var(--dyn-ease); }

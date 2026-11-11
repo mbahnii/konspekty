@@ -50,7 +50,7 @@ const K = {
   'home.empty': ['Додайте перше відео через пілюлю внизу.', 'Добавьте первое видео через пилюлю внизу.', 'Add your first video with the pill below.'],
   'home.sub': ['Готових конспектів: {n} · в обробці: {q}', 'Готово конспектов: {n} · в обработке: {q}', 'Ready: {n} · processing: {q}'],
   'isl.wide': ['Ширше', 'Шире', 'Wider'],
-  'isl.corners': ['Кути', 'Углы', 'Corners'], 'isl.round': ['Круглі', 'Круглые', 'Round'], 'isl.square': ['Квадратні', 'Квадратные', 'Square'],
+  'isl.corners': ['Кути', 'Углы', 'Corners'], 'isl.round': ['Круглі', 'Круглые', 'Round'], 'isl.motion': ['Анімації', 'Анимации', 'Animations'], 'mo.min': ['Мінімум (швидко)', 'Минимум (быстро)', 'Minimal (fast)'], 'mo.mid': ['Звичайні', 'Обычные', 'Normal'], 'mo.max': ['Більше (плавніше)', 'Больше (плавнее)', 'More (smoother)'], 'mo.minS': ['Мін', 'Мин', 'Min'], 'mo.midS': ['Серед', 'Сред', 'Mid'], 'mo.maxS': ['Макс', 'Макс', 'Max'], 'isl.square': ['Квадратні', 'Квадратные', 'Square'],
   'q.delete': ['Видалити', 'Удалить', 'Delete'],
   'q.reprocess': ['Повторно', 'Повторно', 'Redo'],
   'q.translate': ['Переклад', 'Перевод', 'Translation'],

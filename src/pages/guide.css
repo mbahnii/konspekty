@@ -4,9 +4,9 @@
 
 /* заголовок: проявляется из размытия, по очереди */
 .g-hero { padding: var(--s8) 16px var(--s8); text-align: center; }
-.g-hero > * { animation: g-in 900ms var(--ease-out) both; }
-.g-hero > :nth-child(2) { animation-delay: 90ms; }
-.g-hero > :nth-child(3) { animation-delay: 180ms; }
+.g-hero > * { animation: g-in calc(900ms * var(--mo)) var(--ease-out) both; }
+.g-hero > :nth-child(2) { animation-delay: calc(90ms * var(--mo)); }
+.g-hero > :nth-child(3) { animation-delay: calc(180ms * var(--mo)); }
 .g-eyebrow { display: inline-flex; align-items: center; height: 28px; padding: 0 12px; border-radius: var(--r-pill);
   background: var(--accent-soft); color: var(--accent-text); font-size: var(--fs-sub); font-weight: 600; }
 .g-hero h1 { margin-top: 22px; line-height: 1.12; font-size: clamp(30px, 4.2vw, 44px); letter-spacing: -.03em; }
@@ -16,16 +16,16 @@
 /* карточки: выезжают снизу одна за другой */
 .g-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--s6); max-width: 860px; margin: 0 auto; }
 .g-card { min-width: 0; background: var(--surface); border-radius: var(--r-xl); padding: 10px; box-shadow: var(--shadow-card), 0 0 0 1px var(--separator);
-  animation: g-card 1000ms var(--ease-out) both; animation-delay: calc(260ms + var(--i) * 85ms);
+  animation: g-card calc(1000ms * var(--mo)) var(--ease-out) both; animation-delay: calc(calc(260ms * var(--mo)) + var(--i) * calc(85ms * var(--mo)));
   transition: transform var(--t-mid) var(--ease-out), box-shadow var(--t-mid) var(--ease-out); }
 /* ролик не в фокусе — на паузе и чуть тусклее */
-.g-card > * { transition: opacity 500ms var(--ease-out), filter 500ms var(--ease-out); }
+.g-card > * { transition: opacity calc(500ms * var(--mo)) var(--ease-out), filter calc(500ms * var(--mo)) var(--ease-out); }
 .g-card:not(.active) > * { opacity: .45; filter: saturate(.6); }
 @media (hover: hover) { .g-card:hover { transform: translateY(-3px); box-shadow: 0 18px 50px rgba(0,0,0,.10), 0 0 0 1px var(--separator); } }
 @keyframes g-card { from { opacity: 0; transform: translateY(36px) scale(.97); filter: blur(6px); } to { opacity: 1; transform: none; filter: none; } }
 
-.g-media { position: relative; border-radius: 14px; overflow: hidden; background: var(--surface-2); aspect-ratio: 16 / 9; }
-.g-media video { max-width: 100%; width: 100%; height: 100%; object-fit: cover; display: block; animation: g-zoom 1400ms var(--ease-out) both; animation-delay: calc(260ms + var(--i) * 85ms); }
+.g-media { position: relative; border-radius: calc(14px * var(--k)); overflow: hidden; background: var(--surface-2); aspect-ratio: 16 / 9; }
+.g-media video { max-width: 100%; width: 100%; height: 100%; object-fit: cover; display: block; animation: g-zoom calc(1400ms * var(--mo)) var(--ease-out) both; animation-delay: calc(calc(260ms * var(--mo)) + var(--i) * calc(85ms * var(--mo))); }
 @keyframes g-zoom { from { transform: scale(1.06); } to { transform: none; } }
 
 .g-sound { position: absolute; right: 10px; bottom: 10px; width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center;
@@ -41,7 +41,7 @@
 .g-text p { color: var(--text-2); font-size: var(--fs-body); margin-top: 2px; }
 .g-text h3 { font-size: var(--fs-title); }
 
-.g-foot { text-align: center; margin-top: var(--s8); animation: g-in 900ms var(--ease-out) both; animation-delay: calc(260ms + var(--i) * 85ms); }
+.g-foot { text-align: center; margin-top: var(--s8); animation: g-in calc(900ms * var(--mo)) var(--ease-out) both; animation-delay: calc(calc(260ms * var(--mo)) + var(--i) * calc(85ms * var(--mo))); }
 .g-start { height: 46px; padding: 0 28px; border-radius: var(--r-pill); background: var(--accent); color: #fff; font-size: 16px; font-weight: 600; }
 .g-start:hover { transform: scale(1.03); box-shadow: 0 10px 30px rgba(7, 96, 251, .35); }
 .g-foot p { margin-top: var(--s5); font-size: var(--fs-cap); color: var(--text-3); }

@@ -41,6 +41,9 @@ export default function App() {
     const el = document.documentElement
     if (theme === 'system') el.removeAttribute('data-theme'); else el.setAttribute('data-theme', theme)
   }, [theme])
+  const corners = useSettings((s) => s.corners), motion = useSettings((s) => s.motion)
+  useEffect(() => { document.documentElement.dataset.corners = corners }, [corners])
+  useEffect(() => { document.documentElement.dataset.motion = motion }, [motion])
   useEffect(() => { document.documentElement.lang = lang }, [lang])
   useEffect(() => { if (loc.pathname !== '/') useNav.getState().setLast(loc.pathname + loc.search) }, [loc.pathname, loc.search])
   // Переход список ⇄ страница: новая страница плавно въезжает (вперёд — справа, назад — слева)

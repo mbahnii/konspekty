@@ -8,7 +8,7 @@ import { ICloud } from './Icons'
 export function useSettingsMenu() {
   const t = useT()
   const menu = useMenu()
-  const { theme, lang, setTheme, setLang } = useSettings()
+  const { theme, lang, setTheme, setLang, corners, setCorners, motion, setMotion } = useSettings()
   const session = useAuth((s) => s.session)
   return (e) => { e.stopPropagation(); menu.open(e.currentTarget, [
     { header: t('theme') },
@@ -16,6 +16,13 @@ export function useSettingsMenu() {
     '-',
     { header: t('language') },
     ...Object.entries(LANGS).map(([k, v]) => ({ tick: lang === k, label: v, onSelect: () => setLang(k) })),
+    '-',
+    '-',
+    { header: t('isl.corners') },
+    ...['round', 'square'].map((k) => ({ tick: corners === k, label: t(k === 'round' ? 'isl.round' : 'isl.square'), onSelect: () => setCorners(k) })),
+    '-',
+    { header: t('isl.motion') },
+    ...['min', 'mid', 'max'].map((k) => ({ tick: motion === k, label: t(`mo.${k}`), onSelect: () => setMotion(k) })),
     '-',
     { icon: <ICloud />, label: session ? t('login.menuOn') : t('login.menuOff'), onSelect: () => setLoginOpen(true) },
     { header: (session ? session.user.email : t('login.none')) + ' · ' + t('version') + ' ' + __BUILD__ },

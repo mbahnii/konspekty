@@ -8,13 +8,13 @@ a.row { color: inherit; }
 /* Свечение вверху экрана: одно на весь сайт, пятна всё время медленно плавают.
    Ниже маска полностью гасит его, чтобы не просвечивало сквозь карточки. */
 .amb { position: fixed; top: -80px; left: calc(var(--side-w, 0px) - 40px); width: min(760px, 70vw); height: 420px; z-index: -1; pointer-events: none;
-  transition: left 600ms var(--ease-out), width 600ms var(--ease-out);
+  transition: left calc(600ms * var(--mo)) var(--ease-out), width calc(600ms * var(--mo)) var(--ease-out);
   -webkit-mask-image: radial-gradient(ellipse 50% 50% at 50% 45%, #000 30%, transparent 100%); mask-image: radial-gradient(ellipse 50% 50% at 50% 45%, #000 30%, transparent 100%); }
 .amb.center { left: calc(var(--side-w, 0px) + (100vw - var(--side-w, 0px) - min(1000px, 80vw)) / 2); width: min(1000px, 80vw); }
 .amb i { position: absolute; border-radius: 50%; filter: blur(60px); opacity: var(--glow, .6); will-change: transform; }
-.amb i:nth-child(1) { width: 42%; height: 240px; left: 6%;  top: 70px; background: var(--g1); animation: amb-a 9s ease-in-out infinite; }
-.amb i:nth-child(2) { width: 36%; height: 220px; left: 34%; top: 40px; background: var(--g2); animation: amb-b 11s ease-in-out infinite; }
-.amb i:nth-child(3) { width: 38%; height: 230px; left: 58%; top: 90px; background: var(--g3); animation: amb-c 13s ease-in-out infinite; }
+.amb i:nth-child(1) { width: 42%; height: 240px; left: 6%;  top: 70px; background: var(--g1); animation: amb-a calc(9s * var(--mo)) ease-in-out infinite; }
+.amb i:nth-child(2) { width: 36%; height: 220px; left: 34%; top: 40px; background: var(--g2); animation: amb-b calc(11s * var(--mo)) ease-in-out infinite; }
+.amb i:nth-child(3) { width: 38%; height: 230px; left: 58%; top: 90px; background: var(--g3); animation: amb-c calc(13s * var(--mo)) ease-in-out infinite; }
 @keyframes amb-a { 0%, 100% { transform: translate(0, 0) scale(1); } 33% { transform: translate(120px, 40px) scale(1.15); } 66% { transform: translate(40px, -30px) scale(.9); } }
 @keyframes amb-b { 0%, 100% { transform: translate(0, 0) scale(1); } 33% { transform: translate(-110px, 50px) scale(.85); } 66% { transform: translate(90px, 10px) scale(1.2); } }
 @keyframes amb-c { 0%, 100% { transform: translate(0, 0) scale(1.1); } 33% { transform: translate(-60px, -40px) scale(.9); } 66% { transform: translate(-150px, 30px) scale(1.2); } }
@@ -27,17 +27,17 @@ a.row { color: inherit; }
 }
 @media (max-width: 860px) { .amb.calm, .amb.center { left: 0; width: 100%; height: 340px; } }
 /* ---- «живой» режим для списков: контейнер растёт на весь экран, появляются ещё три пятна, все плавают ---- */
-.amb { transition: left 700ms var(--ease-out), top 700ms var(--ease-out), width 700ms var(--ease-out), height 700ms var(--ease-out); }
+.amb { transition: left calc(700ms * var(--mo)) var(--ease-out), top calc(700ms * var(--mo)) var(--ease-out), width calc(700ms * var(--mo)) var(--ease-out), height calc(700ms * var(--mo)) var(--ease-out); }
 .amb.alive { top: -10vh; left: calc(var(--side-w, 0px) - 8vw); width: calc(100vw - var(--side-w, 0px) + 16vw); height: 120dvh; }
-.amb i:nth-child(n+4) { opacity: 0; transition: opacity 900ms var(--ease-out); background: radial-gradient(closest-side, var(--gc) 0%, transparent 100%); }
-.amb i:nth-child(4) { --gc: var(--g2); width: 38%; height: 38%; left: 52%; top: 52%; animation: amb-d 17s ease-in-out infinite; }
-.amb i:nth-child(5) { --gc: var(--g3); width: 34%; height: 34%; left: 4%;  top: 58%; animation: amb-e 21s ease-in-out infinite; }
-.amb i:nth-child(6) { --gc: var(--g1); width: 30%; height: 30%; left: 66%; top: 6%;  animation: amb-f 19s ease-in-out infinite; }
+.amb i:nth-child(n+4) { opacity: 0; transition: opacity calc(900ms * var(--mo)) var(--ease-out); background: radial-gradient(closest-side, var(--gc) 0%, transparent 100%); }
+.amb i:nth-child(4) { --gc: var(--g2); width: 38%; height: 38%; left: 52%; top: 52%; animation: amb-d calc(17s * var(--mo)) ease-in-out infinite; }
+.amb i:nth-child(5) { --gc: var(--g3); width: 34%; height: 34%; left: 4%;  top: 58%; animation: amb-e calc(21s * var(--mo)) ease-in-out infinite; }
+.amb i:nth-child(6) { --gc: var(--g1); width: 30%; height: 30%; left: 66%; top: 6%;  animation: amb-f calc(19s * var(--mo)) ease-in-out infinite; }
 .amb.alive i:nth-child(n+4) { opacity: calc(var(--glow, .6) * 1.15); }
-.amb.alive i:nth-child(1) { top: 8%;  height: 32%; animation-duration: 24s; }
-.amb.alive i:nth-child(2) { top: 26%; height: 30%; animation-duration: 28s; }
-.amb.alive i:nth-child(3) { top: 14%; height: 34%; animation-duration: 31s; }
-.amb i { transition: top 700ms var(--ease-out), height 700ms var(--ease-out), opacity 900ms var(--ease-out); }
+.amb.alive i:nth-child(1) { top: 8%;  height: 32%; animation-duration: calc(24s * var(--mo)); }
+.amb.alive i:nth-child(2) { top: 26%; height: 30%; animation-duration: calc(28s * var(--mo)); }
+.amb.alive i:nth-child(3) { top: 14%; height: 34%; animation-duration: calc(31s * var(--mo)); }
+.amb i { transition: top calc(700ms * var(--mo)) var(--ease-out), height calc(700ms * var(--mo)) var(--ease-out), opacity calc(900ms * var(--mo)) var(--ease-out); }
 @keyframes amb-d { 0%, 100% { transform: translate(0, 0) scale(1); } 40% { transform: translate(-18vw, -10vh) scale(1.2); } 70% { transform: translate(8vw, 8vh) scale(.9); } }
 @keyframes amb-e { 0%, 100% { transform: translate(0, 0) scale(1.1); } 35% { transform: translate(20vw, -14vh) scale(.9); } 70% { transform: translate(8vw, 10vh) scale(1.25); } }
 @keyframes amb-f { 0%, 100% { transform: translate(0, 0) scale(1); } 50% { transform: translate(-14vw, 20vh) scale(1.3); } }
@@ -65,12 +65,12 @@ a.row { color: inherit; }
 /* Полоса вкладок — одна плашка из стекла, как навигация в Apple/Telegram: прилипает к верху, не накладывается на текст.
    Внутри — вкладки и тонкая полоска разделов (появляется, когда плашка прилипла). Стили стекла — в styles/glass.css. */
 .sticky, .sticky.stuck { background: transparent; -webkit-backdrop-filter: none; backdrop-filter: none; top: 0; padding: 0 var(--s3); margin: 0 calc(-1 * var(--s3)); }
-.sticky .plate { padding: 6px; margin: 0 -6px; border-radius: 22px; transition: background-color var(--t-mid) var(--ease-out), box-shadow var(--t-mid) var(--ease-out); }
+.sticky .plate { padding: 6px; margin: 0 -6px; border-radius: calc(22px * var(--k)); transition: background-color var(--t-mid) var(--ease-out), box-shadow var(--t-mid) var(--ease-out); }
 .sticky .seg { background: color-mix(in srgb, var(--text) 7%, transparent); box-shadow: none; transition: background-color var(--t-mid) var(--ease-out); }
 .sticky .seg .thumb { background: color-mix(in srgb, var(--text) 13%, transparent); }
-.sticky .mini-tl { display: flex; gap: 3px; height: 4px; margin: 8px 8px 2px; opacity: 0; transform: scaleY(.3); transform-origin: 50% 0; pointer-events: none; transition: opacity 320ms var(--ease-out), transform 420ms var(--ease-out); }
+.sticky .mini-tl { display: flex; gap: 3px; height: 4px; margin: 8px 8px 2px; opacity: 0; transform: scaleY(.3); transform-origin: 50% 0; pointer-events: none; transition: opacity calc(320ms * var(--mo)) var(--ease-out), transform calc(420ms * var(--mo)) var(--ease-out); }
 .sticky.stuck .mini-tl { opacity: 1; transform: none; pointer-events: auto; }
-.mini-tl button { position: relative; min-width: 6px; border-radius: 2px; background: color-mix(in srgb, var(--text) 20%, transparent); transition: background-color 300ms var(--ease-out), transform 300ms var(--ease-out); }
+.mini-tl button { position: relative; min-width: 6px; border-radius: calc(2px * var(--k)); background: color-mix(in srgb, var(--text) 20%, transparent); transition: background-color calc(300ms * var(--mo)) var(--ease-out), transform calc(300ms * var(--mo)) var(--ease-out); }
 .mini-tl button::before { content: ""; position: absolute; inset: -9px 0; }          /* зона нажатия выше и ниже полоски */
 .mini-tl button.skip { background: color-mix(in srgb, var(--text) 9%, transparent); }
 .mini-tl button.on { background: var(--accent); }

@@ -22,14 +22,14 @@
 }
 /* большие текстовые карточки конспекта: тот же тон, но без размытия (их много, телефон не должен греться) */
 .card { background: var(--glass); box-shadow: var(--glass-edge); }
-.vcard { transition: transform 300ms var(--ease-out), box-shadow 300ms var(--ease-out), background-color 300ms var(--ease-out); }
+.vcard { transition: transform calc(300ms * var(--mo)) var(--ease-out), box-shadow calc(300ms * var(--mo)) var(--ease-out), background-color calc(300ms * var(--mo)) var(--ease-out); }
 a.vcard:hover { box-shadow: var(--glass-edge), 0 8px 28px rgba(0, 0, 0, .12); }
 .menu, .tip, .modal { box-shadow: var(--shadow-pop), var(--glass-edge); }
 
 /* прилипшее меню должно читаться поверх текста — плотнее общего стекла */
 :root { --glass-strong: color-mix(in srgb, var(--glass-base) 88%, transparent); }
 .sticky.stuck .plate { background: var(--glass-strong); }
-.sticky .plate { transition: background-color var(--t-mid) var(--ease-out), box-shadow var(--t-mid) var(--ease-out), padding-left 360ms var(--ease-out); }
+.sticky .plate { transition: background-color var(--t-mid) var(--ease-out), box-shadow var(--t-mid) var(--ease-out), padding-left calc(360ms * var(--mo)) var(--ease-out); }
 /* телефон: слева в плашке место под кнопку «назад», как в навигации iOS */
 @media (max-width: 860px) {
   .sticky.stuck .plate { padding-left: 54px; }

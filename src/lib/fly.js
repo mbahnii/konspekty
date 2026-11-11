@@ -1,4 +1,5 @@
 import { setArrive, useArrive } from '../store/arrive'
+import { mo, ms } from './motion'
 
 // «Улетает в список» — как окно в Dock на Mac.
 // Кольцо очереди превращается в круглую миниатюру видео, по дуге летит к обложке строки в списке,
@@ -34,7 +35,7 @@ export async function flyToList(vid, srcEl) {
   // откуда летим — запоминаем сразу: кольцо-источник может исчезнуть, пока ждём строку в списке
   const src = srcEl && srcEl.isConnected ? srcEl.getBoundingClientRect() : null
   const state = () => useArrive.getState().st[vid]
-  const finish = () => { setArrive(vid, 'go'); setTimeout(() => state() === 'go' && setArrive(vid, null), 1100) }
+  const finish = () => { setArrive(vid, 'go'); setTimeout(() => state() === 'go' && setArrive(vid, null), ms(1100)) }
   if (document.hidden || reduce()) { finish(); return }
 
   await waitTargets(vid)                                     // хотя бы одно место для видео уже есть на экране
@@ -66,7 +67,7 @@ export async function flyToList(vid, srcEl) {
   Object.assign(orbX.style, { left: `${sx - S / 2}px`, top: `${sy - S / 2}px` })
   orbY.appendChild(orb); orbX.appendChild(orbY); document.body.appendChild(orbX)
 
-  const dur = Math.min(1050, Math.max(760, Math.hypot(tx - sx, ty - sy) * 0.95))
+  const dur = Math.min(1050, Math.max(760, Math.hypot(tx - sx, ty - sy) * 0.95)) * Math.max(.5, mo())
   const up = ty < sy
   const ax = orbX.animate([{ transform: 'translateX(0)' }, { transform: `translateX(${tx - sx}px)` }],
     { duration: dur, easing: 'cubic-bezier(.65, 0, .35, 1)', fill: 'forwards' })
@@ -86,6 +87,6 @@ export async function flyToList(vid, srcEl) {
 
   await ax.finished.catch(() => {})
   finish()                                                   // обложка и текст появляются на месте шарика
-  orbX.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 320, easing: 'ease-out', fill: 'forwards' })
+  orbX.animate([{ opacity: 1 }, { opacity: 0 }], { duration: ms(320), easing: 'ease-out', fill: 'forwards' })
     .finished.catch(() => {}).then(() => orbX.remove())
 }
