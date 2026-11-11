@@ -4,7 +4,10 @@ import { useVideo } from '../data/useData'
 import { useT } from '../i18n'
 import { hello } from '../lib/hello'
 import { useMenu } from '../components/Menu'
-import { useToast } from '../store/ui'
+import { useToast, useQueue } from '../store/ui'
+import { useSettings } from '../store/settings'
+import { useAuth } from '../store/auth'
+import { LANGS } from '../i18n'
 import { useProgress, stepOn } from '../store/progress'
 import Segmented from '../components/Segmented'
 import Timeline from '../components/Timeline'
@@ -41,7 +44,16 @@ export default function Video({ onBack }) {
   const t = useT()
   const menu = useMenu()
   const say = useToast((s) => s.say)
-  const { summary, meta, error } = useVideo(id)
+  const { summary: original, meta, error } = useVideo(id)
+  // Язык конспекта — отдельная настройка для каждого видео (меню ⋯). Перевод делается по запросу и сохраняется.
+  const origLang = original?.lang || 'uk'
+  const noteLang = useSettings((s) => s.noteLang[id]) || origLang
+  const setNoteLang = useSettings((s) => s.setNoteLang)
+  const queueItems = useQueue((s) => s.items)
+  const queueAdd = useQueue((s) => s.add)
+  const translated = noteLang !== origLang ? original?.tr?.[noteLang] : null
+  const summary = translated || original
+  const trWaiting = !!original && noteLang !== origLang && !translated
   const videoMenu = useVideoMenu()
   const { data: index } = useIndex()
   const [filter, setFilter] = useState('all')
@@ -91,8 +103,20 @@ export default function Video({ onBack }) {
     { header: t('filter.show') },
     ...['all', 'clean', 'adv'].map((k) => ({ tick: filter === k, label: t(`filter.${k}`), onSelect: () => { setFilter(k); go('notes') } })),
   ], { alignRight: true }) }
+  const pickLang = (l) => {
+    if (l !== origLang && !original.tr?.[l]) {
+      if (!useAuth.getState().session) { say(t('toast.trLogin')); return }
+      const busy = queueItems.some((x) => x.vid === id && x.tr === l && (x.status === 'queued' || x.status === 'processing'))
+      if (!busy) queueAdd(url, 'reprocess', { title: meta.title, vid: id, tr: l })
+      say(t('toast.translating'))
+    }
+    setNoteLang(id, l)
+  }
   const moreMenu = (e) => { e.stopPropagation(); const v = index?.find((x) => x.id === id) ?? { id, url, ready: true }; const items = videoMenu(v); menu.open(e.currentTarget, [
-    ...items.slice(1, -2), { icon: <IPrint />, label: t('print'), onSelect: () => print() }, ...items.slice(-2),
+    ...items.slice(1, -2), { icon: <IPrint />, label: t('print'), onSelect: () => print() },
+    '-', { header: t('m.noteLang') },
+    ...Object.keys(LANGS).map((l) => ({ tick: noteLang === l, label: LANGS[l], onSelect: () => pickLang(l) })),
+    ...items.slice(-2),
   ], { alignRight: true }) }
 
   const items = [
@@ -133,6 +157,7 @@ export default function Video({ onBack }) {
           <section className="panel on" key={tab}>
             {tab === 'main' && (
               <>
+                {trWaiting && <div className="card draft"><p>✦ {t('tr.pending', { l: LANGS[noteLang] })}</p></div>}
                 {summary.engine && <div className="card draft"><p>✦ {t('draft', { m: summary.engine })}</p></div>}
                 <div className="card"><p className="tldr">{inline(summary.tldr)}</p></div>
                 <div className="card"><h2>{t('keyPoints')}</h2>

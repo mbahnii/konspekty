@@ -49,8 +49,11 @@ async function syncQueue() {
   }
   const pending = q.items.filter((x) => x.pending)
   if (pending.length) {
-    const { error } = await supabase.from('queue').upsert(pending.map((x) => ({ id: x.id, url: x.url, kind: x.kind, note: JSON.stringify({ title: x.title, channel: x.channel, vid: x.vid }) })), { onConflict: 'id' })
+    const { error } = await supabase.from('queue').upsert(pending.map((x) => ({ id: x.id, url: x.url, kind: x.kind, note: JSON.stringify({ title: x.title, channel: x.channel, vid: x.vid, translate: x.tr }) })), { onConflict: 'id' })
     if (error) throw error
+    // «звонок» ноутбуку: worker держит открытое соединение и сразу проверяет очередь (без ожидания)
+    const bell = supabase.channel('wake-' + user().id)
+    bell.send({ type: 'broadcast', event: 'wake', payload: {} }).catch(() => {}).finally(() => supabase.removeChannel(bell))
   }
   const { data, error } = await supabase.from('queue').select('id,url,kind,status,note,created_at').order('created_at')
   if (error) throw error
@@ -61,7 +64,7 @@ async function syncQueue() {
   const mine = cur.items.filter((x) => x.pending && !pending.some((p) => p.id === x.id))   // добавлено, пока шёл запрос
   useQueue.setState({
     removed: cur.removed.filter((id) => !q.removed.includes(id)),
-    items: [...data.map((r) => { let n = {}; try { n = JSON.parse(r.note) ?? {} } catch { /* ignore */ } return { id: r.id, url: r.url, kind: r.kind, status: r.status, stage: n.stage, at: Date.parse(r.created_at), title: n.title, channel: n.channel, vid: n.vid } }), ...mine],
+    items: [...data.map((r) => { let n = {}; try { n = JSON.parse(r.note) ?? {} } catch { /* ignore */ } return { id: r.id, url: r.url, kind: r.kind, status: r.status, stage: n.stage, at: Date.parse(r.created_at), title: n.title, channel: n.channel, vid: n.vid, tr: n.translate } }), ...mine],
   })
   if (newlyDone) {                      // видео опубликовано — показать его в списке сразу
     refreshData()

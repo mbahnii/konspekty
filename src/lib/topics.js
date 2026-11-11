@@ -2,6 +2,7 @@
 const N = {
   setup: ['Встановлення і старт', 'Установка и старт', 'Setup'],
   genshin: ['Genshin Impact', 'Genshin Impact', 'Genshin Impact'],
+  calculus: ['Математичний аналіз', 'Математический анализ', 'Calculus'],
   probability: ['Теорія ймовірностей', 'Теория вероятностей', 'Probability'],
   psychology: ['Психологія', 'Психология', 'Psychology'],
   communication: ['Комунікація', 'Коммуникация', 'Communication'],

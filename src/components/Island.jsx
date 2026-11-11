@@ -118,7 +118,7 @@ export default function Island({ open, setOpen }) {
             <div key={it.id} className={`isl-q ${confirm === it.id ? 'conf' : ''}`}>
               <div className="rc">
                 {it.vid ? <img src={`https://i.ytimg.com/vi/${it.vid}/default.jpg`} alt="" /> : <span className={`sync ${it.status === 'processing' ? 'busy' : it.status === 'done' ? 'ok' : 'off'}`} />}
-                <div className="qt"><b>{it.kind && it.kind !== 'add' ? `${t(`q.${it.kind}`)} · ` : ''}{it.title || shortUrl(it.url)}</b><small>{shortUrl(it.url)}</small></div>
+                <div className="qt"><b>{it.tr ? `${t('q.translate')} ${it.tr.toUpperCase()} · ` : it.kind && it.kind !== 'add' ? `${t(`q.${it.kind}`)} · ` : ''}{it.title || shortUrl(it.url)}</b><small>{shortUrl(it.url)}</small></div>
                 <span className="st">{it.pending ? t('st.local') : it.status === 'processing' && it.stage ? t(`stage.${it.stage}`) : t(`st.${it.status}`)}</span>
                 {it.status === 'queued' && <button className="trash" title={t('m.delete')} onClick={() => setConfirm(confirm === it.id ? null : it.id)}><ITrash /></button>}
               </div>
