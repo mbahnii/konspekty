@@ -142,3 +142,9 @@
 html[data-corners="square"] { --k: .4; --kp: .45; }
 html[data-motion="min"] { --mo: .3; --ease-spring: var(--ease-out); --ease-pop: var(--ease-out); }
 html[data-motion="max"] { --mo: 1.5; --ease-spring: cubic-bezier(.3, 1.45, .5, 1); --ease-pop: cubic-bezier(.3, 1.9, .5, 1); }
+
+/* Смена углов плавная: --k и --kp — настоящие числа, поэтому браузер умеет их анимировать, а все радиусы на сайте пересчитываются вместе */
+@property --k { syntax: '<number>'; inherits: true; initial-value: 1; }
+@property --kp { syntax: '<number>'; inherits: true; initial-value: 1; }
+html { transition: --k calc(520ms * var(--mo)) cubic-bezier(.32, .72, 0, 1), --kp calc(520ms * var(--mo)) cubic-bezier(.32, .72, 0, 1); }
+html.no-anim { transition: none; }

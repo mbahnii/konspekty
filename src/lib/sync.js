@@ -51,7 +51,7 @@ async function syncQueue() {
   }
   const pending = q.items.filter((x) => x.pending)
   if (pending.length) {
-    const { error } = await supabase.from('queue').upsert(pending.map((x) => ({ id: x.id, url: x.url, kind: x.kind, note: JSON.stringify({ title: x.title, channel: x.channel, vid: x.vid, translate: x.tr, photos: x.photos, mode: x.mode, guest: x.guest }) })), { onConflict: 'id' })
+    const { error } = await supabase.from('queue').upsert(pending.map((x) => ({ id: x.id, url: x.url, kind: x.kind, note: JSON.stringify({ title: x.title, channel: x.channel, vid: x.vid, translate: x.tr, photos: x.photos, mode: x.mode, guest: x.guest, share: x.share }) })), { onConflict: 'id' })
     if (error) throw error
     // «звонок» ноутбуку: worker держит открытое соединение и сразу проверяет очередь (без ожидания)
     const bell = supabase.channel('wake-' + user().id)

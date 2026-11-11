@@ -77,11 +77,11 @@
 .dyn-inner {
   padding: var(--g) var(--g) 0;
   opacity: 0; filter: blur(8px); transform: scale(.96); transform-origin: 50% 100%;
-  transition: opacity calc(160ms * var(--mo)) var(--dyn-ease), filter calc(160ms * var(--mo)) var(--dyn-ease), transform calc(320ms * var(--mo)) var(--dyn-ease);
+  transition: opacity calc(110ms * var(--mo)) var(--dyn-ease), filter calc(110ms * var(--mo)) var(--dyn-ease), transform calc(320ms * var(--mo)) var(--dyn-ease);
 }
 .dyn.open .dyn-inner {
   opacity: 1; filter: none; transform: none;
-  transition: opacity var(--dyn-f) var(--dyn-ease) calc(80ms * var(--mo)), filter var(--dyn-f) var(--dyn-ease) calc(80ms * var(--mo)), transform var(--dyn-t) var(--dyn-spring);
+  transition: opacity var(--dyn-f) var(--dyn-ease) 0ms, filter var(--dyn-f) var(--dyn-ease) 0ms, transform var(--dyn-t) var(--dyn-spring);
 }
 
 /* вкладки */
@@ -102,13 +102,13 @@
   position: absolute; left: 0; right: 0; top: 0;
   opacity: 0; visibility: hidden; filter: blur(6px); transform: scale(.98); transform-origin: 50% 0;
   pointer-events: none;
-  transition: opacity calc(180ms * var(--mo)) var(--dyn-ease), filter calc(180ms * var(--mo)) var(--dyn-ease), transform calc(260ms * var(--mo)) var(--dyn-ease), visibility 0s linear calc(180ms * var(--mo));
+  transition: opacity calc(110ms * var(--mo)) var(--dyn-ease), filter calc(110ms * var(--mo)) var(--dyn-ease), transform calc(260ms * var(--mo)) var(--dyn-ease), visibility 0s linear calc(180ms * var(--mo));
 }
 .dyn-pane.on {
   position: relative; opacity: 1; visibility: visible; filter: none; transform: none; pointer-events: auto;
   max-height: var(--pane-max); overflow-y: auto; overscroll-behavior: contain; scrollbar-width: none;
   padding-bottom: var(--g);
-  transition: opacity calc(280ms * var(--mo)) var(--dyn-ease) calc(70ms * var(--mo)), filter calc(280ms * var(--mo)) var(--dyn-ease) calc(70ms * var(--mo)), transform calc(420ms * var(--mo)) var(--dyn-spring) calc(70ms * var(--mo)), visibility 0s;
+  transition: opacity calc(280ms * var(--mo)) var(--dyn-ease) 0ms, filter calc(280ms * var(--mo)) var(--dyn-ease) 0ms, transform calc(420ms * var(--mo)) var(--dyn-spring) 0ms, visibility 0s;
 }
 .dyn-pane::-webkit-scrollbar { display: none; }
 .dyn-pane > * + * { margin-top: var(--g); }
@@ -211,6 +211,10 @@ html[data-motion="max"] { --dyn-spring: cubic-bezier(.3, 1.6, .5, 1); }
 
 /* «шире» в открытой пилюле: ширина и высота меняются одним движением — панель повторяет содержимое кадр в кадр, лимиты высоты тоже плавные */
 .dyn.sizing .dyn-panel { transition: none; }
-.dyn-pane.on { transition: opacity calc(280ms * var(--mo)) var(--dyn-ease) calc(70ms * var(--mo)), filter calc(280ms * var(--mo)) var(--dyn-ease) calc(70ms * var(--mo)), transform calc(420ms * var(--mo)) var(--dyn-spring) calc(70ms * var(--mo)), max-height var(--dyn-t) var(--dyn-ease), visibility 0s; }
+.dyn-pane.on { transition: opacity calc(280ms * var(--mo)) var(--dyn-ease) 0ms, filter calc(280ms * var(--mo)) var(--dyn-ease) 0ms, transform calc(420ms * var(--mo)) var(--dyn-spring) 0ms, max-height var(--dyn-t) var(--dyn-ease), visibility 0s; }
 .dyn .ph .ph-list ol { transition: max-height var(--dyn-t) var(--dyn-ease); }
 .dyn .isl-tabs.isl-seg, .dyn .isl-tabs.isl-seg button { transition: height var(--dyn-t) var(--dyn-ease), background-color calc(240ms * var(--mo)) var(--dyn-ease), color calc(240ms * var(--mo)) var(--dyn-ease); }
+
+/* отклик как у Apple: нажатие реагирует сразу, отпускание — мягкая пружинка; кнопка пилюли и вкладки отвечают без задержки */
+.dyn-btn:active, .dyn-main:active { transition-duration: calc(60ms * var(--mo)); }
+.dyn .isl-seg button { transition-delay: 0ms; }

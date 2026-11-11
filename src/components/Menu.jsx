@@ -50,6 +50,7 @@ export function MenuProvider({ children }) {
         {st.items.map((it, i) => {
           if (it === '-') return <hr key={i} />
           if (it.header) return <div key={i} className="mh">{it.header}</div>
+          if (it.node) return <div key={i} className="mi-node" style={{ '--d': i }} onClick={(e) => e.stopPropagation()}>{it.node}</div>
           if (it.swatches) return (
             <div key={i} className="mi-row" style={{ '--d': i }}>
               {it.swatches.map((c) => (

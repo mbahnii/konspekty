@@ -17,7 +17,7 @@ svg.i { width: 18px; height: 18px; flex: none; stroke: currentColor; fill: none;
 
 /* Общий отклик: всё нажимаемое чуть сжимается при нажатии */
 .tap { transition: transform var(--t-fast) var(--ease-out), background-color var(--t-fast) var(--ease-out), color var(--t-fast) var(--ease-out), box-shadow var(--t-fast) var(--ease-out), opacity var(--t-fast); }
-.tap:active { transform: scale(.97); }
+.tap:active { transform: scale(.96); transition-duration: calc(60ms * var(--mo)); }
 
 /* =====================================================================
    Каркас: центрированный, на больших экранах не «разъезжается»
@@ -1331,3 +1331,42 @@ a.tcard:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(0,0,0,.
 
 /* числа во вкладках Усі / Загальні / Мої видны и на телефоне */
 .cat-seg .badge-n { display: inline !important; margin-left: 2px; }
+
+/* ---------- меню настроек: компактное (аккаунт + 4 переключателя) ---------- */
+.menu .mi-node { padding: 2px 4px 4px; display: flex; flex-direction: column; gap: 6px; opacity: 0; transform: translateY(-3px); transition: opacity calc(220ms * var(--mo)) var(--ease-out), transform calc(300ms * var(--mo)) var(--ease-out); }
+.menu.show .mi-node { opacity: 1; transform: none; transition-delay: calc(var(--d) * calc(22ms * var(--mo))); }
+.menu:has(.mi-node) { min-width: 268px; }
+.ms-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: 30px; }
+.ms-row > span { font-size: var(--fs-cap); font-weight: 500; color: var(--text-2); white-space: nowrap; }
+.seg.ms-seg { padding: 2px; border-radius: calc(9px * var(--k)); }
+.seg.ms-seg button { height: 26px; padding: 0 9px; font-size: 12px; border-radius: calc(7px * var(--k)); white-space: nowrap; }
+.seg.ms-seg .thumb { top: 2px; bottom: 2px; border-radius: calc(7px * var(--k)); }
+.ms-ic .am-badge { position: static; width: 28px; height: 28px; } .ms-ic .am-badge svg { width: 16px; height: 16px; }
+.mi:has(.ms-acc) { height: 46px; }
+.ms-acc { display: flex; flex-direction: column; min-width: 0; line-height: 1.25; text-align: left; }
+.ms-acc b { font-size: var(--fs-sub); font-weight: 600; overflow: hidden; text-overflow: ellipsis; max-width: 170px; }
+.ms-acc small { font-size: 11.5px; color: var(--text-3); overflow: hidden; text-overflow: ellipsis; max-width: 170px; }
+.mi:hover .ms-acc small { color: rgba(255,255,255,.8); }
+.mi .sc svg { width: 14px; height: 14px; }
+
+/* ---------- профиль ---------- */
+.pf-who { display: flex; align-items: center; gap: var(--s4); }
+.pf-ic { width: 56px; height: 56px; border-radius: 50%; overflow: hidden; display: grid; place-items: center; flex: none; background: var(--surface-2); }
+.pf-ic img { width: 100%; height: 100%; object-fit: cover; }
+.pf-ic .am-badge { position: static; width: 56px; height: 56px; border-radius: 50%; } .pf-ic .am-badge svg { width: 28px; height: 28px; }
+.pf-t { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.pf-t b { font-size: var(--fs-body); font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pf-t small { color: var(--text-2); font-size: var(--fs-sub); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pf-prov .am-badge { position: static; width: 28px; height: 28px; } .pf-prov .am-badge svg { width: 16px; height: 16px; }
+.pf-form { display: flex; flex-direction: column; gap: var(--s4); }
+.pf-form label { display: flex; flex-direction: column; gap: 4px; }
+.pf-form label > span { font-size: var(--fs-cap); font-weight: 600; color: var(--text-2); }
+.pf-form input { height: 44px; padding: 0 var(--s4); border-radius: var(--r-md); background: var(--surface-2); border: 1px solid transparent; color: var(--text); font: inherit; font-size: 16px; outline: none; transition: border-color calc(200ms * var(--mo)) var(--ease-out), background-color calc(200ms * var(--mo)) var(--ease-out); }
+.pf-form input:focus { border-color: var(--accent); background: var(--surface); }
+.pf-form input.bad { border-color: var(--danger); } .pf-form input.ro { color: var(--text-3); }
+.pf-form small { font-size: 11.5px; color: var(--text-3); } .pf-form small.bad { color: var(--danger); }
+.pf-act { display: flex; justify-content: flex-end; }
+.pf-save:disabled { opacity: .4; pointer-events: none; }
+.pf-stat { display: flex; align-items: center; justify-content: space-between; } .pf-stat b { font-size: var(--fs-large); font-variant-numeric: tabular-nums; }
+.pf-out { display: grid; place-items: center; width: 100%; height: 46px; margin-top: var(--s2); border-radius: var(--r-md); background: var(--surface); box-shadow: 0 0 0 1px var(--separator); color: var(--danger); font-weight: 600; }
+.pf-out:hover { background: color-mix(in srgb, var(--danger) 10%, var(--surface)); }

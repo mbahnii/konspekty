@@ -6,6 +6,7 @@ import { useQueue, useToast } from '../store/ui'
 import { QueueRing } from './QueueRing'
 import { ITrash, IChevUp, IChevDown, IRedo, IPlus } from './Icons'
 import PhotoViewer from './PhotoViewer'
+import { shareDefault } from '../lib/share'
 
 // Загрузка фото конспектов — одна из главных функций сайта.
 // Как добавить фото:  перетащить файлы в окно браузера (откроется сама),  выбрать кнопкой,  вставить из буфера (⌘V / Ctrl+V),
@@ -112,9 +113,10 @@ export default function PhotoPanel({ open, onDone, onWantOpen }) {
         if (err) throw err
         paths.push(path); setPct(((i + 1) / files.length) * 100)
       }
+      const share = shareDefault()
       const name = title.trim() || `${t('ph.default')} ${new Date().toLocaleDateString()}`
-      add(`photos:${pid}`, 'add', { title: name, channel: t('ph.channel'), vid: pid, photos: paths, mode })
-      say(t('isl.queued')); onDone?.()
+      add(`photos:${pid}`, 'add', { title: name, channel: t('ph.channel'), vid: pid, photos: paths, mode, share })
+      say(t(share ? 'isl.queuedPub' : 'isl.queuedMine')); onDone?.()
     } catch (e) {
       console.warn('photo upload', e); say(String(e?.message || '').startsWith(t('ph.cantRead')) ? e.message : t('ph.fail'))
     } finally { setBusy(false) }

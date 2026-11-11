@@ -13,6 +13,7 @@ import { accountsOn } from '../lib/accounts'
 import { supabase } from '../lib/supabase'
 import { flyToList } from '../lib/fly'
 import { ms } from '../lib/motion'
+import { shareDefault } from '../lib/share'
 import { setArrive, useArrive } from '../store/arrive'
 import { IYt, IPhoto, IPlus, IExpand, ICollapse, ISearch, ISystem, ISun, IMoon, ITrash } from './Icons'
 
@@ -221,8 +222,9 @@ export default function Island({ open, setOpen }) {
       if (error) { say(t('au.off')); setLoginOpen(true); return }
       guest = true
     }
-    add(url.trim(), 'add', { title: prev.title, channel: prev.channel, vid: prev.id, guest }); setUrl('')
-    if (!session && !accountsOn()) { say(t('isl.needLogin')); setLoginOpen(true) } else say(t('isl.queued'))
+    const share = guest || shareDefault()                       // общий каталог или только мне (см. lib/share.js)
+    add(url.trim(), 'add', { title: prev.title, channel: prev.channel, vid: prev.id, guest, share }); setUrl('')
+    if (!session && !accountsOn()) { say(t('isl.needLogin')); setLoginOpen(true) } else say(t(!accountsOn() || guest ? 'isl.queued' : share ? 'isl.queuedPub' : 'isl.queuedMine'))
   }
 
   const lq = q.trim().toLowerCase()

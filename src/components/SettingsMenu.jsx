@@ -1,30 +1,39 @@
+import { useNavigate } from 'react-router-dom'
 import { useSettings } from '../store/settings'
 import { useAuth, setLoginOpen } from '../store/auth'
 import { useT, LANGS } from '../i18n'
 import { useMenu } from './Menu'
-import { ICloud } from './Icons'
+import Segmented from './Segmented'
+import { ICON } from './ProviderBadge'
+import { accountInfo } from '../lib/account'
+import { IForward, ICloud } from './Icons'
 
-// Меню настроек: тема, язык, вход для синхронизации
+// Рядок настройки: подпись + переключатель (компактно, как в пилюле)
+const Row = ({ label, children }) => <div className="ms-row"><span>{label}</span>{children}</div>
+
+// Меню настроек: аккаунт (→ профиль) и четыре компактных переключателя; без длинных списков
 export function useSettingsMenu() {
   const t = useT()
   const menu = useMenu()
+  const nav = useNavigate()
   const { theme, lang, setTheme, setLang, corners, setCorners, motion, setMotion } = useSettings()
   const session = useAuth((s) => s.session)
-  return (e) => { e.stopPropagation(); menu.open(e.currentTarget, [
-    { header: t('theme') },
-    ...['system', 'light', 'dark'].map((k) => ({ tick: theme === k, label: t(`theme.${k}`), onSelect: () => setTheme(k) })),
-    '-',
-    { header: t('language') },
-    ...Object.entries(LANGS).map(([k, v]) => ({ tick: lang === k, label: v, onSelect: () => setLang(k) })),
-    '-',
-    '-',
-    { header: t('isl.corners') },
-    ...['round', 'square'].map((k) => ({ tick: corners === k, label: t(k === 'round' ? 'isl.round' : 'isl.square'), onSelect: () => setCorners(k) })),
-    '-',
-    { header: t('isl.motion') },
-    ...['min', 'mid', 'max'].map((k) => ({ tick: motion === k, label: t(`mo.${k}`), onSelect: () => setMotion(k) })),
-    '-',
-    { icon: <ICloud />, label: session ? t('login.menuOn') : t('login.menuOff'), onSelect: () => setLoginOpen(true) },
-    { header: (session ? session.user.email : t('login.none')) + ' · ' + t('version') + ' ' + __BUILD__ },
-  ], { alignRight: true }) }
+  return (e) => {
+    e.stopPropagation()
+    const acc = accountInfo(session)
+    const L = Object.keys(LANGS)
+    menu.open(e.currentTarget, [
+      acc
+        ? { icon: <span className="ms-ic">{ICON[acc.provider] || ICON.email}</span>, label: <span className="ms-acc"><b>{acc.name}</b><small>{acc.sub}</small></span>, sc: <IForward />, onSelect: () => nav('/profile') }
+        : { icon: <ICloud />, label: t('login.menuOff'), onSelect: () => setLoginOpen(true) },
+      '-',
+      { node: <>
+        <Row label={t('theme')}><Segmented className="seg ms-seg" value={theme} onChange={setTheme} items={['system', 'light', 'dark'].map((k) => ({ id: k, label: t(`theme.${k}S`) }))} /></Row>
+        <Row label={t('language')}><Segmented className="seg ms-seg" value={lang} onChange={setLang} items={L.map((k) => ({ id: k, label: k.toUpperCase() }))} /></Row>
+        <Row label={t('isl.corners')}><Segmented className="seg ms-seg" value={corners} onChange={setCorners} items={[{ id: 'round', label: t('isl.round') }, { id: 'square', label: t('isl.square') }]} /></Row>
+        <Row label={t('isl.motion')}><Segmented className="seg ms-seg" value={motion} onChange={setMotion} items={['min', 'mid', 'max'].map((k) => ({ id: k, label: t(`mo.${k}S`) }))} /></Row>
+      </> },
+      { header: t('version') + ' ' + __BUILD__ },
+    ], { alignRight: true })
+  }
 }
