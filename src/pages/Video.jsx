@@ -11,16 +11,17 @@ import { LANGS } from '../i18n'
 import { useProgress, stepOn } from '../store/progress'
 import Segmented from '../components/Segmented'
 import Timeline from '../components/Timeline'
+import PhotoViewer from '../components/PhotoViewer'
 import MiniTimeline from '../components/MiniTimeline'
 import Rail from '../components/Rail'
 import Pending from './Pending'
 import { useVideoMenu } from '../components/VideoMenu'
 import { useIndex } from '../data/useData'
-import { IChevDown, IMore, IPlay, IClock, IYt, ILink, IPrint, ICopy, IOk, ICheck, ISearch, IBack } from '../components/Icons'
+import { IChevDown, IMore, IPlay, IClock, IYt, ILink, IPrint, ICopy, IOk, ICheck, ISearch, IBack, IPhoto, IZoomIn } from '../components/Icons'
 import { Md, inline } from '../lib/md'
-import { fmt, ytLink, framesFor, frameUrl, isPhotos, stamp as pageStamp } from '../lib/time'   // не «stamp»: это имя занято переменной ссылки ?n=
+import { fmt, ytLink, framesFor, frameUrl, isPhotos, pageNo, stamp as pageStamp } from '../lib/time'   // не «stamp»: это имя занято переменной ссылки ?n=
 
-const TABS = ['main', 'notes', 'guides', 'terms', 'later']
+const TABS = ['main', 'notes', 'guides', 'terms', 'later', 'pages']
 
 const PhotosCtx = createContext(false)   // материал из фото: вместо времени — «стор. N», ссылок на YouTube нет
 const Tc = ({ id, t }) => {
@@ -28,6 +29,22 @@ const Tc = ({ id, t }) => {
   const tr = useT()
   if (photos) return <span className="tc page">{pageStamp({ source: 'photos' }, t, tr('ph.page'))}</span>
   return <a className="tc tap" href={ytLink(id, t)} target="_blank" rel="noreferrer" onClick={(e) => e.stopPropagation()}><IPlay />{fmt(t)}</a>
+}
+
+// Полоса страниц фото-конспекта (вместо видео-хронологии): миниатюры, нажатие открывает фото
+function PageStrip({ pages, onOpen, title }) {
+  return (
+    <div className="pstrip">
+      <div className="tl-head"><IPhoto />{title}</div>
+      <div className="pstrip-row">
+        {pages.map((p, i) => (
+          <button key={p.n} className="pstrip-it tap" onClick={() => onOpen(i)} aria-label={p.label}>
+            <img loading="lazy" src={p.thumb} alt="" /><span>{p.label}</span>
+          </button>
+        ))}
+      </div>
+    </div>
+  )
 }
 
 // Полоса вкладок получает фон, только когда прилипла к верху (иначе сквозь неё просвечивает свечение)
@@ -48,6 +65,7 @@ export default function Video({ onBack }) {
   const [sp] = useSearchParams()
   const t = useT()
   const menu = useMenu()
+  const [look, setLook] = useState(null)         // открытое фото (номер страницы в списке pages)
   const say = useToast((s) => s.say)
   const { summary: original, meta, error } = useVideo(id)
   // Язык конспекта — отдельная настройка для каждого видео (меню ⋯). Перевод делается по запросу и сохраняется.
@@ -97,7 +115,8 @@ export default function Video({ onBack }) {
   if (entry && !entry.ready) return <><main><Pending v={entry} onBack={onBack} /></main><aside className="rail" /></>
   if (error) return shell(<div className="empty" style={{ marginTop: 'var(--s8)' }}><b>{t('notFound')}</b>{t('notFound.d')}<div><button className="nf-btn tap" onClick={onBack}>{t('notFound.go')}</button></div></div>)
   if (!summary || !meta) return shell(<p style={{ color: 'var(--text-3)' }}>{t('loading')}</p>)
-  if (!TABS.includes(tab)) { nav(`/v/${id}`, { replace: true }); return null }
+  const photos0 = isPhotos(meta)
+  if (!TABS.includes(tab) || (tab === 'pages' && !photos0)) { nav(`/v/${id}`, { replace: true }); return null }
 
   const words = JSON.stringify(summary.sections.filter((s) => !s.skip).map((s) => s.body)).split(/\s+/).length
   const readMin = Math.max(1, Math.round(words / 180))
@@ -125,8 +144,14 @@ export default function Video({ onBack }) {
     ...items.slice(-2),
   ], { alignRight: true }) }
 
+  // страницы фото-конспекта: по одному снимку на страницу
+  const seen = new Set()
+  const pages = photos ? (meta.frames ?? []).filter((f) => { const k = pageNo(f.t); if (seen.has(k)) return false; seen.add(k); return true; }).map((f) => ({ src: frameUrl(id, f), thumb: frameUrl(id, f, true), n: pageNo(f.t), label: `${t('ph.page')} ${pageNo(f.t)}` })) : []
+  const openPage = (n) => { const i = pages.findIndex((x) => x.n === n); if (i >= 0) setLook(i) }
+
   const items = [
     { id: 'main', label: t('tab.main') },
+    ...(photos ? [{ id: 'pages', label: t('tab.pages'), count: pages.length }] : []),
     { id: 'notes', label: t('tab.notes'), count: summary.sections.length },
     { id: 'guides', label: t('tab.guides'), count: summary.guides.length },
     { id: 'terms', label: t('tab.terms'), count: summary.terms.length },
@@ -161,7 +186,7 @@ export default function Video({ onBack }) {
               <MiniTimeline secs={summary.sections} current={current} onPick={goto} />
             </div>
           </div>
-          <Timeline id={id} summary={summary} meta={meta} current={current} onPick={goto} />
+          {photos ? (tab === 'pages' ? null : <PageStrip pages={pages} onOpen={setLook} title={t('ph.pages')} />) : <Timeline id={id} summary={summary} meta={meta} current={current} onPick={goto} />}
 
           <section className="panel on" key={tab}>
             {tab === 'main' && (
@@ -185,15 +210,25 @@ export default function Video({ onBack }) {
                 <article key={s.id} id={`sec-${s.id}`} className={`card ${s.skip ? 'skip' : ''}`}>
                   <h2>{s.title} <Tc id={id} t={s.t} />{s.adv && <span className="badge adv">{t('advanced')}</span>}{s.skip && <span className="badge">{t('skipped')}</span>}</h2>
                   <div className="body"><Md text={s.body} /></div>
-                  {fr.length > 0 && <div className="frames">{fr.map((f) => (
-                    <a key={f.t} className="frame" href={photos ? frameUrl(id, f) : ytLink(id, f.t)} target="_blank" rel="noreferrer">
-                      <div className="img"><img loading="lazy" src={frameUrl(id, f)} alt="" /><div className="play"><span><IPlay /></span></div></div>
+                  {fr.length > 0 && <div className={`frames ${photos ? 'photos' : ''}`}>{fr.map((f) => (
+                    <a key={f.t} className="frame" href={photos ? frameUrl(id, f) : ytLink(id, f.t)} target="_blank" rel="noreferrer" onClick={photos ? (e) => { e.preventDefault(); openPage(pageNo(f.t)) } : undefined}>
+                      <div className="img"><img loading="lazy" src={frameUrl(id, f)} alt="" /><div className="play"><span>{photos ? <IZoomIn /> : <IPlay />}</span></div></div>
                       <figcaption>{pageStamp(meta, f.t, t('ph.page'))}</figcaption></a>
                   ))}</div>}
                   {s.note && <div className="note"><div className="who">✦ {t('claudeNote')}</div>{inline(s.note)}</div>}
                 </article>
               )
             })}
+            {tab === 'pages' && (
+              <div className="pg-grid">
+                {pages.map((p, i) => (
+                  <button key={p.n} className="pg-card tap" onClick={() => setLook(i)} aria-label={`${t('ph.openPage')}: ${p.label}`}>
+                    <span className="pg-img"><img loading="lazy" src={p.thumb} alt="" /><span className="pg-zoom"><IZoomIn /></span></span>
+                    <b>{p.label}</b>
+                  </button>
+                ))}
+              </div>
+            )}
             {tab === 'guides' && <Guides id={id} summary={summary} />}
             {tab === 'terms' && <Terms summary={summary} />}
             {tab === 'later' && (summary.later.length ? summary.later.map((x, i) => (
@@ -202,6 +237,7 @@ export default function Video({ onBack }) {
           </section>
         </div>
       </main>
+      <PhotoViewer items={pages.map((p) => ({ src: p.src, label: p.label }))} index={look != null && look < pages.length ? look : null} onClose={() => setLook(null)} onIndex={setLook} />
       <Rail id={id} tab={tab} summary={summary} current={current} onGoto={goto} onTab={go} photos={photos} />
     </PhotosCtx.Provider>
   )

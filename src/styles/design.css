@@ -1234,3 +1234,97 @@ a.tcard:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(0,0,0,.
 /* закрытая пилюля: скрытая панель не должна занимать место (верхний отступ панели сдвигал кнопки вниз) */
 .isl-inner { transition: opacity 300ms var(--ease-out), transform .55s var(--ease-island), padding-top .55s var(--ease-island); }
 .island:not(.open) .isl-inner { padding-top: 0; }
+
+/* =====================================================================
+   Раунд 13: ЕДИНАЯ логика размеров пилюли (последнее слово — перекрывает всё выше).
+   --cw = ширина колонки контента. Кнопка «шире» меняет размер и закрытой, и открытой:
+     закрытая:  маленькая → побольше
+     открытая:  обычная = ~80% колонки → «шире» = 100% колонки
+   ===================================================================== */
+.island-dock { --cw: min(var(--content), calc(100vw - 2 * var(--s5))); padding: 0 var(--s5); }
+.island { --w: 236px; }
+.island.wide:not(.open) { --w: min(316px, var(--cw)); }
+.island.open { --w: min(var(--cw), max(300px, calc(var(--cw) * .8))); }
+.island.open.wide { --w: var(--cw); }
+@media (max-width: 860px) {
+  .island:not(.open) { --w: 236px; }
+  .island.wide:not(.open) { --w: min(300px, var(--cw)); }
+}
+
+/* =====================================================================
+   Раунд 13: фото — список страниц в панели, просмотр фото, полоса и вкладка «Фото» на странице конспекта
+   ===================================================================== */
+/* --- панель добавления: страницы списком, все кнопки видны и нажимаются --- */
+.ph .ph-list { margin: 10px 0 6px; }
+.ph .ph-tap { margin: 0 2px 6px; font-size: var(--fs-cap); color: color-mix(in srgb, var(--island-text) 62%, transparent); }
+.ph .ph-list ol { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; max-height: min(300px, calc(100dvh - 470px)); min-height: 76px; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: none; }
+.ph .ph-list ol::-webkit-scrollbar { display: none; }
+.ph-row { display: grid; grid-template-columns: 52px minmax(0, 1fr) auto; align-items: center; gap: 10px; padding: 6px; border-radius: var(--rin, 12px); background: var(--island-key); animation: qin 420ms var(--ease-out) both; flex: none; }
+.ph-pic { position: relative; width: 52px; height: 68px; border-radius: 8px; overflow: hidden; background: rgba(0,0,0,.25); box-shadow: 0 0 0 1px rgba(255,255,255,.12); }
+.ph-pic .ph-img { position: absolute; inset: 0; background: center / contain no-repeat; }
+.ph-lab { min-width: 0; text-align: left; display: flex; flex-direction: column; gap: 2px; padding: 6px 0; }
+.ph-lab b { font-weight: 600; font-size: 14px; white-space: nowrap; }
+.ph-lab small { font-size: 11.5px; color: color-mix(in srgb, var(--island-text) 55%, transparent); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ph-ctl { display: flex; gap: 4px; }
+.ph-ctl button { width: 36px; height: 36px; border-radius: 10px; display: grid; place-items: center; background: color-mix(in srgb, var(--island-text) 14%, transparent); color: var(--island-text); transition: background-color 180ms var(--ease-out), opacity 180ms; }
+.ph-ctl button svg { width: 18px; height: 18px; }
+.ph-ctl button:hover { background: color-mix(in srgb, var(--island-text) 24%, transparent); }
+.ph-ctl button:disabled { opacity: .3; pointer-events: none; }
+.ph-ctl button.del { color: #ff7a7a; }
+.ph-more { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; height: 40px; margin-top: 8px; border-radius: var(--rin, 12px); font-weight: 600; box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--island-text) 30%, transparent); transition: background-color 200ms var(--ease-out); }
+.ph-more:hover { background: var(--island-key); }
+.ph-more svg { width: 18px; height: 18px; }
+/* узкая пилюля (телефон): имя файла убираем, кнопки чуть меньше */
+@media (max-width: 860px) {
+  .island.open:not(.wide) .ph-lab small { display: none; }
+  .island.open:not(.wide) .ph-row { gap: 8px; grid-template-columns: 48px minmax(0, 1fr) auto; }
+  .island.open:not(.wide) .ph-pic { width: 48px; height: 62px; }
+  .island.open:not(.wide) .ph-ctl { gap: 3px; } .island.open:not(.wide) .ph-ctl button { width: 34px; height: 34px; }
+  /* вкладки в узкой пилюле: значок над подписью, чтобы подписи не обрезались */
+  .island.open:not(.wide) .isl-tabs.isl-seg { height: 52px; }
+  .island.open:not(.wide) .isl-tabs.isl-seg button { height: 46px; flex-direction: column; gap: 2px; font-size: 11px; padding: 0 2px; }
+  .island.open:not(.wide) .isl-tabs.isl-seg button svg { width: 17px; height: 17px; }
+}
+@media (max-height: 520px) { .ph .ph-list ol { max-height: 120px; } }
+
+/* --- просмотр фото на весь экран --- */
+.pv { position: fixed; inset: 0; z-index: 200; display: flex; flex-direction: column; background: rgba(0,0,0,.88); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px);
+  opacity: 0; visibility: hidden; pointer-events: none; transition: opacity 260ms var(--ease-out), visibility 0s linear 260ms; }
+.pv.open { opacity: 1; visibility: visible; pointer-events: auto; transition: opacity 260ms var(--ease-out); }
+.pv-top { position: relative; z-index: 2; display: flex; align-items: center; gap: 8px; padding: max(12px, env(safe-area-inset-top)) 12px 8px; color: #fff; }
+.pv-count { flex: 1; min-width: 0; font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pv-btn, .pv-nav { width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; background: rgba(255,255,255,.14); color: #fff; transition: background-color 180ms var(--ease-out), opacity 200ms; }
+.pv-btn svg, .pv-nav svg { width: 22px; height: 22px; }
+.pv-btn:hover, .pv-nav:hover:not(:disabled) { background: rgba(255,255,255,.26); }
+.pv-stage { position: relative; flex: 1; min-height: 0; display: grid; grid-template: minmax(0, 1fr) / minmax(0, 1fr); place-items: center; padding: 4px 12px 16px; overflow: hidden; touch-action: pan-y; }
+.pv-stage.zoom { display: block; overflow: auto; touch-action: auto; -webkit-overflow-scrolling: touch; }
+.pv-img { max-width: 100%; max-height: 100%; width: auto; height: auto; object-fit: contain; border-radius: 6px; background: #fff; cursor: zoom-in; user-select: none; -webkit-user-drag: none; animation: pvin 300ms var(--ease-out) both; transition: transform 300ms var(--ease-out); }
+.pv-img.sw { max-width: calc(100dvh - 120px); max-height: calc(100vw - 24px); }
+.pv-stage.zoom .pv-img { display: block; max-width: none; max-height: none; width: 220%; margin: 0 auto; cursor: zoom-out; }
+@keyframes pvin { from { opacity: 0; transform: scale(.97); } }
+.pv-nav { position: absolute; top: 50%; margin-top: -22px; z-index: 2; }
+.pv-nav.pv-l { left: 10px; } .pv-nav.pv-r { right: 10px; }
+.pv-nav:disabled { opacity: 0; pointer-events: none; }
+@media (max-width: 860px) { .pv-nav { top: auto; bottom: max(18px, env(safe-area-inset-bottom)); margin: 0; background: rgba(255,255,255,.2); } .pv-nav.pv-l { left: calc(50% - 56px); } .pv-nav.pv-r { right: calc(50% - 56px); } .pv-stage { padding-bottom: 74px; } }
+@media (prefers-reduced-motion: reduce) { .pv, .pv-img { transition: none; animation: none; } }
+
+/* --- страница фото-конспекта: полоса страниц, вкладка «Фото», кадры целиком --- */
+.pstrip { margin-top: var(--s3); }
+.pstrip-row { display: flex; gap: 8px; overflow-x: auto; padding: 2px 2px 6px; scrollbar-width: none; scroll-snap-type: x proximity; }
+.pstrip-row::-webkit-scrollbar { display: none; }
+.pstrip-it { flex: none; width: 76px; scroll-snap-align: start; text-align: center; font-size: var(--fs-cap); color: var(--text-2); }
+.pstrip-it img { display: block; width: 76px; height: 100px; object-fit: cover; border-radius: 10px; background: var(--surface-2); box-shadow: 0 0 0 1px var(--separator); transition: transform 240ms var(--ease-out), box-shadow 240ms var(--ease-out); }
+.pstrip-it span { display: block; margin-top: 4px; }
+@media (hover: hover) { .pstrip-it:hover img { transform: translateY(-2px); box-shadow: 0 0 0 2px var(--accent), 0 8px 20px rgba(0,0,0,.25); } }
+.pg-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s4); margin-top: var(--s5); }
+@media (min-width: 560px) { .pg-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+.pg-card { text-align: left; border-radius: var(--r-md); background: var(--surface); box-shadow: 0 0 0 1px var(--separator); padding: 8px; display: flex; flex-direction: column; gap: 8px; transition: transform 240ms var(--ease-out), box-shadow 240ms var(--ease-out); }
+@media (hover: hover) { .pg-card:hover { transform: translateY(-2px); box-shadow: 0 0 0 2px var(--accent), 0 10px 26px rgba(0,0,0,.22); } }
+.pg-img { position: relative; display: block; aspect-ratio: 3 / 4; border-radius: 8px; overflow: hidden; background: var(--surface-2); }
+.pg-img img { width: 100%; height: 100%; object-fit: contain; display: block; }
+.pg-zoom { position: absolute; right: 8px; bottom: 8px; width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; background: rgba(0,0,0,.6); color: #fff; }
+.pg-zoom svg { width: 18px; height: 18px; }
+.pg-card b { font-size: var(--fs-sub); font-weight: 600; padding: 0 2px 2px; }
+.frames.photos { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+.frames.photos .frame img { aspect-ratio: 3 / 4; object-fit: cover; }
+.frames.photos .frame { cursor: zoom-in; }

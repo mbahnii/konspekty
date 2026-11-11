@@ -164,9 +164,9 @@ export default function Island({ open, setOpen }) {
   useEffect(() => {
     const onDoc = (e) => {
       if (!e.target.closest('.trash,.del')) setConfirm(null)
-      if (!e.target.closest('.island') && !e.target.closest('[data-open-island]') && !e.target.closest('.menu')) setOpen(false)
+      if (!e.target.closest('.island') && !e.target.closest('[data-open-island]') && !e.target.closest('.menu') && !e.target.closest('.pv')) setOpen(false)
     }
-    const onKey = (e) => e.key === 'Escape' && setOpen(false)
+    const onKey = (e) => e.key === 'Escape' && !document.querySelector('.pv.open') && setOpen(false)
     document.addEventListener('click', onDoc); document.addEventListener('keydown', onKey)
     return () => { document.removeEventListener('click', onDoc); document.removeEventListener('keydown', onKey) }
   }, [setOpen])

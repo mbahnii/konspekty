@@ -4,7 +4,8 @@ import { supabase } from '../lib/supabase'
 import { useAuth, setLoginOpen } from '../store/auth'
 import { useQueue, useToast } from '../store/ui'
 import { QueueRing } from './QueueRing'
-import { ITrash } from './Icons'
+import { ITrash, IChevUp, IChevDown, IRedo, IPlus } from './Icons'
+import PhotoViewer from './PhotoViewer'
 
 // Загрузка фото конспектов — одна из главных функций сайта.
 // Как добавить фото:  перетащить файлы в окно браузера (откроется сама),  выбрать кнопкой,  вставить из буфера (⌘V / Ctrl+V),
@@ -43,6 +44,7 @@ export default function PhotoPanel({ open, onDone, onWantOpen }) {
   const [busy, setBusy] = useState(false)
   const [pct, setPct] = useState(0)
   const [over, setOver] = useState(false)           // файлы сейчас над окном
+  const [look, setLook] = useState(null)            // какое фото открыто для просмотра
   const input = useRef(null), cam = useRef(null), depth = useRef(0), live = useRef(files), titleRow = useRef(null)
   live.current = files
   const touch = typeof matchMedia !== 'undefined' && matchMedia('(hover: none)').matches
@@ -80,7 +82,7 @@ export default function PhotoPanel({ open, onDone, onWantOpen }) {
   }, [pick, onWantOpen])
 
   useEffect(() => () => live.current.forEach((f) => URL.revokeObjectURL(f.url)), [])
-  useEffect(() => { if (!open) { setFiles((fs) => { fs.forEach((f) => URL.revokeObjectURL(f.url)); return [] }); setTitle(''); setBusy(false) } }, [open])
+  useEffect(() => { if (!open) { setFiles((fs) => { fs.forEach((f) => URL.revokeObjectURL(f.url)); return [] }); setTitle(''); setBusy(false); setLook(null) } }, [open])
 
   // добавили фото — прокручиваем так, чтобы кнопка «Надіслати» была видна (на телефоне она иначе уходит под край)
   useEffect(() => { if (files.length) { const id = setTimeout(() => titleRow.current?.scrollIntoView({ block: 'nearest', behavior: 'smooth' }), 120); return () => clearTimeout(id) } }, [files.length])
@@ -145,22 +147,25 @@ export default function PhotoPanel({ open, onDone, onWantOpen }) {
           <small>{t('ph.zoneSub')}</small>
         </button>
       )) : (
-        <div className="ph-strip">
-          {files.map((f, i) => (
-            <div key={f.id} className="ph-th">
-              <span className="ph-img" style={{ backgroundImage: `url("${f.url}")`, transform: `rotate(${f.turn * 90}deg)` }} />
-              <i>{i + 1}</i>
-              <div className="ph-act">
-                <button className="tap" aria-label={t('ph.left')} disabled={i === 0} onClick={() => move(i, -1)}>‹</button>
-                <button className="tap" aria-label={t('ph.rotate')} onClick={() => turn(f.id)}>↻</button>
-                <button className="tap" aria-label={t('ph.right')} disabled={i === n - 1} onClick={() => move(i, 1)}>›</button>
-              </div>
-              <button className="ph-x tap" aria-label={t('m.delete')} onClick={() => drop1(f.id)}><ITrash /></button>
-            </div>
-          ))}
-          <button className="ph-add tap" onClick={() => input.current?.click()} aria-label={t('ph.pick')}>
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
-          </button>
+        <div className="ph-list">
+          <p className="ph-tap">{t('ph.tapHint')}</p>
+          <ol>
+            {files.map((f, i) => (
+              <li key={f.id} className="ph-row">
+                <button className="ph-pic tap" onClick={() => setLook(i)} aria-label={t('ph.openPage')}>
+                  <span className="ph-img" style={{ backgroundImage: `url("${f.url}")`, transform: `rotate(${f.turn * 90}deg)` }} />
+                </button>
+                <button className="ph-lab tap" onClick={() => setLook(i)}><b>{t('ph.page')} {i + 1}</b><small>{f.file.name}</small></button>
+                <div className="ph-ctl">
+                  <button className="tap" aria-label={t('ph.up')} title={t('ph.up')} disabled={i === 0} onClick={() => move(i, -1)}><IChevUp /></button>
+                  <button className="tap" aria-label={t('ph.down')} title={t('ph.down')} disabled={i === n - 1} onClick={() => move(i, 1)}><IChevDown /></button>
+                  <button className="tap" aria-label={t('ph.rotate')} title={t('ph.rotate')} onClick={() => turn(f.id)}><IRedo /></button>
+                  <button className="tap del" aria-label={t('m.delete')} title={t('m.delete')} onClick={() => drop1(f.id)}><ITrash /></button>
+                </div>
+              </li>
+            ))}
+          </ol>
+          <button className="ph-more tap" onClick={() => input.current?.click()}><IPlus />{t('ph.addMore')}</button>
         </div>
       )}
 
@@ -169,6 +174,8 @@ export default function PhotoPanel({ open, onDone, onWantOpen }) {
         {busy ? <><QueueRing k={1} mode="run" size={20} /><span>{Math.round(pct)}%</span></> : n ? t('ph.send', { n }) : t('ph.addFirst')}
       </button>
       {busy && <div className="ph-bar"><i style={{ width: `${pct}%` }} /></div>}
+
+      <PhotoViewer items={files.map((f, i) => ({ src: f.url, label: `${t('ph.page')} ${i + 1}`, turn: f.turn }))} index={look != null && look < n ? look : null} onClose={() => setLook(null)} onIndex={setLook} />
 
       <div className="ph-drop" aria-hidden={!over}><div><span className="ph-zi big">{ZoneIcon}</span><b>{t('ph.release')}</b></div></div>
     </div>

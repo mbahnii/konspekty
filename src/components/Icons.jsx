@@ -35,3 +35,5 @@ export const ICollapse = P(<path d="M4 14h6v6M20 10h-6V4M10 14l-6 6M14 10l6-6" /
 export const ICloud = P(<path d="M7 18a4 4 0 0 1-.6-7.96A5.5 5.5 0 0 1 17 8.5a4.75 4.75 0 0 1 .5 9.5z" />)
 export const IForward = P(<path d="M9 18l6-6-6-6" />)
 export const IPhoto = P(<><path d="M4 8.5A2.5 2.5 0 0 1 6.5 6h1.2l1.3-1.8h6L16.3 6h1.2A2.5 2.5 0 0 1 20 8.5v8A2.5 2.5 0 0 1 17.5 19h-11A2.5 2.5 0 0 1 4 16.5z" /><circle cx="12" cy="12.6" r="3.2" /></>)
+export const IClose = P(<path d="M6 6l12 12M18 6L6 18" />)
+export const IZoomIn = P(<><circle cx="11" cy="11" r="7" /><path d="M20 20l-3.5-3.5M11 8v6M8 11h6" /></>)
