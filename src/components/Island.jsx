@@ -209,8 +209,12 @@ export default function Island({ open, setOpen }) {
   }, [setSync])
   useEffect(() => {
     const onDoc = (e) => {
-      if (!e.target.closest('.trash,.del')) setConfirm(null)
-      if (!e.target.closest('.dyn') && !e.target.closest('[data-open-island]') && !e.target.closest('.menu') && !e.target.closest('.pv')) setOpen(false)
+      // путь клика берём из события, а не из e.target: кнопки «корзина»/«Видалити» исчезают со страницы сразу после нажатия,
+      // и у «оторванного» элемента closest('.dyn') уже ничего не находит — пилюля ошибочно считала клик внешним и закрывалась
+      const path = e.composedPath ? e.composedPath() : []
+      const hit = (sel) => path.some((n) => n.matches && n.matches(sel))
+      if (!hit('.trash,.del')) setConfirm(null)
+      if (!hit('.dyn') && !hit('[data-open-island]') && !hit('.menu') && !hit('.pv')) setOpen(false)
     }
     const onKey = (e) => e.key === 'Escape' && !document.querySelector('.pv.open') && setOpen(false)
     document.addEventListener('click', onDoc); document.addEventListener('keydown', onKey)

@@ -243,3 +243,12 @@ html[data-motion="max"] { --dyn-spring: cubic-bezier(.3, 1.6, .5, 1); }
 .dyn .isl-q img.qthumb { aspect-ratio: 1; width: 44px; height: 44px; object-fit: cover; }
 @keyframes qtitle-in { from { opacity: 0; transform: translateY(6px); filter: blur(4px); } }
 .dyn .qtitle { animation: qtitle-in calc(420ms * var(--mo)) var(--dyn-ease) both; }
+
+/* рамка при перетаскивании файлов: ровно по границам области фото, с теми же углами, что у остального (раньше выходила за край и обрезалась) */
+.dyn .ph { position: relative; }
+.dyn .ph-drop { inset: 0; border-radius: var(--rin); box-shadow: none; border: 2px dashed color-mix(in srgb, var(--accent) 85%, #fff); background: color-mix(in srgb, var(--accent) 24%, var(--island-glass, #1c1c1e)); }
+/* кнопка «Надіслати»: без «обводки» вокруг; неактивная — плотная, а не полупрозрачная */
+.dyn .ph .ph-send { box-shadow: none; }
+.dyn .ph .ph-send:disabled { opacity: 1; background: color-mix(in srgb, var(--island-text) 16%, #2c2c2e); color: color-mix(in srgb, var(--island-text) 50%, transparent); }
+/* Safari иногда «не дорисовывает» анимацию масштаба у элементов с размытием фона — меню оставалось уменьшенным: выносим их на отдельный слой */
+.menu, .modal, .dyn { will-change: transform, opacity; }
