@@ -45,7 +45,7 @@ export function MenuProvider({ children }) {
   return (
     <Ctx.Provider value={{ open, close }}>
       {children}
-      <div ref={ref} className={`menu ${st.phase === 'show' ? 'show' : ''}`} role="menu"
+      <div ref={ref} key={undefined} className={`menu ${st.phase === 'show' ? 'show' : ''} ${st.swap ? 'swap' + (st.swap % 2) : ''}`} role="menu"
         style={{ left: st.pos.left, top: st.pos.top, transformOrigin: st.pos.origin, visibility: st.phase === 'measure' ? 'hidden' : undefined }}>
         {st.items.map((it, i) => {
           if (it === '-') return <hr key={i} />
@@ -67,8 +67,13 @@ export function MenuProvider({ children }) {
             </div>
           )
           return (
-            <button key={i} className={`mi ${it.danger ? 'danger' : ''}`} style={{ '--d': i }}
-              onClick={(e) => { e.stopPropagation(); close(); it.onSelect?.() }}>
+            <button key={i} className={`mi ${it.danger ? 'danger' : ''} ${it.on ? 'on' : ''}`} style={{ '--d': i }}
+              onClick={(e) => {
+                e.stopPropagation()
+                if (it.sub) { setSt((s) => ({ ...s, items: [{ icon: <span className="mi-back">‹</span>, label: it.back || it.label, onSelect: it.onBack, keep: s.items }, ...it.sub], swap: (s.swap ?? 0) + 1 })); return }
+                if (it.keep) { setSt((s) => ({ ...s, items: it.keep, swap: (s.swap ?? 0) + 1 })); return }
+                close(); it.onSelect?.()
+              }}>
               {it.tick !== undefined ? <span className="tick">{it.tick ? '✓' : ''}</span> : it.icon}
               <span>{it.label}</span>{it.sc && <span className="sc">{it.sc}</span>}
             </button>

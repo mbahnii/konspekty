@@ -7,6 +7,16 @@ import './styles/design.css'
 import './app.css'
 import './styles/glass.css'
 
+// Вход через Telegram (стандартный): после подтверждения Telegram возвращает на сайт с #tgAuthResult=… — забираем до роутера
+try {
+  const m = location.hash.match(/tgAuthResult=([^&]+)/)
+  if (m) {
+    const json = decodeURIComponent(escape(atob(m[1].replace(/-/g, '+').replace(/_/g, '/'))))
+    sessionStorage.setItem('konspekty-tg', json)
+    history.replaceState(null, '', location.pathname + location.search + '#/')
+  }
+} catch { /* ignore */ }
+
 document.documentElement.classList.add('no-anim')
 requestAnimationFrame(() => requestAnimationFrame(() => document.documentElement.classList.remove('no-anim')))
 createRoot(document.getElementById('root')).render(<HashRouter><App /></HashRouter>)

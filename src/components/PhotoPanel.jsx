@@ -119,23 +119,33 @@ export default function PhotoPanel({ open, onDone, onWantOpen }) {
   }
 
   const ZoneIcon = <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15V4m0 0L8 8m4-4 4 4" /><path d="M5 14v3a3 3 0 0 0 3 3h8a3 3 0 0 0 3-3v-3" /></svg>
+  const GalIcon = <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="4.5" width="17" height="15" rx="3" /><circle cx="9" cy="10" r="1.6" /><path d="m4 17 5-4.5 4 3.5 3-2.5 4 3.5" /></svg>
+  const CamIcon = <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8.5A2.5 2.5 0 0 1 6.5 6h1.2l1.3-1.8h6L16.3 6h1.2A2.5 2.5 0 0 1 20 8.5v8a2.5 2.5 0 0 1-2.5 2.5h-11A2.5 2.5 0 0 1 4 16.5z" /><circle cx="12" cy="12.6" r="3.2" /></svg>
+  const n = files.length
   return (
     <div className={`ph ${over ? 'over' : ''}`}>
       <input ref={input} type="file" accept="image/*" multiple hidden onChange={(e) => { pick(e.target.files); e.target.value = '' }} />
       <input ref={cam} type="file" accept="image/*" capture="environment" hidden onChange={(e) => { pick(e.target.files); e.target.value = '' }} />
-      <div className="ph-modes" role="tablist">
-        <button className={`tap ${mode === 'print' ? 'on' : ''}`} onClick={() => setMode('print')}>{t('ph.print')}<small>{t('ph.printHint')}</small></button>
-        <button className={`tap ${mode === 'hand' ? 'on' : ''}`} onClick={() => setMode('hand')}>{t('ph.hand')}<small>{t('ph.handHint')}</small></button>
-      </div>
 
-      {!files.length ? (
+      <div className="ph-modes" role="tablist">
+        <button className={mode === 'print' ? 'on' : ''} onClick={() => setMode('print')}>{t('ph.print')}</button>
+        <button className={mode === 'hand' ? 'on' : ''} onClick={() => setMode('hand')}>{t('ph.hand')}</button>
+      </div>
+      <p className="ph-hint" key={mode}>{t(mode === 'print' ? 'ph.printNote' : 'ph.handNote')}</p>
+
+      {!n ? (touch ? (
+        <div className="ph-two">
+          <button type="button" className="ph-tile tap" onClick={() => input.current?.click()}><span>{GalIcon}</span><b>{t('ph.gallery')}</b></button>
+          <button type="button" className="ph-tile tap" onClick={() => cam.current?.click()}><span>{CamIcon}</span><b>{t('ph.camera')}</b></button>
+        </div>
+      ) : (
         <button type="button" className="ph-zone tap" onClick={() => input.current?.click()}>
           <span className="ph-zi">{ZoneIcon}</span>
-          <b>{t(touch ? 'ph.zoneTouch' : 'ph.zone')}</b>
-          <small>{t(touch ? 'ph.zoneTouchSub' : 'ph.zoneSub')}</small>
+          <b>{t('ph.zone')}</b>
+          <small>{t('ph.zoneSub')}</small>
         </button>
-      ) : (
-        <div className="ph-grid">
+      )) : (
+        <div className="ph-strip">
           {files.map((f, i) => (
             <div key={f.id} className="ph-th">
               <span className="ph-img" style={{ backgroundImage: `url("${f.url}")`, transform: `rotate(${f.turn * 90}deg)` }} />
@@ -143,7 +153,7 @@ export default function PhotoPanel({ open, onDone, onWantOpen }) {
               <div className="ph-act">
                 <button className="tap" aria-label={t('ph.left')} disabled={i === 0} onClick={() => move(i, -1)}>‹</button>
                 <button className="tap" aria-label={t('ph.rotate')} onClick={() => turn(f.id)}>↻</button>
-                <button className="tap" aria-label={t('ph.right')} disabled={i === files.length - 1} onClick={() => move(i, 1)}>›</button>
+                <button className="tap" aria-label={t('ph.right')} disabled={i === n - 1} onClick={() => move(i, 1)}>›</button>
               </div>
               <button className="ph-x tap" aria-label={t('m.delete')} onClick={() => drop1(f.id)}><ITrash /></button>
             </div>
@@ -153,14 +163,11 @@ export default function PhotoPanel({ open, onDone, onWantOpen }) {
           </button>
         </div>
       )}
-      {touch && <button type="button" className="ph-cam tap" onClick={() => cam.current?.click()}>{t('ph.camera')}</button>}
 
-      <div className="isl-link ph-title" ref={titleRow}>
-        <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder={t('ph.titlePh')} maxLength={90} />
-        <button className="go tap" disabled={!files.length || busy} onClick={submit}>
-          {busy ? <QueueRing k={1} mode="run" size={20} /> : t('ph.go', { n: files.length })}
-        </button>
-      </div>
+      <input className="ph-name" value={title} onChange={(e) => setTitle(e.target.value)} placeholder={t('ph.titlePh')} maxLength={90} ref={titleRow} />
+      <button className="ph-send tap" disabled={!n || busy} onClick={submit}>
+        {busy ? <><QueueRing k={1} mode="run" size={20} /><span>{Math.round(pct)}%</span></> : n ? t('ph.send', { n }) : t('ph.addFirst')}
+      </button>
       {busy && <div className="ph-bar"><i style={{ width: `${pct}%` }} /></div>}
 
       <div className="ph-drop" aria-hidden={!over}><div><span className="ph-zi big">{ZoneIcon}</span><b>{t('ph.release')}</b></div></div>

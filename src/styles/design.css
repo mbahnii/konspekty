@@ -1159,3 +1159,39 @@ a.tcard:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(0,0,0,.
   .island:not(.open).wide { --w: min(300px, calc(100vw - 32px)); }
   .island-dock { bottom: max(18px, calc(env(safe-area-inset-bottom) + 10px)); }
 }
+
+/* Метки: плитки как значки в Настройках iOS; подменю плавно сменяет список внутри того же окна */
+.tag-tile { width: 24px; height: 24px; border-radius: 7px; flex: none; display: grid; place-items: center; font-size: 13px; line-height: 1; background: var(--c); box-shadow: inset 0 0 0 1px rgba(0,0,0,.12); }
+.tag-tile.none { background: transparent; box-shadow: inset 0 0 0 1.5px var(--text-3); position: relative; }
+.tag-tile.none i { position: absolute; left: 4px; right: 4px; top: 50%; height: 1.5px; background: var(--text-3); transform: rotate(-45deg); }
+.mi-back { width: 24px; text-align: center; font-size: 22px; line-height: 20px; color: var(--text-2); }
+.mi.on { background: transparent; }
+.menu.swap0 .mi, .menu.swap1 .mi { animation: miIn 340ms var(--ease-out) both; animation-delay: calc(var(--d, 0) * 22ms); }
+@keyframes miIn { from { opacity: 0; transform: translateX(14px); } }
+
+/* ===== Добавление фото — новая вёрстка (раунд 11) ===== */
+.ph { display: flex; flex-direction: column; gap: var(--g); }
+.ph > * { margin: 0 !important; }
+.ph-modes { display: grid; grid-template-columns: 1fr 1fr; height: var(--ctl); padding: 3px; border-radius: var(--rin); background: var(--island-key); gap: 0; }
+.ph-modes button { height: calc(var(--ctl) - 6px); padding: 0 8px; border-radius: calc(var(--rin) - 3px); font-weight: 600; font-size: 13px; color: color-mix(in srgb, var(--island-text) 64%, transparent); display: grid; place-items: center; transition: background-color 260ms var(--ease-out), color 260ms var(--ease-out); }
+.ph-modes button.on { background: color-mix(in srgb, var(--island-text) 20%, transparent); color: var(--island-text); }
+.ph-hint { font-size: 12px; line-height: 1.4; padding: 0 4px; color: color-mix(in srgb, var(--island-text) 62%, transparent); animation: paneIn 320ms var(--ease-out) both; }
+.ph-two { display: grid; grid-template-columns: 1fr 1fr; gap: var(--g); }
+.ph-tile { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; height: 96px; border-radius: var(--rin); background: var(--island-key); font-weight: 600; font-size: 13px;
+  transition: background-color 220ms var(--ease-out), transform 260ms var(--ease-pop); }
+.ph-tile span { width: 40px; height: 40px; border-radius: 13px; display: grid; place-items: center; background: var(--accent); color: #fff; }
+.ph-tile svg, .ph-zi svg { fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+.ph-tile svg { width: 22px; height: 22px; }
+.ph-tile:active { transform: scale(.97); }
+.ph-zone { min-height: 96px; margin: 0; }
+.ph-strip { display: flex; gap: 8px; overflow-x: auto; overflow-y: hidden; padding: 2px; margin: 0 -2px !important; scrollbar-width: none; scroll-snap-type: x proximity; }
+.ph-strip::-webkit-scrollbar { display: none; }
+.ph-name { height: var(--ctl); padding: 0 12px; border-radius: var(--rin); background: var(--island-key); border: 0; outline: none; color: var(--island-text); font: inherit; width: 100%; }
+.ph-send { height: var(--ctl); border-radius: var(--rin); background: var(--accent); color: #fff; font-weight: 650; font-size: 14px; display: flex; align-items: center; justify-content: center; gap: 8px;
+  transition: filter 200ms var(--ease-out), transform 220ms var(--ease-pop), opacity 240ms var(--ease-out), background-color 240ms var(--ease-out); }
+.ph-send:disabled { background: var(--island-key); color: color-mix(in srgb, var(--island-text) 55%, transparent); pointer-events: none; }
+@media (hover: hover) { .ph-send:not(:disabled):hover { filter: brightness(1.1); } .ph-tile:hover { background: color-mix(in srgb, var(--island-text) 18%, transparent); } }
+.ph-send:not(:disabled):active { transform: scale(.98); }
+.ph-bar { height: 3px; border-radius: 2px; background: var(--island-key); overflow: hidden; }
+@media (max-width: 860px), (max-height: 520px) { .ph-name { font-size: 16px; } }
+@media (max-height: 520px) { .ph-hint, .ph-tile b { display: none; } .ph-tile { height: 56px; } .ph-two { grid-template-columns: 1fr 1fr; } }
