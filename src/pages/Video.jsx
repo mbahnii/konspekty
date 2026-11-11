@@ -22,7 +22,19 @@ const Tc = ({ id, t }) => (
   <a className="tc tap" href={ytLink(id, t)} target="_blank" rel="noreferrer" onClick={(e) => e.stopPropagation()}><IPlay />{fmt(t)}</a>
 )
 
+// Полоса вкладок получает фон, только когда прилипла к верху (иначе сквозь неё просвечивает свечение)
+function useStuck() {
+  const ref = useRef(null)
+  useEffect(() => {
+    const on = () => { const el = ref.current; if (el) el.classList.toggle('stuck', el.getBoundingClientRect().top <= 9) }
+    on(); addEventListener('scroll', on, { passive: true }); addEventListener('resize', on)
+    return () => { removeEventListener('scroll', on); removeEventListener('resize', on) }
+  })
+  return ref
+}
+
 export default function Video({ onBack }) {
+  const stickyRef = useStuck()
   const { id, tab = 'main' } = useParams()
   const nav = useNavigate()
   const [sp] = useSearchParams()
@@ -66,7 +78,7 @@ export default function Video({ onBack }) {
   const entry = index?.find((x) => x.id === id)
   const shell = (el) => <><main><div className="wrap">{el}</div></main><aside className="rail" /></>
   if (entry && !entry.ready) return <><main><Pending v={entry} onBack={onBack} /></main><aside className="rail" /></>
-  if (error) return shell(<p>{t('notFound')}</p>)
+  if (error) return shell(<div className="empty" style={{ marginTop: 'var(--s8)' }}><b>{t('notFound')}</b>{t('notFound.d')}<div><button className="nf-btn tap" onClick={onBack}>{t('notFound.go')}</button></div></div>)
   if (!summary || !meta) return shell(<p style={{ color: 'var(--text-3)' }}>{t('loading')}</p>)
   if (!TABS.includes(tab)) { nav(`/v/${id}`, { replace: true }); return null }
 
@@ -113,7 +125,7 @@ export default function Video({ onBack }) {
             <span className="chip">{t(`level.${summary.level}`)}</span>
           </div>
 
-          <div className="sticky">
+          <div className="sticky" ref={stickyRef}>
             <Segmented items={items} value={tab} onChange={(v) => { go(v); const top = document.querySelector('.sticky')?.offsetTop ?? 0; if (scrollY > top) scrollTo({ top }) }} />
             <Timeline id={id} summary={summary} meta={meta} current={current} onPick={goto} />
           </div>

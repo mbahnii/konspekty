@@ -120,7 +120,6 @@ export default function Guide() {
   const tel = usePhone()
   return (
     <div className="guide">
-      <div className="g-glow" aria-hidden><i /><i /><i /></div>
       <header className="g-hero">
         <span className="g-eyebrow">{t('guide.eyebrow')}</span>
         <h1>{t('guide.title')}</h1>

@@ -1,10 +1,11 @@
+import { fileUrl } from '../lib/files'
 import { NavLink } from 'react-router-dom'
 import { useT } from '../i18n'
 import { useMenu } from './Menu'
 import { useVideoMenu } from './VideoMenu'
 import { IMore, IPin, IHourglass, ICheckSm } from './Icons'
 
-export const coverOf = (v) => (v.cover ? `./data/v/${v.id}/${v.cover}` : `https://i.ytimg.com/vi/${v.id}/mqdefault.jpg`)
+export const coverOf = (v) => (v.cover ? fileUrl(v.id, v.cover) : `https://i.ytimg.com/vi/${v.id}/mqdefault.jpg`)
 
 // Строка видео: обложка, название, подпись («1/5 · 8 мин»), меню по ⋯ и правому клику
 export default function VideoRow({ v, big, onPick }) {

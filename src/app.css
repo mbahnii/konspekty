@@ -1,3 +1,60 @@
 /* Только то, чего нет в design.css */
 .li.flash { background: var(--accent-soft); }
 a.row { color: inherit; }
+
+/* Первая отрисовка — без плавной смены цветов */
+.no-anim, .no-anim * { transition: none !important; }
+
+/* Свечение вверху экрана: одно на весь сайт, пятна всё время медленно плавают.
+   Ниже маска полностью гасит его, чтобы не просвечивало сквозь карточки. */
+.amb { position: fixed; top: -80px; left: calc(var(--side-w, 0px) - 40px); width: min(760px, 70vw); height: 420px; z-index: -1; pointer-events: none;
+  transition: left 600ms var(--ease-out), width 600ms var(--ease-out);
+  -webkit-mask-image: radial-gradient(ellipse 50% 50% at 50% 45%, #000 30%, transparent 100%); mask-image: radial-gradient(ellipse 50% 50% at 50% 45%, #000 30%, transparent 100%); }
+.amb.center { left: calc(var(--side-w, 0px) + (100vw - var(--side-w, 0px) - min(1000px, 80vw)) / 2); width: min(1000px, 80vw); }
+.amb i { position: absolute; border-radius: 50%; filter: blur(60px); opacity: var(--glow, .6); will-change: transform; }
+.amb i:nth-child(1) { width: 42%; height: 240px; left: 6%;  top: 70px; background: var(--g1); animation: amb-a 9s ease-in-out infinite; }
+.amb i:nth-child(2) { width: 36%; height: 220px; left: 34%; top: 40px; background: var(--g2); animation: amb-b 11s ease-in-out infinite; }
+.amb i:nth-child(3) { width: 38%; height: 230px; left: 58%; top: 90px; background: var(--g3); animation: amb-c 13s ease-in-out infinite; }
+@keyframes amb-a { 0%, 100% { transform: translate(0, 0) scale(1); } 33% { transform: translate(120px, 40px) scale(1.15); } 66% { transform: translate(40px, -30px) scale(.9); } }
+@keyframes amb-b { 0%, 100% { transform: translate(0, 0) scale(1); } 33% { transform: translate(-110px, 50px) scale(.85); } 66% { transform: translate(90px, 10px) scale(1.2); } }
+@keyframes amb-c { 0%, 100% { transform: translate(0, 0) scale(1.1); } 33% { transform: translate(-60px, -40px) scale(.9); } 66% { transform: translate(-150px, 30px) scale(1.2); } }
+:root { --g1: #8fb3ff; --g2: #ffc9ae; --g3: #d4c1ff; }
+:root[data-theme="dark"] { --g1: #2f6bff; --g2: #7c4dff; --g3: #00b3d6; }
+:root[data-theme="dark"] .amb { --glow: .38; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --g1: #2f6bff; --g2: #7c4dff; --g3: #00b3d6; }
+  :root:not([data-theme="light"]) .amb { --glow: .38; }
+}
+@media (max-width: 860px) { .amb, .amb.center { left: 0; width: 100%; height: 340px; } }
+@media (prefers-reduced-motion: reduce) { .amb i { animation: none; } }
+.empty { background: var(--surface); }
+
+/* Одинаковый отступ от шапки страницы до содержимого */
+.wrap > .head { margin-bottom: var(--s6); }
+.wrap > .head + * { margin-top: 0 !important; }
+
+/* Пункт «Як користуватися» внизу меню: метка текущей страницы видна */
+.side-foot .row.active { color: var(--text); }
+.side-foot .row.active::before { left: 2px; }
+
+/* Прокручиваемые вкладки: мягкое затухание по краю — видно, что можно листать */
+.seg.scroll { -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 28px), transparent); mask-image: linear-gradient(90deg, #000 calc(100% - 28px), transparent); padding-right: 24px; }
+
+/* Страница «Відео не знайдено» */
+.nf-btn { margin-top: var(--s5); height: 40px; padding: 0 20px; border-radius: var(--r-pill); background: var(--accent); color: #fff; font-weight: 600; }
+/* Поиск в пилюле: под названием — из какого видео */
+.isl-row .nm small.from { display: block; font-size: var(--fs-cap); color: color-mix(in srgb, var(--island-text) 50%, transparent); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.isl-row .nm { min-width: 0; overflow: hidden; }
+
+/* Полоса вкладок и хронология — как закреплённые плашки в Telegram:
+   при прокрутке прилипают к верху, сами плашки скруглённые и из размытого стекла, сквозь них видно свечение и текст. */
+.sticky, .sticky.stuck { background: transparent; -webkit-backdrop-filter: none; backdrop-filter: none; }
+.sticky .timeline { margin-top: var(--s3); padding: 8px 12px 6px; border-radius: var(--r-lg); transition: background-color var(--t-mid) var(--ease-out), box-shadow var(--t-mid) var(--ease-out); }
+.sticky .seg { transition: background-color var(--t-mid) var(--ease-out); }
+.sticky.stuck .seg, .sticky.stuck .timeline {
+  background: color-mix(in srgb, var(--surface) 62%, transparent);
+  -webkit-backdrop-filter: var(--blur); backdrop-filter: var(--blur);
+  box-shadow: 0 8px 30px rgba(0,0,0,.18), 0 0 0 1px var(--separator);
+}
+/* Плашки «парят» чуть ниже края экрана, как в Telegram */
+.sticky { top: 8px; }

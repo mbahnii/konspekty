@@ -6,6 +6,8 @@ import './styles/tokens.css'
 import './styles/design.css'
 import './app.css'
 
+document.documentElement.classList.add('no-anim')
+requestAnimationFrame(() => requestAnimationFrame(() => document.documentElement.classList.remove('no-anim')))
 createRoot(document.getElementById('root')).render(<HashRouter><App /></HashRouter>)
 
 // PWA (добавлено на экран «Домой») часто не перезагружается полностью, а просто

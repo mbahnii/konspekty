@@ -78,16 +78,21 @@ export default function Island({ open, setOpen }) {
       return
     }
     if (dup) { say(t(dup)); box.current.animate([{ translate: '0' }, { translate: '-6px' }, { translate: '6px' }, { translate: '0' }], { duration: 280 }); return }
+    useLibrary.getState().setFlag('hidden', prev.id, false)   // если это видео раньше удаляли — снова показывать
     add(url.trim(), 'add', { title: prev.title, channel: prev.channel, vid: prev.id }); setUrl('')
     if (!session) { say(t('isl.needLogin')); setLoginOpen(true) } else say(t('isl.queued'))
   }
 
   const lq = q.trim().toLowerCase()
   const results = []
-  if (lq) for (const { id, summary } of all) {
-    summary.sections.forEach((s) => `${s.title} ${s.body}`.toLowerCase().includes(lq) && results.push({ kind: 'r.notes', name: s.title, go: () => nav(`/v/${id}/notes?s=${s.id}&n=${Date.now()}`) }))
-    summary.terms.forEach((x) => `${x.term} ${x.explain}`.toLowerCase().includes(lq) && results.push({ kind: 'r.term', name: x.term, go: () => nav(`/v/${id}/terms?s=${encodeURIComponent(x.id)}&n=${Date.now()}`) }))
-    summary.guides.forEach((g) => `${g.title} ${JSON.stringify(g.steps)}`.toLowerCase().includes(lq) && results.push({ kind: 'r.guide', name: g.title, go: () => nav(`/v/${id}/guides?s=${g.id}&n=${Date.now()}`) }))
+  // ищем по началу слова: «сад» найдёт «садок», но не «досадно»
+  const re = lq ? new RegExp(`(^|[^\\p{L}\\p{N}])${lq.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`, 'iu') : null
+  const has = (txt) => re.test(txt)
+  if (lq) for (const { id, title, summary } of all) {
+    const from = title
+    summary.sections.forEach((s) => has(`${s.title} ${s.body}`) && results.push({ kind: 'r.notes', name: s.title, from, go: () => nav(`/v/${id}/notes?s=${s.id}&n=${Date.now()}`) }))
+    summary.terms.forEach((x) => has(`${x.term} ${x.explain}`) && results.push({ kind: 'r.term', name: x.term, from, go: () => nav(`/v/${id}/terms?s=${encodeURIComponent(x.id)}&n=${Date.now()}`) }))
+    summary.guides.forEach((g) => has(`${g.title} ${g.steps.map((x) => `${x.text} ${x.prompt ?? ''} ${x.command ?? ''}`).join(' ')}`) && results.push({ kind: 'r.guide', name: g.title, from, go: () => nav(`/v/${id}/guides?s=${g.id}&n=${Date.now()}`) }))
   }
 
   const shortUrl = (u) => u.replace(/^https?:\/\/(www\.)?/, '')
@@ -123,7 +128,7 @@ export default function Island({ open, setOpen }) {
 
           <div className="isl-h">{t('isl.search')}</div>
           <label className="isl-search"><ISearch /><input value={q} onChange={(e) => setQ(e.target.value)} placeholder={t('isl.searchPh')} /></label>
-          {results.slice(0, 8).map((r, i) => <button key={i} className="isl-row tap" onClick={() => { setOpen(false); r.go() }}><span className="nm">{r.name}</span><span className="st">{t(r.kind)}</span></button>)}
+          {results.slice(0, 8).map((r, i) => <button key={i} className="isl-row tap" onClick={() => { setOpen(false); r.go() }}><span className="nm">{r.name}<small className="from">{r.from}</small></span><span className="st">{t(r.kind)}</span></button>)}
           {lq && !results.length && <div className="isl-row"><span className="st" style={{ margin: 0 }}>{t('isl.none')}</span></div>}
 
           <div className="isl-h">{t('isl.themeLang')}</div>

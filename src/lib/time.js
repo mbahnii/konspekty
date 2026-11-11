@@ -1,3 +1,4 @@
+import { fileUrl } from './files.js'
 export function fmt(sec) {
   sec = Math.max(0, Math.round(sec))
   const h = Math.floor(sec / 3600), m = Math.floor((sec % 3600) / 60), r = sec % 60
@@ -13,4 +14,4 @@ export function framesFor(meta, s, max = 6) {
   if (max === 1) return [l[0]]
   return Array.from({ length: max }, (_, i) => l[Math.round((i * (l.length - 1)) / (max - 1))])
 }
-export const frameUrl = (id, f, thumb) => `./data/v/${id}/${(thumb && f.thumb) || f.file}`
+export const frameUrl = (id, f, thumb) => fileUrl(id, (thumb && f.thumb) || f.file)

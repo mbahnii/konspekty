@@ -11,6 +11,7 @@ import Topics from './pages/Topics'
 import Learned from './pages/Learned'
 import Later from './pages/Later'
 import Guide from './pages/Guide'
+import Glow from './components/Glow'
 import LoginModal from './components/LoginModal'
 import BackButton from './components/BackButton'
 import { useHoverHighlight } from './lib/useHoverHighlight'
@@ -56,6 +57,7 @@ export default function App() {
 
   return (
     <MenuProvider>
+      <Glow center={loc.pathname === '/guide'} />
       <div className={`shell ${sidebarCollapsed ? 'mini' : ''}`}>
         <Sidebar onAdd={(e) => { e.stopPropagation(); setIsland(true) }} />
         <Routes>

@@ -282,7 +282,7 @@ a.chip:hover, button.chip:hover { background: var(--surface-hover); color: var(-
 .island.square { --r: 12px; }
 @media (hover: hover) { .island:not(.open):hover { transform: scale(1.03); box-shadow: 0 16px 60px rgba(0,0,0,.32); } }
 .island:not(.open):active { transform: scale(.98); }
-.isl-bar { display: flex; align-items: center; gap: 6px; height: 50px; padding: 6px; flex: none; }
+.isl-bar { display: flex; align-items: center; gap: 6px; padding: 6px; flex: none; }
 .isl-main { flex: 1; min-width: 0; height: 38px; display: flex; align-items: center; gap: 10px; padding: 0 10px; border-radius: calc(var(--r) - 6px); white-space: nowrap; font-weight: 500; transition: background-color 200ms var(--ease-out), border-radius .55s var(--ease-island); }
 .isl-main:hover { background: var(--island-key); }
 .isl-main svg { transition: transform 360ms var(--ease-out); }
@@ -632,3 +632,12 @@ a.tcard:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(0,0,0,.
   .isl-seg button { flex: 1; min-width: 0; padding: 0; font-size: 14px; }
   .isl-scroll { max-height: 55vh; max-height: min(55dvh, 440px); }
 }
+
+/* Точка синхронизации: место под обводку (2px) заложено всегда, чтобы отступы не менялись, когда она появляется */
+.isl-bar .sync { margin: 0 2px; }
+/* Скругления пилюли совпадают с высотой: внешнее = половина высоты, внутреннее = внешнее − отступ */
+.island { --r: calc((var(--ctl) + 12px) / 2); }
+.isl-main { border-radius: calc(var(--r) - 6px); }
+@media (max-width: 860px), (max-height: 520px) { .island, .island.wide { --r: calc((var(--ctl) + 10px) / 2); } .isl-main { border-radius: calc(var(--r) - 5px); } }
+.island.open { --r: 24px; }
+.island.square { --r: 12px; }

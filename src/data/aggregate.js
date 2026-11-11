@@ -1,11 +1,9 @@
-import { useEffect, useState } from 'react'
-import { useAllSummaries, useIndex } from './useData'
+import { useAllSummaries, useIndex, useTopicsJson } from './useData'
 
 // Темы: если есть topics.json — берём его; иначе группируем видео по полю topics
 export function useTopics() {
   const { data: index } = useIndex()
-  const [custom, setCustom] = useState(undefined)
-  useEffect(() => { fetch('./data/topics.json').then((r) => (r.ok ? r.json() : null)).then(setCustom).catch(() => setCustom(null)) }, [])
+  const custom = useTopicsJson().data
   if (custom && index) {
     // темы из topics.json + новые видео с этими темами + темы, которых ещё нет в topics.json
     const out = custom.map((tp) => {

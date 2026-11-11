@@ -2,27 +2,15 @@
 .shell > main:has(.guide) { min-width: 0; }   /* ролики не раздувают колонку на телефоне */
 .guide { position: relative; max-width: 1040px; margin: 0 auto; padding-bottom: 120px; isolation: isolate; }
 
-/* мягкое цветное свечение за заголовком */
-.g-glow { position: absolute; inset: -40px 0 auto; height: 440px; z-index: -1; pointer-events: none;
-  -webkit-mask-image: radial-gradient(ellipse 50% 50% at 50% 45%, #000 35%, transparent 100%); mask-image: radial-gradient(ellipse 50% 50% at 50% 45%, #000 35%, transparent 100%); }
-.g-glow i { position: absolute; border-radius: 50%; filter: blur(70px); opacity: 0; animation: g-glow 1600ms var(--ease-out) forwards, g-drift 14s ease-in-out infinite alternate; }
-.g-glow i:nth-child(1) { width: 38%; height: 260px; left: 8%; top: 60px; background: #8fb3ff; }
-.g-glow i:nth-child(2) { width: 32%; height: 240px; left: 36%; top: 30px; background: #ffc9ae; animation-delay: 120ms, -4s; }
-.g-glow i:nth-child(3) { width: 34%; height: 240px; right: 8%; top: 80px; background: #d4c1ff; animation-delay: 240ms, -8s; }
-@keyframes g-glow { to { opacity: var(--glow, .6); } }
-@keyframes g-drift { from { transform: translate(0, 0) scale(1); } to { transform: translate(30px, 16px) scale(1.08); } }
-:root[data-theme="dark"] .g-glow { --glow: .28; }
-@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .g-glow { --glow: .28; } }
-
 /* заголовок: проявляется из размытия, по очереди */
-.g-hero { padding: var(--s8) 0 var(--s7); text-align: center; }
+.g-hero { padding: var(--s8) 16px var(--s8); text-align: center; }
 .g-hero > * { animation: g-in 900ms var(--ease-out) both; }
 .g-hero > :nth-child(2) { animation-delay: 90ms; }
 .g-hero > :nth-child(3) { animation-delay: 180ms; }
 .g-eyebrow { display: inline-flex; align-items: center; height: 28px; padding: 0 12px; border-radius: var(--r-pill);
   background: var(--accent-soft); color: var(--accent-text); font-size: var(--fs-sub); font-weight: 600; }
-.g-hero h1 { margin-top: var(--s4); font-size: clamp(30px, 4.2vw, 44px); letter-spacing: -.03em; }
-.g-hero .page-sub { max-width: 520px; margin: var(--s3) auto 0; font-size: 17px; }
+.g-hero h1 { margin-top: 22px; line-height: 1.12; font-size: clamp(30px, 4.2vw, 44px); letter-spacing: -.03em; }
+.g-hero .page-sub { max-width: 520px; margin: 18px auto 0; font-size: 17px; line-height: 1.5; }
 @keyframes g-in { from { opacity: 0; transform: translateY(16px); filter: blur(10px); } to { opacity: 1; transform: none; filter: none; } }
 
 /* карточки: выезжают снизу одна за другой */
@@ -61,14 +49,12 @@
 @media (max-width: 860px) {
   .g-grid { gap: var(--s5); }
   .g-hero h1 { font-size: 30px; }
-  .g-glow { height: 320px; }
-  .g-hero { padding: var(--s6) 0 var(--s6); text-align: left; }
+  .g-hero { padding: var(--s6) 4px var(--s7); text-align: left; }
   .g-hero .page-sub { margin-left: 0; }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .g-hero > *, .g-card, .g-media video, .g-foot { animation: none; }
-  .g-glow i { animation: none; opacity: .4; }
 }
 
 /* Телефон: место слева под плавающую кнопку «назад» (как у приветствия на других страницах) */

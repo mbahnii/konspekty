@@ -3,7 +3,7 @@ import { useAuth } from '../store/auth'
 import { useProgress } from '../store/progress'
 import { useLibrary } from '../store/library'
 import { useQueue } from '../store/ui'
-import { refreshData } from '../data/useData'
+import { refreshData, load } from '../data/useData'
 
 // Синхронизация с облаком (Supabase). Работает только если вы вошли; без входа всё хранится на устройстве.
 // Правило для отметок: если на этом устройстве есть неотправленные изменения — побеждают они,
@@ -75,11 +75,11 @@ async function showWhenLive(vids) {
   if (!vids.length) return
   for (let i = 0; i < 12; i++) {
     try {
-      const r = await fetch(`./data/index.json?t=${Date.now()}`, { cache: 'no-store' })
-      const ready = new Set((await r.json()).filter((v) => v.ready).map((v) => v.id))
-      if (vids.every((id) => ready.has(id))) { refreshData(); return }
+      refreshData()
+      const ready = new Set((await load('./data/index.json')).filter((v) => v.ready).map((v) => v.id))
+      if (vids.every((id) => ready.has(id))) return
     } catch { /* сеть пропала — попробуем ещё */ }
-    await new Promise((res) => setTimeout(res, 5000))
+    await new Promise((res) => setTimeout(res, 3000))
   }
   refreshData()
 }
