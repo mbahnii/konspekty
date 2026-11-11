@@ -1328,3 +1328,6 @@ a.tcard:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(0,0,0,.
 .frames.photos { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
 .frames.photos .frame img { aspect-ratio: 3 / 4; object-fit: cover; }
 .frames.photos .frame { cursor: zoom-in; }
+
+/* числа во вкладках Усі / Загальні / Мої видны и на телефоне */
+.cat-seg .badge-n { display: inline !important; margin-left: 2px; }

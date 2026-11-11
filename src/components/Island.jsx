@@ -12,6 +12,7 @@ import PhotoPanel from './PhotoPanel'
 import { accountsOn } from '../lib/accounts'
 import { supabase } from '../lib/supabase'
 import { flyToList } from '../lib/fly'
+import { setArrive, useArrive } from '../store/arrive'
 import { IYt, IPhoto, IPlus, IExpand, ICollapse, ISearch, ISystem, ISun, IMoon, ITrash } from './Icons'
 
 // Сколько показываем «готово» и «скоро зникне», прежде чем видео улетит в список
@@ -90,14 +91,31 @@ export default function Island({ open, setOpen }) {
   const photoOpen = pane === 'photo'
   const setPhotoOpen = (v) => setPane(v ? 'photo' : 'video')
   const wantPhotos = useCallback(() => { setOpen(true); setPane('photo') }, [setOpen])      // файлы тащат над окном — открываем пилюлю с панелью фото
-  const paneOuter = useRef(null), paneInner = useRef(null)
+  // Высота панели всегда равна содержимому и меняется плавно (одна пружинистая кривая): ничего не прыгает
+  const panel = useRef(null), inner = useRef(null), dock = useRef(null), searchIn = useRef(null)
   useLayoutEffect(() => {
-    const o = paneOuter.current, i = paneInner.current
-    if (!o || !i || typeof ResizeObserver === 'undefined') return
-    const fit = () => { o.style.height = i.offsetHeight + 'px' }
+    const pn = panel.current, i = inner.current
+    if (!pn || !i || typeof ResizeObserver === 'undefined') return
+    const fit = () => { pn.style.height = (open ? i.offsetHeight : 0) + 'px' }
     fit(); const ro = new ResizeObserver(fit); ro.observe(i)
     return () => ro.disconnect()
+  }, [open])
+  // Клавиатура iPhone: пилюля поднимается над ней (visualViewport), а не прячется под ней
+  useEffect(() => {
+    const vv = window.visualViewport, d = dock.current
+    if (!vv || !d) return
+    const on = () => {
+      const kb = Math.max(0, innerHeight - vv.height - vv.offsetTop)
+      d.style.setProperty('--kb', kb > 60 ? kb + 'px' : '0px')
+      d.style.setProperty('--vvh', vv.height + 'px')
+    }
+    on(); vv.addEventListener('resize', on); vv.addEventListener('scroll', on)
+    return () => { vv.removeEventListener('resize', on); vv.removeEventListener('scroll', on) }
   }, [])
+  const pickPane = (p) => {
+    setPane(p)
+    if (p === 'search') searchIn.current?.focus({ preventScroll: true })    // сразу в нажатии — иначе iPhone не покажет клавиатуру
+  }
   const box = useRef(null), input = useRef(null)
   const all = useAllSummaries(open)
   const prev = usePreview(url)
@@ -142,7 +160,7 @@ export default function Island({ open, setOpen }) {
       const vid = it.vid || ytId(it.url)
       if ((it.kind ?? 'add') === 'add' && !it.tr && vid) {
         // откуда летит шарик: из кольца в открытой очереди, из статуса в широкой закрытой пилюле, иначе — из кнопки «+»
-        const src = open ? ringEls.current[it.id] : (statusEl.current && wide ? statusEl.current : box.current?.querySelector('.isl-main svg'))
+        const src = open && pane === 'video' ? ringEls.current[it.id] : (!open && wide && statusEl.current ? statusEl.current : box.current?.querySelector('.dyn-main svg'))
         flyToList(vid, src)
       }
       setLeaving((s) => ({ ...s, [it.id]: true }))
@@ -150,11 +168,24 @@ export default function Island({ open, setOpen }) {
     }
   })
 
+  const hid = useRef(new Set())
+  useEffect(() => {
+    const want = new Set()
+    for (const it of items) {
+      const ph = phases[it.id], vid = it.vid || ytId(it.url || '')
+      if (!vid || (it.kind ?? 'add') !== 'add' || it.tr || ph.gone || ph.mode === 'error' || ph.mode === 'local') continue
+      want.add(vid)
+      if (!useArrive.getState().st[vid]) setArrive(vid, 'hidden')
+    }
+    for (const vid of hid.current) if (!want.has(vid) && useArrive.getState().st[vid] === 'hidden' && !items.some((it) => (it.vid || ytId(it.url || '')) === vid && phases[it.id].gone)) setArrive(vid, null)
+    hid.current = want
+  })
+
   const lastPrev = useRef(prev)
   if (prev.shown) lastPrev.current = prev
   const p = lastPrev.current
 
-  useEffect(() => { if (open) { const id = setTimeout(() => input.current?.focus({ preventScroll: true }), 300); return () => clearTimeout(id) } else setConfirm(null) }, [open])
+  useEffect(() => { if (open) { if (!matchMedia('(hover: hover)').matches) return; const id = setTimeout(() => (pane === 'search' ? searchIn : input).current?.focus({ preventScroll: true }), 300); return () => clearTimeout(id) } else setConfirm(null) }, [open]) // eslint-disable-line
   useEffect(() => {
     const on = () => setSync('ok'), off = () => setSync('off')
     addEventListener('online', on); addEventListener('offline', off)
@@ -164,7 +195,7 @@ export default function Island({ open, setOpen }) {
   useEffect(() => {
     const onDoc = (e) => {
       if (!e.target.closest('.trash,.del')) setConfirm(null)
-      if (!e.target.closest('.island') && !e.target.closest('[data-open-island]') && !e.target.closest('.menu') && !e.target.closest('.pv')) setOpen(false)
+      if (!e.target.closest('.dyn') && !e.target.closest('[data-open-island]') && !e.target.closest('.menu') && !e.target.closest('.pv')) setOpen(false)
     }
     const onKey = (e) => e.key === 'Escape' && !document.querySelector('.pv.open') && setOpen(false)
     document.addEventListener('click', onDoc); document.addEventListener('keydown', onKey)
@@ -203,116 +234,99 @@ export default function Island({ open, setOpen }) {
   }
 
   const shortUrl = (u) => u.replace(/^https?:\/\/(www\.)?/, '')
-  return (
-    <div className="island-dock">
-      <div ref={box} className={`island ${open ? 'open' : ''} ${wide ? 'wide' : ''} ${square ? 'square' : ''} ${photoOpen ? 'photo' : ''}`}>
-        <div className="isl-panel"><div className="isl-inner">
-          <Segmented className="isl-seg isl-tabs" value={pane} onChange={setPane}
-            items={[['video', <IYt key="i" />, 'pane.video'], ['photo', <IPhoto key="i" />, 'pane.photo'], ['search', <ISearch key="i" />, 'pane.search'], ['look', <ISun key="i" />, 'pane.look']]
-              .map(([id, ic, lb]) => ({ id, label: <>{ic}<span>{t(lb)}</span></> }))} />
-          <div className="isl-pane-wrap" ref={paneOuter}><div ref={paneInner} className="isl-pane-in">
-            {pane === 'video' && <div className="isl-pane" key="video">
-              <div className="isl-link">
-                <input ref={input} value={url} onChange={(e) => setUrl(e.target.value)} placeholder={t('isl.link')} inputMode="url" autoCapitalize="off" autoCorrect="off"
-                  onKeyDown={(e) => e.key === 'Enter' && submit()} />
-                <button className="go tap" onClick={submit}>{t('isl.go')}</button>
+  const queue = () => (
+    <>
+      <div className="isl-h">{t('isl.queue')}{shown.length > 0 && <span className="isl-hn">{shown.length}</span>}</div>
+      {!session && <div className="isl-warn"><span>{t('isl.nologin')}</span><button className="tap" onClick={(e) => { e.stopPropagation(); setLoginOpen(true) }}>{t('login.go')}</button></div>}
+      {shown.length ? shown.slice(0, QMAX).map((it) => {
+        const ph = phases[it.id].gone ? { k: 4, mode: 'leaving', label: 'st.leaving' } : phases[it.id]
+        const step = ph.mode === 'run' || ph.mode === 'done' ? t('q.step', { a: Math.min(ph.k + 1, 5), b: 5 }) : null
+        const kindTag = it.tr ? `${t('q.translate')} ${it.tr.toUpperCase()} · ` : it.kind && it.kind !== 'add' ? `${t(`q.${it.kind}`)} · ` : ''
+        return (
+          <div key={it.id} className={`isl-qw ${leaving[it.id] || removing[it.id] ? 'out' : ''} ${firstIds.current.has(it.id) ? '' : 'enter'}`}><div>
+            <div className={`isl-q ${confirm === it.id ? 'conf' : ''} m-${ph.mode}`} style={{ '--sc': ringColor(ph.k, ph.mode), '--prog': ringPct(ph.k, ph.mode, ph.frac) / 100 }}>
+              <div className="rc">
+                {it.vid && !String(it.vid).startsWith('ph-') ? <img src={`https://i.ytimg.com/vi/${it.vid}/mqdefault.jpg`} alt="" /> : <span className="noimg">{it.photos && <IPhoto />}</span>}
+                <div className="qt">
+                  <b>{kindTag}{it.title || shortUrl(it.url)}</b>
+                  <span className="qsub">
+                    <StageLabel text={t(ph.label)} className={`st-${ph.mode}`} />
+                    {step && <span className="qstep">{step}</span>}
+                  </span>
+                </div>
+                <QueueRing k={ph.k} mode={ph.mode} frac={ph.frac} ringRef={(el) => { ringEls.current[it.id] = el }} />
+                <button className="trash" aria-label={t('m.delete')} title={t('m.delete')} onClick={() => setConfirm(confirm === it.id ? null : it.id)}><ITrash /></button>
               </div>
-              <div className={`isl-prev ${prev.shown ? 'show' : ''}`}><div>
-                <div className="prev">
-                  {p.id && <img src={`https://i.ytimg.com/vi/${p.id}/mqdefault.jpg`} alt="" />}
-                  <div className="pt">{p.title ? <><b>{p.title}</b><small>{p.channel}</small></> : p.loading ? <span className="sk" /> : <small>{shortUrl(url)}</small>}{dup && <span className="dup">{t(dup)}</span>}</div>
-                </div>
-              </div></div>
-          <div className="isl-h">{t('isl.queue')}{shown.length > 0 && <span className="isl-hn">{shown.length}</span>}</div>
-          {!session && <div className="isl-warn"><span>{t('isl.nologin')}</span><button className="tap" onClick={(e) => { e.stopPropagation(); setLoginOpen(true) }}>{t('login.go')}</button></div>}
-          {shown.length ? shown.slice(0, QMAX).map((it) => {
-            const ph = phases[it.id].gone ? { k: 4, mode: 'leaving', label: 'st.leaving' } : phases[it.id]
-            const step = ph.mode === 'run' || ph.mode === 'done' ? t('q.step', { a: Math.min(ph.k + 1, 5), b: 5 }) : null
-            const kindTag = it.tr ? `${t('q.translate')} ${it.tr.toUpperCase()} · ` : it.kind && it.kind !== 'add' ? `${t(`q.${it.kind}`)} · ` : ''
-            return (
-              <div key={it.id} className={`isl-qw ${leaving[it.id] || removing[it.id] ? 'out' : ''} ${firstIds.current.has(it.id) ? '' : 'enter'}`}><div>
-                <div className={`isl-q ${confirm === it.id ? 'conf' : ''} m-${ph.mode}`} style={{ '--sc': ringColor(ph.k, ph.mode), '--prog': ringPct(ph.k, ph.mode, ph.frac) / 100 }}>
-                  <div className="rc">
-                    {it.vid && !String(it.vid).startsWith('ph-') ? <img src={`https://i.ytimg.com/vi/${it.vid}/mqdefault.jpg`} alt="" /> : <span className="noimg">{it.photos && <IPhoto />}</span>}
-                    <div className="qt">
-                      <b>{kindTag}{it.title || shortUrl(it.url)}</b>
-                      <span className="qsub">
-                        <StageLabel text={t(ph.label)} className={`st-${ph.mode}`} />
-                        {step && <span className="qstep">{step}</span>}
-                      </span>
-                    </div>
-                    <QueueRing k={ph.k} mode={ph.mode} frac={ph.frac} ringRef={(el) => { ringEls.current[it.id] = el }} />
-                    <button className="trash" aria-label={t('m.delete')} title={t('m.delete')} onClick={() => setConfirm(confirm === it.id ? null : it.id)}><ITrash /></button>
-                  </div>
-                  <button className="del" onClick={() => drop(it.id)}>{t('isl.confirm')}</button>
-                </div>
-              </div></div>
-            )
-          }) : <div className="isl-empty">{t('isl.empty')}</div>}
-          {shown.length > QMAX && <div className="isl-more">{t('isl.more', { n: shown.length - QMAX })}</div>}
-            </div>}
-            <div className={`isl-pane ${photoOpen ? '' : 'isl-hide'}`} key="photo" aria-hidden={!photoOpen}>
-              <PhotoPanel open={open && photoOpen} onDone={() => setPane('video')} onWantOpen={wantPhotos} />
-              {photoOpen && <>          <div className="isl-h">{t('isl.queue')}{shown.length > 0 && <span className="isl-hn">{shown.length}</span>}</div>
-          {false && <div className="isl-warn"><span>{t('isl.nologin')}</span><button className="tap" onClick={(e) => { e.stopPropagation(); setLoginOpen(true) }}>{t('login.go')}</button></div>}
-          {shown.length ? shown.slice(0, QMAX).map((it) => {
-            const ph = phases[it.id].gone ? { k: 4, mode: 'leaving', label: 'st.leaving' } : phases[it.id]
-            const step = ph.mode === 'run' || ph.mode === 'done' ? t('q.step', { a: Math.min(ph.k + 1, 5), b: 5 }) : null
-            const kindTag = it.tr ? `${t('q.translate')} ${it.tr.toUpperCase()} · ` : it.kind && it.kind !== 'add' ? `${t(`q.${it.kind}`)} · ` : ''
-            return (
-              <div key={it.id} className={`isl-qw ${leaving[it.id] || removing[it.id] ? 'out' : ''} ${firstIds.current.has(it.id) ? '' : 'enter'}`}><div>
-                <div className={`isl-q ${confirm === it.id ? 'conf' : ''} m-${ph.mode}`} style={{ '--sc': ringColor(ph.k, ph.mode), '--prog': ringPct(ph.k, ph.mode, ph.frac) / 100 }}>
-                  <div className="rc">
-                    {it.vid && !String(it.vid).startsWith('ph-') ? <img src={`https://i.ytimg.com/vi/${it.vid}/mqdefault.jpg`} alt="" /> : <span className="noimg">{it.photos && <IPhoto />}</span>}
-                    <div className="qt">
-                      <b>{kindTag}{it.title || shortUrl(it.url)}</b>
-                      <span className="qsub">
-                        <StageLabel text={t(ph.label)} className={`st-${ph.mode}`} />
-                        {step && <span className="qstep">{step}</span>}
-                      </span>
-                    </div>
-                    <QueueRing k={ph.k} mode={ph.mode} frac={ph.frac} ringRef={(el) => { ringEls.current[it.id] = el }} />
-                    <button className="trash" aria-label={t('m.delete')} title={t('m.delete')} onClick={() => setConfirm(confirm === it.id ? null : it.id)}><ITrash /></button>
-                  </div>
-                  <button className="del" onClick={() => drop(it.id)}>{t('isl.confirm')}</button>
-                </div>
-              </div></div>
-            )
-          }) : <div className="isl-empty">{t('isl.empty')}</div>}
-          {shown.length > QMAX && <div className="isl-more">{t('isl.more', { n: shown.length - QMAX })}</div>}
-              </>}
+              <button className="del" onClick={() => drop(it.id)}>{t('isl.confirm')}</button>
             </div>
-            {pane === 'search' && <div className="isl-pane" key="search">
-              <label className="isl-search"><ISearch /><input autoFocus value={q} onChange={(e) => setQ(e.target.value)} placeholder={t('isl.searchPh')} /></label>
-              {results.slice(0, 5).map((r, i) => <button key={i} className="isl-row tap" onClick={() => { setOpen(false); r.go() }}><span className="nm">{r.name}<small className="from">{r.from}</small></span><span className="st">{t(r.kind)}</span></button>)}
-              {lq && !results.length && <div className="isl-empty">{t('isl.none')}</div>}
-              {!lq && <div className="isl-empty">{t('isl.searchHint')}</div>}
-            </div>}
-            {pane === 'look' && <div className="isl-pane" key="look">
-              <div className="isl-h">{t('isl.theme')}</div>
-              <Segmented className="isl-seg full" value={theme} onChange={setTheme}
-                items={[{ id: 'system', label: <><ISystem /><span>{t('theme.system')}</span></> }, { id: 'light', label: <><ISun /><span>{t('theme.light')}</span></> }, { id: 'dark', label: <><IMoon /><span>{t('theme.dark')}</span></> }]} />
-              <div className="isl-h">{t('isl.lang')}</div>
-              <Segmented className="isl-seg full" value={lang} onChange={setLang}
-                items={[{ id: 'uk', label: 'Українська' }, { id: 'ru', label: 'Русский' }, { id: 'en', label: 'English' }]} />
-            </div>}
           </div></div>
-        </div></div>
+        )
+      }) : <div className="isl-empty">{t('isl.empty')}</div>}
+      {shown.length > QMAX && <div className="isl-more">{t('isl.more', { n: shown.length - QMAX })}</div>}
+    </>
+  )
+  const paneCls = (id) => `dyn-pane ${pane === id ? 'on' : ''}`
 
-        <div className="isl-bar">
-          <button className="isl-main" onClick={(e) => { e.stopPropagation(); setOpen(!open) }}><IPlus />{t('addVideo')}</button>
-          <span className="isl-status" ref={statusEl} style={{ '--sc': leadPh ? ringColor(leadPh.k, leadPh.mode) : 'transparent' }}>
-            <span className={`chip ${lead ? '' : 'idle'}`}>
-              {lead
-                ? <>{shown.length > 1 && <i className="cnt">{shown.length}</i>}<StageLabel text={t(leadPh.label)} className={`lg st-${leadPh.mode}`} /><StageLabel text={t(short(leadPh.label))} className={`sh st-${leadPh.mode}`} /></>
-                : <><span className="lg">{t('isl.empty')}</span><span className="sh">{t('sh.idle')}</span></>}
+  return (
+    <div className="dyn-dock" ref={dock}>
+      <div ref={box} className={`dyn ${open ? 'open' : ''} ${wide ? 'wide' : ''} ${square ? 'square' : ''}`}>
+        <div className="dyn-panel" ref={panel} aria-hidden={!open}>
+          <div className="dyn-inner" ref={inner}>
+            <Segmented className="isl-seg isl-tabs" value={pane} onChange={pickPane}
+              items={[['video', <IYt key="i" />, 'pane.video'], ['photo', <IPhoto key="i" />, 'pane.photo'], ['search', <ISearch key="i" />, 'pane.search'], ['look', <ISun key="i" />, 'pane.look']]
+                .map(([id, ic, lb]) => ({ id, label: <>{ic}<span>{t(lb)}</span></> }))} />
+            <div className="dyn-panes">
+              <div className={paneCls('video')} aria-hidden={pane !== 'video'}>
+                <div className="isl-link">
+                  <input ref={input} value={url} onChange={(e) => setUrl(e.target.value)} placeholder={t('isl.link')} inputMode="url" autoCapitalize="off" autoCorrect="off"
+                    onKeyDown={(e) => e.key === 'Enter' && submit()} />
+                  <button className="go tap" onClick={submit}>{t('isl.go')}</button>
+                </div>
+                <div className={`dyn-grow ${prev.shown ? 'on' : ''}`}><div>
+                  <div className="prev">
+                    {p.id && <img src={`https://i.ytimg.com/vi/${p.id}/mqdefault.jpg`} alt="" />}
+                    <div className="pt">{p.title ? <><b>{p.title}</b><small>{p.channel}</small></> : p.loading ? <span className="sk" /> : <small>{shortUrl(url)}</small>}{dup && <span className="dup">{t(dup)}</span>}</div>
+                  </div>
+                </div></div>
+                {queue()}
+              </div>
+              <div className={paneCls('photo')} aria-hidden={pane !== 'photo'}>
+                <PhotoPanel open={open} onDone={() => setPane('video')} onWantOpen={wantPhotos} />
+              </div>
+              <div className={paneCls('search')} aria-hidden={pane !== 'search'}>
+                <label className="isl-search"><ISearch /><input ref={searchIn} value={q} onChange={(e) => setQ(e.target.value)} placeholder={t('isl.searchPh')} enterKeyHint="search" /></label>
+                {results.slice(0, 5).map((r, i) => <button key={i} className="isl-row tap" onClick={() => { setOpen(false); r.go() }}><span className="nm">{r.name}<small className="from">{r.from}</small></span><span className="st">{t(r.kind)}</span></button>)}
+                {lq && !results.length && <div className="isl-empty">{t('isl.none')}</div>}
+                {!lq && <div className="isl-empty">{t('isl.searchHint')}</div>}
+              </div>
+              <div className={paneCls('look')} aria-hidden={pane !== 'look'}>
+                <div className="dyn-set"><span>{t('isl.theme')}</span>
+                  <Segmented className="isl-seg" value={theme} onChange={setTheme}
+                    items={[{ id: 'system', title: t('theme.system'), label: <ISystem /> }, { id: 'light', title: t('theme.light'), label: <ISun /> }, { id: 'dark', title: t('theme.dark'), label: <IMoon /> }]} /></div>
+                <div className="dyn-set"><span>{t('isl.lang')}</span>
+                  <Segmented className="isl-seg" value={lang} onChange={setLang}
+                    items={[{ id: 'uk', title: 'Українська', label: 'УКР' }, { id: 'ru', title: 'Русский', label: 'РУС' }, { id: 'en', title: 'English', label: 'ENG' }]} /></div>
+                <div className="dyn-set"><span>{t('isl.corners')}</span>
+                  <Segmented className="isl-seg" value={square ? 'sq' : 'round'} onChange={(v) => (v === 'sq') !== square && toggle('square')}
+                    items={[{ id: 'round', title: t('isl.round'), label: <span className="shape round" /> }, { id: 'sq', title: t('isl.square'), label: <span className="shape sq" /> }]} /></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="dyn-bar">
+          <button className="dyn-main" onClick={(e) => { e.stopPropagation(); setOpen(!open) }}><IPlus /><span className="dyn-lab"><span className="lg">{t('addVideo')}</span><span className="sh">{t('addShort')}</span></span></button>
+          <span className={`dyn-col ${!open && wide ? 'on' : ''}`}><span>
+            <span className="isl-status" ref={statusEl} style={{ '--sc': leadPh ? ringColor(leadPh.k, leadPh.mode) : 'transparent' }}>
+              <span className={`chip ${lead ? '' : 'idle'}`}>
+                {lead
+                  ? <>{shown.length > 1 && <i className="cnt">{shown.length}</i>}<StageLabel text={t(short(leadPh.label))} className={`st-${leadPh.mode}`} /></>
+                  : <span>{t('sh.idle')}</span>}
+              </span>
             </span>
-          </span>
+          </span></span>
           <span className={`sync ${sync}`} title={t(`sync.${sync}`)} role={sync === 'nologin' ? 'button' : undefined} onClick={sync === 'nologin' ? (e) => { e.stopPropagation(); setLoginOpen(true) } : undefined} />
-          <button className={`isl-btn ${square ? 'on' : ''}`} title={t('isl.corners')} onClick={(e) => { e.stopPropagation(); toggle('square') }}>
-            <span className={`shape sq ${square ? 'off' : ''}`} /><span className={`shape round ${square ? '' : 'off'}`} />
-          </button>
-          <button className={`isl-btn wide-btn ${wide ? 'on' : ''}`} title={t('isl.wide')} onClick={(e) => { e.stopPropagation(); toggle('wide') }}>
+          <button className={`dyn-btn ${wide ? 'on' : ''}`} title={t('isl.wide')} aria-pressed={wide} onClick={(e) => { e.stopPropagation(); toggle('wide') }}>
             <IExpand className={`i ${wide ? 'off' : ''}`} /><ICollapse className={`i ${wide ? '' : 'off'}`} />
           </button>
         </div>

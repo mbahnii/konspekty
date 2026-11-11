@@ -21,12 +21,17 @@ export function useVideos() {
   const marks = useProgress((p) => p.marks)
   const catalog = useSettings((s) => s.catalog)
   const uid = useAuth((s) => s.session?.user?.id)
-  const inScope = (v) => catalog === 'mine' ? !!uid && v.owner === uid : catalog === 'public' ? (v.visibility ?? 'public') === 'public' : true
-  const list = (data ?? []).filter((v) => !hidden[v.id] && inScope(v)).map((v) => ({
+  // «Мої» — мои; «Загальні» — открытые всем; «Усі» — открытые всем + мои (чужие личные не показываем и не считаем)
+  const mine = (v) => !!uid && v.owner === uid
+  const pub = (v) => (v.visibility ?? 'public') === 'public'
+  const SCOPE = { mine, public: pub, all: (v) => pub(v) || mine(v) }
+  const base = (data ?? []).filter((v) => !hidden[v.id])
+  const counts = { all: base.filter(SCOPE.all).length, public: base.filter(pub).length, mine: base.filter(mine).length }
+  const list = base.filter(SCOPE[catalog] ?? SCOPE.all).map((v) => ({
     ...v, pinned: !!pinned[v.id], learned: !!learned[v.id],
     done: doneOf(marks, v), total: (v.guides ?? []).length,
   }))
   if (data) data.forEach((v) => knownIds.add(v.id))
   list.sort((a, b) => (b.pinned - a.pinned) || (b.ready - a.ready) || ((b.added ?? 0) - (a.added ?? 0)))
-  return { videos: list, loaded: !!data }
+  return { videos: list, loaded: !!data, counts }
 }

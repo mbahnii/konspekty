@@ -1,0 +1,207 @@
+/* =====================================================================
+   ПИЛЮЛЯ (как Dynamic Island) — ВСЕ её стили здесь, в одном файле.
+   Правила — в «_заметки-сайта/design/ДИЗАЙН-ПРАВИЛА.md».
+
+   Размеры (--cw — ширина колонки контента):
+     закрытая         — небольшая, своя для каждого устройства
+     закрытая «шире»  — примерно в 1,4 раза больше, но НИКОГДА не во всю колонку
+     открытая         — компактная: ~80% колонки на телефоне, обычная ширина на ноутбуке
+     открытая «шире»  — на телефоне стоя 100% колонки; лёжа и на ноутбуке — больше, но не во весь экран
+   Высота содержимого ограничена (--pane-max): пилюля не закрывает экран, лишнее прокручивается внутри.
+
+   Анимация — одна для всего: --dyn-spring (рост, с лёгким перелётом) и --dyn-ease (сжатие, растворение).
+   ===================================================================== */
+:root {
+  --dyn-spring: cubic-bezier(.34, 1.26, .64, 1);
+  --dyn-ease: cubic-bezier(.32, .72, 0, 1);
+  --dyn-t: 540ms;      /* смена размера */
+  --dyn-f: 240ms;      /* растворение содержимого */
+}
+
+.dyn-dock {
+  --cw: min(var(--content), calc(100vw - 32px));
+  position: fixed; left: 0; right: 0; z-index: 20; padding: 0 16px;
+  bottom: calc(max(14px, env(safe-area-inset-bottom)) + var(--kb, 0px));
+  display: flex; justify-content: center; pointer-events: none;
+  transition: bottom 300ms var(--dyn-ease);
+}
+
+/* ---------- каркас ---------- */
+.dyn {
+  /* телефон стоя — по умолчанию */
+  --w: 204px;
+  --g: 6px; --ctl: 38px; --rin: 12px; --ctl-r: var(--rin);
+  --r: calc(var(--ctl) / 2 + var(--g));
+  --pane-max: min(44dvh, calc(var(--vvh, 100dvh) - 170px));
+  pointer-events: auto; position: relative;
+  width: min(var(--w), var(--cw));
+  display: flex; flex-direction: column;
+  border-radius: var(--r); overflow: hidden;
+  background: var(--island-glass); -webkit-backdrop-filter: var(--blur); backdrop-filter: var(--blur);
+  color: var(--island-text); box-shadow: var(--shadow-island);
+  font-size: 13.5px; font-weight: 500;
+  transition: width var(--dyn-t) var(--dyn-spring), border-radius var(--dyn-t) var(--dyn-ease),
+              transform 320ms var(--dyn-spring), box-shadow 320ms var(--dyn-ease);
+}
+.dyn.wide { --w: min(284px, calc(var(--cw) - 56px)); }
+.dyn.open { --w: max(292px, calc(var(--cw) * .8)); --r: 24px; }
+.dyn.open.wide { --w: var(--cw); --pane-max: min(60dvh, calc(var(--vvh, 100dvh) - 170px)); }
+.dyn.square, .dyn.square.open { --r: 14px; --rin: 8px; }
+.dyn:not(.open):active { transform: scale(.96); }
+@media (hover: hover) { .dyn:not(.open):hover { transform: scale(1.025); } }
+
+/* телефон лёжа: мало высоты — пилюля чуть больше закрытой, открытая не во весь экран */
+@media (max-height: 520px) and (min-width: 561px) {
+  .dyn { --w: 236px; --pane-max: calc(var(--vvh, 100dvh) - 186px); }
+  .dyn.wide { --w: 330px; }
+  .dyn.open { --w: min(420px, var(--cw)); }
+  .dyn.open.wide { --w: min(580px, var(--cw)); --pane-max: calc(var(--vvh, 100dvh) - 186px); }
+}
+/* планшет / узкое окно */
+@media (min-width: 561px) and (min-height: 521px) {
+  .dyn { --w: 240px; --g: 7px; --pane-max: min(56dvh, calc(var(--vvh, 100dvh) - 190px)); }
+  .dyn.wide { --w: 340px; }
+  .dyn.open { --w: min(460px, var(--cw)); }
+  .dyn.open.wide { --w: var(--cw); --pane-max: min(64dvh, calc(var(--vvh, 100dvh) - 190px)); }
+}
+/* ноутбук: места много — обычная открытая уже вмещает всё (5 фото), «шире» — вся колонка */
+@media (min-width: 861px) and (min-height: 521px) {
+  .dyn { --w: 260px; --g: 8px; --ctl: 40px; --pane-max: min(560px, 66dvh); }
+  .dyn.wide { --w: 372px; }
+  .dyn.open { --w: min(500px, var(--cw)); }
+  .dyn.open.wide { --w: var(--cw); --pane-max: min(600px, 70dvh); }
+}
+
+/* ---------- открытая часть ---------- */
+.dyn-panel { height: 0; overflow: hidden; transition: height var(--dyn-t) var(--dyn-spring); }
+.dyn:not(.open) .dyn-panel { transition: height 420ms var(--dyn-ease); }
+.dyn-inner {
+  padding: var(--g) var(--g) 0;
+  opacity: 0; filter: blur(8px); transform: scale(.96); transform-origin: 50% 100%;
+  transition: opacity 160ms var(--dyn-ease), filter 160ms var(--dyn-ease), transform 320ms var(--dyn-ease);
+}
+.dyn.open .dyn-inner {
+  opacity: 1; filter: none; transform: none;
+  transition: opacity var(--dyn-f) var(--dyn-ease) 80ms, filter var(--dyn-f) var(--dyn-ease) 80ms, transform var(--dyn-t) var(--dyn-spring);
+}
+
+/* вкладки */
+.dyn .isl-tabs.isl-seg { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0; width: 100%; height: var(--ctl); padding: 3px; border-radius: var(--rin); background: var(--island-key); }
+.dyn .isl-tabs.isl-seg button { height: calc(var(--ctl) - 6px); min-width: 0; padding: 0 4px; display: flex; align-items: center; justify-content: center; gap: 6px; border-radius: calc(var(--rin) - 3px); font-size: 12.5px; font-weight: 600; }
+.dyn .isl-tabs.isl-seg button svg { width: 16px; height: 16px; flex: none; }
+.dyn .isl-tabs.isl-seg button span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dyn .isl-tabs.isl-seg .thumb { border-radius: calc(var(--rin) - 3px); }
+@media (max-width: 560px) {
+  /* узкая открытая пилюля на телефоне: значок над подписью — подписи не обрезаются */
+  .dyn.open:not(.wide) .isl-tabs.isl-seg { height: 50px; }
+  .dyn.open:not(.wide) .isl-tabs.isl-seg button { height: 44px; flex-direction: column; gap: 2px; font-size: 10.5px; }
+}
+
+/* состояния (Відео / Фото / Пошук / Вигляд): одно растворяется, другое проявляется, высота меняется плавно */
+.dyn-panes { position: relative; margin-top: var(--g); }
+.dyn-pane {
+  position: absolute; left: 0; right: 0; top: 0;
+  opacity: 0; visibility: hidden; filter: blur(6px); transform: scale(.98); transform-origin: 50% 0;
+  pointer-events: none;
+  transition: opacity 180ms var(--dyn-ease), filter 180ms var(--dyn-ease), transform 260ms var(--dyn-ease), visibility 0s linear 180ms;
+}
+.dyn-pane.on {
+  position: relative; opacity: 1; visibility: visible; filter: none; transform: none; pointer-events: auto;
+  max-height: var(--pane-max); overflow-y: auto; overscroll-behavior: contain; scrollbar-width: none;
+  padding-bottom: var(--g);
+  transition: opacity 280ms var(--dyn-ease) 70ms, filter 280ms var(--dyn-ease) 70ms, transform 420ms var(--dyn-spring) 70ms, visibility 0s;
+}
+.dyn-pane::-webkit-scrollbar { display: none; }
+.dyn-pane > * + * { margin-top: var(--g); }
+.dyn-pane > .isl-h { margin-top: 0; }
+
+/* то, что появляется внутри (превью ссылки): высота растёт плавно, без скачка */
+.dyn-grow { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 420ms var(--dyn-ease); }
+.dyn-grow.on { grid-template-rows: 1fr; transition: grid-template-rows var(--dyn-t) var(--dyn-spring); }
+.dyn-grow > div { min-height: 0; overflow: hidden; }
+.dyn-grow .prev { margin-top: 0; }
+.dyn-grow.on .prev { opacity: 1; transform: none; }
+.dyn-pane > .dyn-grow:not(.on) { margin-top: 0; }
+
+/* содержимое: одна высота --ctl, один радиус --rin */
+.dyn .isl-link, .dyn .isl-search { height: var(--ctl); border-radius: var(--rin); margin: 0; }
+.dyn .isl-link { padding: 3px; align-items: center; }
+.dyn .isl-link input { height: 100%; }
+.dyn .isl-link .go { height: calc(var(--ctl) - 6px); border-radius: calc(var(--rin) - 3px); padding: 0 14px; font-size: 13px; }
+.dyn .isl-search input { font-size: 16px; }           /* 16px — iPhone не приближает страницу */
+.dyn .isl-link input { font-size: 16px; }
+@media (hover: hover) and (pointer: fine) { .dyn .isl-link input, .dyn .isl-search input { font-size: 14px; } }
+.dyn .isl-h { padding: 8px 4px 2px; }
+.dyn .isl-warn { margin: 0; min-height: var(--ctl); padding: 6px 6px 6px 12px; border-radius: var(--rin); }
+.dyn .isl-q, .dyn .isl-row { border-radius: var(--rin); }
+.dyn .isl-row { min-height: var(--ctl); }
+.dyn .isl-empty { padding: 6px 4px 2px; }
+
+/* Вигляд: три настройки в компактных строках */
+.dyn-set { display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: var(--ctl); padding: 3px 3px 3px 12px; border-radius: var(--rin); background: var(--island-key); }
+.dyn-set > span { font-size: 13px; color: color-mix(in srgb, var(--island-text) 75%, transparent); white-space: nowrap; }
+.dyn-set .isl-seg { height: calc(var(--ctl) - 6px); padding: 2px; gap: 0; border-radius: calc(var(--rin) - 3px); background: rgba(0,0,0,.18); }
+.dyn-set .isl-seg button { height: calc(var(--ctl) - 10px); min-width: 46px; padding: 0 8px; border-radius: calc(var(--rin) - 5px); font-size: 11.5px; letter-spacing: .02em; }
+.dyn-set .isl-seg .thumb { border-radius: calc(var(--rin) - 5px); }
+.dyn-set .isl-seg svg { width: 16px; height: 16px; }
+.dyn-set .shape { position: static; display: block; width: 14px; height: 14px; border: 2px solid currentColor; opacity: 1; transform: none; }
+.dyn-set .shape.round { border-radius: 50%; } .dyn-set .shape.sq { border-radius: 3px; }
+
+/* ---------- нижняя строка (закрытая пилюля) ---------- */
+.dyn-bar { display: flex; align-items: center; gap: 4px; height: calc(var(--ctl) + 2 * var(--g)); padding: var(--g); flex: none; }
+.dyn-main {
+  flex: 1 1 auto; min-width: 0; height: var(--ctl);
+  display: flex; align-items: center; gap: 8px; padding: 0 10px 0 12px;
+  border-radius: calc(var(--r) - var(--g)); white-space: nowrap; font-weight: 600; text-align: left;
+  transition: background-color 200ms var(--dyn-ease), border-radius var(--dyn-t) var(--dyn-ease);
+}
+.dyn-main:hover { background: var(--island-key); }
+.dyn-main svg { width: 18px; height: 18px; flex: none; transition: transform var(--dyn-t) var(--dyn-spring); }
+.dyn.open .dyn-main svg { transform: rotate(45deg); }
+.dyn-lab { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+
+/* статус в закрытой «шире»: ширина появляется плавно, текст проявляется после */
+.dyn-col { display: grid; grid-template-columns: 0fr; opacity: 0; flex: none;
+  transition: grid-template-columns 420ms var(--dyn-ease), opacity 160ms var(--dyn-ease); }
+.dyn-col.on { grid-template-columns: 1fr; opacity: 1;
+  transition: grid-template-columns var(--dyn-t) var(--dyn-spring), opacity 260ms var(--dyn-ease) 140ms; }
+.dyn-col > span { min-width: 0; overflow: hidden; display: flex; }
+.dyn .isl-status { display: flex; max-width: none; opacity: 1; margin: 0; transform: none; }
+.dyn .isl-status .chip { white-space: nowrap; }
+
+.dyn .sync { margin: 0 9px; }
+.dyn-btn {
+  position: relative; flex: none; width: var(--ctl); height: var(--ctl);
+  display: grid; place-items: center; border-radius: calc(var(--r) - var(--g));
+  background: var(--island-key); color: var(--island-text);
+  transition: background-color 220ms var(--dyn-ease), transform 220ms var(--dyn-spring), border-radius var(--dyn-t) var(--dyn-ease);
+}
+.dyn-btn:hover { background: color-mix(in srgb, var(--island-text) 22%, transparent); }
+.dyn-btn:active { transform: scale(.88); }
+.dyn-btn svg.i { position: absolute; width: 18px; height: 18px; transition: opacity 200ms var(--dyn-ease), transform 380ms var(--dyn-spring); }
+.dyn-btn svg.i.off { opacity: 0; transform: scale(.4) rotate(-90deg); }
+
+/* фото внутри пилюли: список не выталкивает кнопку «Надіслати» за край */
+.dyn .ph { padding: 0; }
+.dyn .ph-list { margin: var(--g) 0 0; }
+.dyn .ph .ph-list ol { max-height: max(140px, calc(var(--pane-max) - 210px)); min-height: 0; }
+.dyn .ph-name, .dyn .ph-send, .dyn .ph-more { margin-top: var(--g); }
+
+@media (prefers-reduced-motion: reduce) {
+  .dyn, .dyn *, .dyn-dock { transition-duration: 1ms !important; transition-delay: 0s !important; }
+}
+@media (max-width: 560px) {
+  .dyn.open:not(.wide) .ph-lab small { display: none; }
+  .dyn.open:not(.wide) .ph-row { grid-template-columns: 44px minmax(0, 1fr) auto; gap: 8px; padding: 5px; }
+  .dyn.open:not(.wide) .ph-pic { width: 44px; height: 56px; }
+  .dyn.open:not(.wide) .ph-ctl { gap: 3px; } .dyn.open:not(.wide) .ph-ctl button { width: 34px; height: 34px; }
+}
+
+/* строки фото — компактные везде: на ноутбуке в обычной пилюле видно ~5 страниц */
+.dyn .ph-row { grid-template-columns: 44px minmax(0, 1fr) auto; gap: 10px; padding: 5px; }
+.dyn .ph-pic { width: 44px; height: 56px; }
+.dyn .ph .ph-list ol { gap: 5px; }
+
+/* подпись кнопки: на телефоне короткая («Додати»), чтобы в «шире» помещался статус очереди */
+.dyn-lab .sh { display: none; }
+@media (max-width: 560px) { .dyn-lab .lg { display: none; } .dyn-lab .sh { display: inline; } }

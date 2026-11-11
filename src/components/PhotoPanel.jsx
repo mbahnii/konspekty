@@ -133,7 +133,6 @@ export default function PhotoPanel({ open, onDone, onWantOpen }) {
         <button className={mode === 'print' ? 'on' : ''} onClick={() => setMode('print')}>{t('ph.print')}</button>
         <button className={mode === 'hand' ? 'on' : ''} onClick={() => setMode('hand')}>{t('ph.hand')}</button>
       </div>
-      <p className="ph-hint" key={mode}>{t(mode === 'print' ? 'ph.printNote' : 'ph.handNote')}</p>
 
       {!n ? (touch ? (
         <div className="ph-two">
@@ -148,7 +147,6 @@ export default function PhotoPanel({ open, onDone, onWantOpen }) {
         </button>
       )) : (
         <div className="ph-list">
-          <p className="ph-tap">{t('ph.tapHint')}</p>
           <ol>
             {files.map((f, i) => (
               <li key={f.id} className="ph-row">

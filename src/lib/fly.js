@@ -39,8 +39,8 @@ export async function flyToList(vid, srcEl) {
 
   await waitTargets(vid)                                     // хотя бы одно место для видео уже есть на экране
   if (state() === 'hidden') {
-    setArrive(vid, 'wait')                                   // готовим место: строка раскрывается, карточки сдвигаются
-    await sleep(340)                                         // даём месту открыться — только потом летим
+    setArrive(vid, 'wait')                                   // место раскрывается ОДНОВРЕМЕННО с вылетом шарика (полёт дольше раскрытия)
+    await sleep(40)                                          // один кадр, чтобы строка/карточка появились в разметке
   }
   const els = targets(vid)                                   // после этого на экране могла появиться и карточка на главной
   const covers = els.map((el) => el.querySelector('.cover, .av')).filter((c) => c && inView(c.getBoundingClientRect()))
