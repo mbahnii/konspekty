@@ -13,9 +13,12 @@ export const stepColor = (k) => `hsl(${HUES[Math.max(0, Math.min(STEPS - 1, k))]
 export const ringColor = (k, mode) => mode === 'error' ? 'hsl(4 100% 62%)' : mode === 'local' ? 'hsl(0 0% 62%)'
   : mode === 'done' || mode === 'leaving' ? stepColor(STEPS - 1) : stepColor(k)
 
+// сколько процентов заполнено: то же число ведёт и кольцо, и свечение за строкой
+export const ringPct = (k, mode) => mode === 'error' || mode === 'done' ? 100 : mode === 'leaving' ? 0 : PCT[Math.min(k, STEPS - 1)]
+
 export function QueueRing({ k = 0, mode = 'run', size = 28, leaveMs = 0, ringRef }) {
   const leaving = mode === 'leaving'
-  const pct = mode === 'error' || mode === 'done' ? 100 : leaving ? 0 : PCT[Math.min(k, STEPS - 1)]
+  const pct = ringPct(k, mode)
   const color = ringColor(k, mode)
   // отсчёт: линия линейно убывает за leaveMs (тот же круг, без второго кольца)
   const fillStyle = { '--p': pct, ...(leaving && leaveMs ? { transition: `--p ${leaveMs}ms linear, stroke 400ms ease` } : null) }

@@ -7,14 +7,13 @@ import { useAllSummaries, useIndex } from '../data/useData'
 import { useLibrary } from '../store/library'
 import { useAuth, setLoginOpen } from '../store/auth'
 import Segmented from './Segmented'
-import { QueueRing, StageLabel, ringColor } from './QueueRing'
+import { QueueRing, StageLabel, ringColor, ringPct } from './QueueRing'
 import { flyToList } from '../lib/fly'
-import { runQueueDemo } from '../lib/demoQueue'
 import { IPlus, IExpand, ICollapse, ISearch, ISystem, ISun, IMoon, ITrash } from './Icons'
 
 // Сколько показываем «готово» и «скоро зникне», прежде чем видео улетит в список
 const DONE_MS = 1500
-const LEAVE_MS = import.meta.env.DEV && /[?&]fast=1/.test(location.search) ? 2500 : 15000   // для проверки на локальной копии: ?demo=queue&fast=1
+const LEAVE_MS = 15000                                   // сколько после «готово» висит обратный отсчёт, прежде чем видео улетит в список
 const STAGE = { download: 1, 'waiting-summary': 2, summary: 2, translate: 2, published: 3 }
 
 // Этап задачи очереди → номер шага кольца, вид кольца и подпись
@@ -78,7 +77,6 @@ export default function Island({ open, setOpen }) {
   const [q, setQ] = useState('')
   const [confirm, setConfirm] = useState(null)
   const seenAlive = useRef(new Set())
-  useEffect(() => { const id = setTimeout(runQueueDemo, 1500); return () => clearTimeout(id) }, [])
   const box = useRef(null), input = useRef(null)
   const all = useAllSummaries(open)
   const prev = usePreview(url)
@@ -201,7 +199,7 @@ export default function Island({ open, setOpen }) {
             const kindTag = it.tr ? `${t('q.translate')} ${it.tr.toUpperCase()} · ` : it.kind && it.kind !== 'add' ? `${t(`q.${it.kind}`)} · ` : ''
             return (
               <div key={it.id} className={`isl-qw ${leaving[it.id] || removing[it.id] ? 'out' : ''} ${firstIds.current.has(it.id) ? '' : 'enter'}`}><div>
-                <div className={`isl-q ${confirm === it.id ? 'conf' : ''} m-${ph.mode}`} style={{ '--sc': ringColor(ph.k, ph.mode) }}>
+                <div className={`isl-q ${confirm === it.id ? 'conf' : ''} m-${ph.mode}`} style={{ '--sc': ringColor(ph.k, ph.mode), '--prog': ringPct(ph.k, ph.mode) / 100, '--leave': `${LEAVE_MS}ms` }}>
                   <div className="rc">
                     {it.vid ? <img src={`https://i.ytimg.com/vi/${it.vid}/mqdefault.jpg`} alt="" /> : <span className="noimg" />}
                     <div className="qt">
@@ -237,10 +235,12 @@ export default function Island({ open, setOpen }) {
 
         <div className="isl-bar">
           <button className="isl-main" onClick={(e) => { e.stopPropagation(); setOpen(!open) }}><IPlus />{t('addVideo')}</button>
-          <span className="isl-status" ref={statusEl}>
-            {lead
-              ? <>{shown.length > 1 && <i className="cnt">{shown.length}</i>}<StageLabel text={t(leadPh.label)} className={`st-${leadPh.mode}`} /></>
-              : <span className="idle">{t('isl.empty')}</span>}
+          <span className="isl-status" ref={statusEl} style={{ '--sc': leadPh ? ringColor(leadPh.k, leadPh.mode) : 'transparent' }}>
+            <span className={`chip ${lead ? '' : 'idle'}`}>
+              {lead
+                ? <>{shown.length > 1 && <i className="cnt">{shown.length}</i>}<StageLabel text={t(leadPh.label)} className={`st-${leadPh.mode}`} /></>
+                : t('isl.empty')}
+            </span>
           </span>
           <span className={`sync ${sync}`} title={t(`sync.${sync}`)} role={sync === 'nologin' ? 'button' : undefined} onClick={sync === 'nologin' ? (e) => { e.stopPropagation(); setLoginOpen(true) } : undefined} />
           <button className={`isl-btn ${square ? 'on' : ''}`} title={t('isl.corners')} onClick={(e) => { e.stopPropagation(); toggle('square') }}>

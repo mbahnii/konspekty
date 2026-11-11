@@ -63,7 +63,7 @@ async function syncQueue() {
   const wasDone = new Set(cur.items.filter((x) => x.status === 'done').map((x) => x.id))
   const doneNow = data.filter((r) => r.status === 'done' && !wasDone.has(r.id))
   const newlyDone = doneNow.length > 0
-  const mine = cur.items.filter((x) => x.demo || (x.pending && !pending.some((p) => p.id === x.id)))   // добавлено, пока шёл запрос
+  const mine = cur.items.filter((x) => x.pending && !pending.some((p) => p.id === x.id))   // добавлено, пока шёл запрос
   useQueue.setState({
     removed: cur.removed.filter((id) => !q.removed.includes(id)),
     items: [...data.map((r) => { let n = {}; try { n = JSON.parse(r.note) ?? {} } catch { /* ignore */ } return { id: r.id, url: r.url, kind: r.kind, status: r.status, stage: n.stage, at: Date.parse(r.created_at), upd: Date.parse(r.updated_at), title: n.title, channel: n.channel, vid: n.vid, tr: n.translate } }), ...mine],
