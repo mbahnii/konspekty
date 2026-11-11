@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { create } from 'zustand'
 import { supabase } from '../lib/supabase'
 import { useLibrary } from '../store/library'
@@ -76,7 +76,9 @@ function useJson(url) {
 export const useIndex = () => {
   const st = useJson('./data/index.json')
   const hidden = useLibrary((s) => s.hidden)
-  return st.data ? { ...st, data: st.data.filter((v) => !hidden[v.id]) } : st
+  // useMemo: тот же список, пока данные не поменялись (иначе зависимые эффекты крутятся по кругу)
+  const data = useMemo(() => st.data && st.data.filter((v) => !hidden[v.id]), [st.data, hidden])
+  return useMemo(() => (st.data ? { ...st, data } : st), [st, data])
 }
 export const useTopicsJson = () => useJson('./data/topics.json')
 
