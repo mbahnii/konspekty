@@ -8,6 +8,7 @@ import { useSettingsMenu } from '../components/SettingsMenu'
 import VideoRow, { coverOf } from '../components/VideoRow'
 import { IBack, IBook, IBookmark, ICheckSm, IGear, IForward, IPlaySm } from '../components/Icons'
 import { useNav } from '../store/nav'
+import { useArriveOf } from '../store/arrive'
 
 export const PageHead = ({ title, sub, onBack }) => {
   const t = useT()
@@ -23,6 +24,8 @@ export const PageHead = ({ title, sub, onBack }) => {
 export function VideoCard({ v }) {
   const t = useT()
   const pct = v.total ? Math.round((v.done / v.total) * 100) : 0
+  const arr = useArriveOf(v.id)
+  if (arr === 'hidden') return null
   const inner = (
     <>
       <div className="cover" style={{ backgroundImage: `url("${coverOf(v)}")` }} />
@@ -31,7 +34,7 @@ export function VideoCard({ v }) {
       {v.ready && <div className="bar"><i style={{ width: `${v.learned ? 100 : pct}%` }} /></div>}
     </>
   )
-  return <Link className="vcard tap" to={`/v/${v.id}`} style={v.ready ? undefined : { opacity: .75 }}>{inner}</Link>
+  return <Link className="vcard tap" data-vid={v.id} data-arrive={arr || undefined} to={`/v/${v.id}`} style={v.ready ? undefined : { opacity: .75 }}>{inner}</Link>
 }
 
 const Tile = ({ color, children }) => <span className="tile" style={{ '--tile': color }}>{children}</span>

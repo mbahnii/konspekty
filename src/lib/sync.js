@@ -4,6 +4,8 @@ import { useProgress } from '../store/progress'
 import { useLibrary } from '../store/library'
 import { useQueue } from '../store/ui'
 import { refreshData, load } from '../data/useData'
+import { setArrive, useArrive } from '../store/arrive'
+import { knownIds } from './videos'
 
 // Синхронизация с облаком (Supabase). Работает только если вы вошли; без входа всё хранится на устройстве.
 // Правило для отметок: если на этом устройстве есть неотправленные изменения — побеждают они,
@@ -55,18 +57,27 @@ async function syncQueue() {
     const bell = supabase.channel('wake-' + user().id)
     bell.send({ type: 'broadcast', event: 'wake', payload: {} }).catch(() => {}).finally(() => supabase.removeChannel(bell))
   }
-  const { data, error } = await supabase.from('queue').select('id,url,kind,status,note,created_at').order('created_at')
+  const { data, error } = await supabase.from('queue').select('id,url,kind,status,note,created_at,updated_at').order('created_at')
   if (error) throw error
   const cur = useQueue.getState()
   const wasDone = new Set(cur.items.filter((x) => x.status === 'done').map((x) => x.id))
   const doneNow = data.filter((r) => r.status === 'done' && !wasDone.has(r.id))
   const newlyDone = doneNow.length > 0
-  const mine = cur.items.filter((x) => x.pending && !pending.some((p) => p.id === x.id))   // добавлено, пока шёл запрос
+  const mine = cur.items.filter((x) => x.demo || (x.pending && !pending.some((p) => p.id === x.id)))   // добавлено, пока шёл запрос
   useQueue.setState({
     removed: cur.removed.filter((id) => !q.removed.includes(id)),
-    items: [...data.map((r) => { let n = {}; try { n = JSON.parse(r.note) ?? {} } catch { /* ignore */ } return { id: r.id, url: r.url, kind: r.kind, status: r.status, stage: n.stage, at: Date.parse(r.created_at), title: n.title, channel: n.channel, vid: n.vid, tr: n.translate } }), ...mine],
+    items: [...data.map((r) => { let n = {}; try { n = JSON.parse(r.note) ?? {} } catch { /* ignore */ } return { id: r.id, url: r.url, kind: r.kind, status: r.status, stage: n.stage, at: Date.parse(r.created_at), upd: Date.parse(r.updated_at), title: n.title, channel: n.channel, vid: n.vid, tr: n.translate } }), ...mine],
   })
   if (newlyDone) {                      // видео опубликовано — показать его в списке сразу
+    // новое видео не показываем в списке сразу: сначала из очереди «прилетит» шарик (lib/fly.js)
+    for (const r of doneNow) {
+      let n = {}; try { n = JSON.parse(r.note) ?? {} } catch { /* ignore */ }
+      const fresh = Date.now() - Date.parse(r.updated_at) < 30000
+      if ((r.kind ?? 'add') === 'add' && !n.translate && n.vid && !knownIds.has(n.vid) && fresh) {
+        setArrive(n.vid, 'hidden')
+        setTimeout(() => { if (useArrive.getState().st[n.vid] === 'hidden') setArrive(n.vid, null) }, 15000)   // страховка
+      }
+    }
     refreshData()
     showWhenLive(doneNow.map((r) => { try { return JSON.parse(r.note)?.vid } catch { return null } }).filter(Boolean))
   }

@@ -7,7 +7,42 @@ import { useAllSummaries, useIndex } from '../data/useData'
 import { useLibrary } from '../store/library'
 import { useAuth, setLoginOpen } from '../store/auth'
 import Segmented from './Segmented'
+import { QueueRing, StageLabel } from './QueueRing'
+import { flyToList } from '../lib/fly'
+import { runQueueDemo } from '../lib/demoQueue'
 import { IPlus, IExpand, ICollapse, ISearch, ISystem, ISun, IMoon, ITrash } from './Icons'
+
+// Сколько показываем «готово» и «скоро зникне», прежде чем видео улетит в список
+const DONE_MS = 1400, LEAVE_MS = 4200
+const STAGE = { download: 1, 'waiting-summary': 2, summary: 2, translate: 2, published: 3 }
+
+// Этап задачи очереди → номер шага кольца, вид кольца и подпись
+function phaseOf(it, seen, now) {
+  if (it.pending) return { k: 0, mode: 'local', label: 'st.local' }
+  if (it.status === 'error') return { k: 0, mode: 'error', label: 'st.error' }
+  if (it.status === 'queued') return { k: 0, mode: 'run', label: 'st.queued' }
+  if (it.status === 'processing') {
+    const k = STAGE[it.stage] ?? 1
+    return { k, mode: 'run', label: it.stage ? `stage.${it.stage}` : 'st.processing' }
+  }
+  const s = seen[it.id]
+  if (!s || s.stale) return { gone: true, quiet: true }      // уже было готово до открытия сайта — не показываем
+  const t = now - s.doneAt
+  if (t < DONE_MS) return { k: 4, mode: 'done', label: 'st.done' }
+  if (t < DONE_MS + LEAVE_MS) return { k: 5, mode: 'leaving', label: 'st.leaving' }
+  return { gone: true }
+}
+
+// Часы, которые тикают, только пока есть «готовые» задачи (для смены «готово» → «скоро зникне» → полёт)
+function useClock(active) {
+  const [now, setNow] = useState(Date.now())
+  useEffect(() => {
+    if (!active) return
+    const id = setInterval(() => setNow(Date.now()), 200)
+    return () => clearInterval(id)
+  }, [active])
+  return active ? now : Date.now()
+}
 
 const ytId = (u) => u.match(/(?:youtu\.be\/|[?&]v=|shorts\/|live\/|embed\/)([\w-]{11})/)?.[1]
 
@@ -41,6 +76,8 @@ export default function Island({ open, setOpen }) {
   const [url, setUrl] = useState('')
   const [q, setQ] = useState('')
   const [confirm, setConfirm] = useState(null)
+  const seenAlive = useRef(new Set())
+  useEffect(() => { const id = setTimeout(runQueueDemo, 1500); return () => clearTimeout(id) }, [])
   const box = useRef(null), input = useRef(null)
   const all = useAllSummaries(open)
   const prev = usePreview(url)
@@ -50,6 +87,43 @@ export default function Island({ open, setOpen }) {
   const dup = !prev.id ? null
     : index?.some((v) => v.id === prev.id && !hidden[v.id]) ? 'isl.dupVideo'
     : items.some((it) => (it.kind ?? 'add') === 'add' && it.status !== 'done' && it.status !== 'error' && ytId(it.url) === prev.id) ? 'isl.dupQueue' : null
+  // Когда этот экран впервые увидел задачу «готово». Старые «готово» (были до открытия сайта) не показываем.
+  const seen = useRef({})
+  for (const it of items) {
+    if (it.status === 'done' && !seen.current[it.id]) {
+      const age = Date.now() - (it.upd || it.at || 0)
+      seen.current[it.id] = { doneAt: Date.now(), stale: !seenAlive.current.has(it.id) && age > 30000 }
+    }
+    if (it.status !== 'done') seenAlive.current.add(it.id)
+  }
+  const anyDone = items.some((it) => it.status === 'done')
+  const now = useClock(anyDone)
+  const [leaving, setLeaving] = useState({})               // id → true: строка сворачивается (видео улетело)
+  const flown = useRef(new Set())
+  const ringEls = useRef({})
+  const barRing = useRef(null)
+  const phases = Object.fromEntries(items.map((it) => [it.id, phaseOf(it, seen.current, now)]))
+  // «ушедшая» строка остаётся на экране, пока из неё вылетает шарик и она сворачивается
+  const shown = items.filter((it) => { const ph = phases[it.id]; return !ph.gone || leaving[it.id] || (!ph.quiet && !flown.current.has(it.id)) })
+  const lead = shown.find((it) => !leaving[it.id])
+
+  // этап «скоро зникне» закончился → шарик летит в список, строка очереди сворачивается
+  useEffect(() => {
+    for (const it of items) {
+      const ph = phases[it.id]
+      if (!ph.gone || flown.current.has(it.id)) continue
+      flown.current.add(it.id)
+      if (ph.quiet) continue
+      const vid = it.vid || ytId(it.url)
+      if ((it.kind ?? 'add') === 'add' && !it.tr && vid) {
+        const src = open ? ringEls.current[it.id] : barRing.current
+        flyToList(vid, src)
+      }
+      setLeaving((s) => ({ ...s, [it.id]: true }))
+      setTimeout(() => setLeaving((s) => { const n = { ...s }; delete n[it.id]; return n }), 520)
+    }
+  })
+
   const lastPrev = useRef(prev)
   if (prev.shown) lastPrev.current = prev
   const p = lastPrev.current
@@ -114,17 +188,25 @@ export default function Island({ open, setOpen }) {
 
           <div className="isl-h">{t('isl.queue')}</div>
           {!session && <div className="isl-warn"><span>{t('isl.nologin')}</span><button className="tap" onClick={(e) => { e.stopPropagation(); setLoginOpen(true) }}>{t('login.go')}</button></div>}
-          {items.length ? items.map((it) => (
-            <div key={it.id} className={`isl-q ${confirm === it.id ? 'conf' : ''}`}>
-              <div className="rc">
-                {it.vid ? <img src={`https://i.ytimg.com/vi/${it.vid}/default.jpg`} alt="" /> : <span className={`sync ${it.status === 'processing' ? 'busy' : it.status === 'done' ? 'ok' : 'off'}`} />}
-                <div className="qt"><b>{it.tr ? `${t('q.translate')} ${it.tr.toUpperCase()} · ` : it.kind && it.kind !== 'add' ? `${t(`q.${it.kind}`)} · ` : ''}{it.title || shortUrl(it.url)}</b><small>{shortUrl(it.url)}</small></div>
-                <span className="st">{it.pending ? t('st.local') : it.status === 'processing' && it.stage ? t(`stage.${it.stage}`) : t(`st.${it.status}`)}</span>
-                {it.status === 'queued' && <button className="trash" title={t('m.delete')} onClick={() => setConfirm(confirm === it.id ? null : it.id)}><ITrash /></button>}
-              </div>
-              <button className="del" onClick={() => { remove(it.id); setConfirm(null) }}>{t('isl.confirm')}</button>
-            </div>
-          )) : <div className="isl-row"><span className="st" style={{ margin: 0 }}>{t('isl.empty')}</span></div>}
+          {shown.length ? shown.map((it) => {
+            const ph = phases[it.id].gone ? { k: 5, mode: 'leaving', label: 'st.leaving' } : phases[it.id]
+            return (
+              <div key={it.id} className={`isl-qw ${leaving[it.id] ? 'out' : ''}`}><div>
+                <div className={`isl-q ${confirm === it.id ? 'conf' : ''}`}>
+                  <div className="rc">
+                    {it.vid ? <img src={`https://i.ytimg.com/vi/${it.vid}/default.jpg`} alt="" /> : <span className="noimg" />}
+                    <div className="qt"><b>{it.tr ? `${t('q.translate')} ${it.tr.toUpperCase()} · ` : it.kind && it.kind !== 'add' ? `${t(`q.${it.kind}`)} · ` : ''}{it.title || shortUrl(it.url)}</b><small>{shortUrl(it.url)}</small></div>
+                    <div className="qstage" title={t(ph.label)}>
+                      <QueueRing k={ph.k} mode={ph.mode} leaveMs={LEAVE_MS} ringRef={(el) => { ringEls.current[it.id] = el }} />
+                      <StageLabel text={t(ph.label)} />
+                    </div>
+                    <button className="trash" title={t('m.delete')} onClick={() => setConfirm(confirm === it.id ? null : it.id)}><ITrash /></button>
+                  </div>
+                  <button className="del" onClick={() => { remove(it.id); setConfirm(null) }}>{t('isl.confirm')}</button>
+                </div>
+              </div></div>
+            )
+          }) : <div className="isl-row"><span className="st" style={{ margin: 0 }}>{t('isl.empty')}</span></div>}
 
           <div className="isl-h">{t('isl.search')}</div>
           <label className="isl-search"><ISearch /><input value={q} onChange={(e) => setQ(e.target.value)} placeholder={t('isl.searchPh')} /></label>
@@ -142,6 +224,9 @@ export default function Island({ open, setOpen }) {
 
         <div className="isl-bar">
           <button className="isl-main" onClick={(e) => { e.stopPropagation(); setOpen(!open) }}><IPlus />{t('addVideo')}</button>
+          {lead && !open && (() => { const ph = phases[lead.id].gone ? { k: 5, mode: 'leaving' } : phases[lead.id]; return (
+            <span className="isl-mini" title={t(ph.label || 'st.leaving')}><QueueRing k={ph.k} mode={ph.mode} size={24} ringRef={barRing} />{shown.length > 1 && <i>{shown.length}</i>}</span>
+          ) })()}
           <span className={`sync ${sync}`} title={t(`sync.${sync}`)} role={sync === 'nologin' ? 'button' : undefined} onClick={sync === 'nologin' ? (e) => { e.stopPropagation(); setLoginOpen(true) } : undefined} />
           <button className={`isl-btn ${square ? 'on' : ''}`} title={t('isl.corners')} onClick={(e) => { e.stopPropagation(); toggle('square') }}>
             <span className={`shape sq ${square ? 'off' : ''}`} /><span className={`shape round ${square ? '' : 'off'}`} />

@@ -9,6 +9,9 @@ export const tint = (id) => TINTS[[...id].reduce((a, c) => a + c.charCodeAt(0), 
 export const doneOf = (marks, v) => (v.guides ?? []).filter((g) =>
   Array.from({ length: g.n }, (_, i) => marks[`${v.id}/${g.id}/${i}`] ?? g.done).every(Boolean)).length
 
+// id видео, которые уже есть в списке (чтобы отличить новое видео — оно «прилетает» из очереди)
+export const knownIds = new Set()
+
 // Список видео: закреплённые сверху, скрытые убраны
 export function useVideos() {
   const { data } = useIndex()
@@ -18,6 +21,7 @@ export function useVideos() {
     ...v, pinned: !!pinned[v.id], learned: !!learned[v.id],
     done: doneOf(marks, v), total: (v.guides ?? []).length,
   }))
+  if (data) data.forEach((v) => knownIds.add(v.id))
   list.sort((a, b) => (b.pinned - a.pinned) || (b.ready - a.ready) || ((b.added ?? 0) - (a.added ?? 0)))
   return { videos: list, loaded: !!data }
 }

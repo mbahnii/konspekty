@@ -28,6 +28,6 @@ export const useQueue = create(
       remove: (id) => set({ items: get().items.filter((x) => x.id !== id), removed: [...get().removed, id] }),
       setSync: (sync) => set({ sync }),
     }),
-    { name: 'konspekty-queue', version: 2, migrate: () => ({ items: [], removed: [] }), storage, partialize: (s) => ({ items: s.items, removed: s.removed }) },
+    { name: 'konspekty-queue', version: 2, migrate: () => ({ items: [], removed: [] }), storage, partialize: (s) => ({ items: s.items.filter((x) => !x.demo), removed: s.removed }) },
   ),
 )
