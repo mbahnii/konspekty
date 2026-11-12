@@ -1,9 +1,11 @@
 import { queueRow } from './queueRow'
 import { supabase } from './supabase'
-import { useAuth } from '../store/auth'
+import { useAuth, setLoginOpen } from '../store/auth'
 import { useProgress } from '../store/progress'
 import { useLibrary } from '../store/library'
-import { useQueue } from '../store/ui'
+import { useQueue, useToast } from '../store/ui'
+import { useSettings } from '../store/settings'
+import { translate } from '../i18n'
 import { refreshData, load } from '../data/useData'
 import { setArrive, useArrive } from '../store/arrive'
 import { knownIds } from './videos'
@@ -51,15 +53,33 @@ export function wakeWorker() {
   bell.send({ type: 'broadcast', event: 'wake', payload: {} }).catch(() => {}).finally(() => supabase.removeChannel(bell))
 }
 
-// Нейросеть сказала «это не материал для конспекта» — человек решил «всё равно сделать»: снимаем вопрос, worker пишет конспект
+// Система сказала «это не материал для конспекта» — человек решил «всё равно сделать»: снимаем вопрос, worker пишет конспект
 export async function confirmQueue(id) {
   const { data, error } = await supabase.from('queue').select('note').eq('id', id).maybeSingle()
   if (error || !data) throw error || new Error('no row')
   let n = {}; try { n = JSON.parse(data.note) ?? {} } catch { /* пусто */ }
-  const note = JSON.stringify({ ...n, force: true, stage: 'summary', reason: null, claude_tries: 0 })
+  const note = JSON.stringify({ ...n, force: true, stage: 'summary', reason: null, tries: 0 })
   const r = await supabase.from('queue').update({ note, updated_at: new Date().toISOString() }).eq('id', id)
   if (r.error) throw r.error
   wakeWorker(); schedule(300)
+}
+
+// Сервер отклонил добавление из-за дневного лимита (гость — 1 видео в день, вошедший — 10)
+const isLimit = (e) => e?.code === 'P0001' || /daily_limit/.test(e?.message ?? '')
+async function dropOverLimit(pending) {
+  const over = []
+  for (const p of pending) {                                 // по одной: отклонённые убираем, остальные уходят как обычно
+    const r = await supabase.from('queue').upsert([queueRow(p)], { onConflict: 'id' })
+    if (r.error) { if (isLimit(r.error)) over.push(p.id); else return r.error }
+  }
+  if (over.length) {
+    useQueue.setState((s) => ({ items: s.items.filter((x) => !over.includes(x.id)) }))
+    const t = (k) => translate(useSettings.getState().lang, k)
+    const guest = !!user()?.is_anonymous
+    useToast.getState().say(t(guest ? 'q.limitGuest' : 'q.limit'))
+    if (guest) setLoginOpen(true)                            // гостю сразу предлагаем войти — лимит у вошедших выше
+  }
+  return null
 }
 
 async function syncQueue() {
@@ -70,7 +90,8 @@ async function syncQueue() {
   }
   const pending = q.items.filter((x) => x.pending)
   if (pending.length) {
-    const { error } = await supabase.from('queue').upsert(pending.map(queueRow), { onConflict: 'id' })
+    let { error } = await supabase.from('queue').upsert(pending.map(queueRow), { onConflict: 'id' })
+    if (error && isLimit(error)) error = await dropOverLimit(pending)     // дневной лимит: строка не зависает, а убирается с понятным сообщением
     if (error) throw error
     wakeWorker()
   }

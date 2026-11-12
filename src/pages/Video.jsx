@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useLayoutEffect, useRef, useState } from 'react'
-import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
+import { Navigate, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { useVideo } from '../data/useData'
 import { useT } from '../i18n'
 import { hello } from '../lib/hello'
@@ -116,7 +116,7 @@ export default function Video({ onBack }) {
   if (error) return shell(<div className="empty" style={{ marginTop: 'var(--s8)' }}><b>{t('notFound')}</b>{t('notFound.d')}<div><button className="nf-btn tap" onClick={onBack}>{t('notFound.go')}</button></div></div>)
   if (!summary || !meta) return shell(<p style={{ color: 'var(--text-3)' }}>{t('loading')}</p>)
   const photos0 = isPhotos(meta)
-  if (!TABS.includes(tab) || (tab === 'pages' && !photos0)) { nav(`/v/${id}`, { replace: true }); return null }
+  if (!TABS.includes(tab) || (tab === 'pages' && !photos0)) return <Navigate to={`/v/${id}`} replace />
 
   const words = JSON.stringify(summary.sections.filter((s) => !s.skip).map((s) => s.body)).split(/\s+/).length
   const readMin = Math.max(1, Math.round(words / 180))
@@ -218,7 +218,7 @@ export default function Video({ onBack }) {
                       <div className="img"><img loading="lazy" src={frameUrl(id, f)} alt="" /><div className="play"><span>{photos ? <IZoomIn /> : <IPlay />}</span></div></div>
                       <figcaption>{pageStamp(meta, f.t, t('ph.page'))}</figcaption></a>
                   ))}</div>}
-                  {s.note && <div className="note"><div className="who">✦ {t('claudeNote')}</div>{inline(s.note)}</div>}
+                  {s.note && <div className="note"><div className="who">✦ {t('noteLabel')}</div>{inline(s.note)}</div>}
                 </article>
               )
             })}
@@ -256,7 +256,7 @@ function Guides({ id, summary }) {
   return summary.guides.map((g) => (
     <article key={g.id} id={`g-${g.id}`} className="card">
       <h3>{g.title} <Tc id={id} t={g.t} />{g.done_already && <span className="badge ok">{t('alreadyDone')}</span>}</h3>
-      {g.goal && <div className="goal">{g.goal}</div>}
+      {g.goal && <div className="goal">{inline(g.goal)}</div>}
       <div className="list">{g.steps.map((st, i) => {
         const on = stepOn(marks, id, g, i), key = `${id}/${g.id}/${i}`
         return (

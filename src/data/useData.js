@@ -97,10 +97,15 @@ export const useIndex = () => {
 }
 export const useTopicsJson = () => useJson('./data/topics.json')
 
+// У конспекта могут отсутствовать списки (старый или битый файл) — подставляем пустые, чтобы страница не падала
+const LISTS = ['sections', 'guides', 'terms', 'later', 'key_points']
+export const safeSummary = (s) => (s && typeof s === 'object' ? { ...s, ...Object.fromEntries(LISTS.map((k) => [k, Array.isArray(s[k]) ? s[k] : []])) } : null)
+
 export function useVideo(id) {
   const s = useJson(`./data/v/${id}/summary.json`)
   const m = useJson(`./data/v/${id}/meta.json`)
-  return { summary: s.data, meta: m.data, error: s.error || m.error }
+  const summary = useMemo(() => safeSummary(s.data), [s.data])
+  return { summary, meta: m.data, error: s.error || m.error }
 }
 
 // Все конспекты — для поиска (грузим только когда нужно)
@@ -110,8 +115,9 @@ export function useAllSummaries(enabled) {
   useEffect(() => {
     if (!enabled || !index) return
     let alive = true
-    Promise.all(index.filter((v) => v.ready).map((v) => load(`./data/v/${v.id}/summary.json`).then((summary) => ({ id: v.id, title: v.title, summary }))))
-      .then((r) => alive && setAll(r)).catch(() => {})
+    // каждый конспект грузится отдельно: если один не загрузился, остальные всё равно попадают в поиск
+    Promise.all(index.filter((v) => v.ready).map((v) => load(`./data/v/${v.id}/summary.json`).then((summary) => ({ id: v.id, title: v.title, summary: safeSummary(summary) })).catch(() => null)))
+      .then((r) => alive && setAll(r.filter((x) => x && x.summary))).catch(() => {})
     return () => { alive = false }
   }, [enabled, index])
   return all

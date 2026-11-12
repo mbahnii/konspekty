@@ -289,7 +289,7 @@ export default function Island({ open, setOpen }) {
               </div>
               <button className="del" onClick={() => drop(it.id)}>{t('isl.confirm')}</button>
             </div>
-            {/* нейросеть сомневается, что это материал для конспекта: объясняем почему и даём решить */}
+            {/* есть сомнение, что это материал для конспекта: объясняем почему и даём решить */}
             <div className={`dyn-grow ${ph.mode === 'ask' ? 'on' : ''}`}><div>
               <div className="q-ask">
                 <p>{it.reason || t('q.askDefault')}</p>

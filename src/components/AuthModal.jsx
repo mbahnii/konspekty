@@ -159,7 +159,7 @@ export default function AuthModal() {
             <form onSubmit={submit}>
               {tab === 'up' && (
                 <label className={`am-f ${nickBad ? 'bad' : ''}`}><span>{t('au.nickname')}</span>
-                  <input autoComplete="nickname" autoCapitalize="off" spellCheck="false" value={nick} onChange={(e) => setNick(e.target.value)} placeholder="mykhailo_b" maxLength={24} required /></label>
+                  <input autoComplete="nickname" autoCapitalize="off" spellCheck="false" value={nick} onChange={(e) => setNick(e.target.value)} placeholder="nickname" maxLength={24} required /></label>
               )}
               <label className="am-f"><span>Email</span>
                 <input type="email" autoComplete={tab === 'in' ? 'username' : 'email'} value={email} onChange={(e) => setEmail(e.target.value)} placeholder="name@example.com" required /></label>

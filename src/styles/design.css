@@ -1295,3 +1295,7 @@ a.tcard:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(0,0,0,.
 .ms-acc small { font-size: 11.5px; color: var(--text-3); overflow: hidden; text-overflow: ellipsis; max-width: 170px; }
 .mi:hover .ms-acc small { color: rgba(255,255,255,.8); }
 .mi .sc svg { width: 14px; height: 14px; }
+
+/* меню не выше экрана (телефон лёжа): лишнее прокручивается внутри; длинные слова без пробелов переносятся */
+.menu { max-height: calc(100dvh - 24px); overflow-y: auto; overscroll-behavior: contain; }
+h1, h2, h3 { overflow-wrap: anywhere; }

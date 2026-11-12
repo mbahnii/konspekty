@@ -5,7 +5,7 @@ const idx = { uk: 0, ru: 1, en: 2 }
 
 // key: [украинский, русский, английский]
 const K = {
-  draft: ['Конспект зроблено локальною нейромережею ({m}) — можливі неточності. Щоб покращити, попросіть Claude переписати.', 'Конспект сделан локальной нейросетью ({m}) — возможны неточности. Чтобы улучшить, попросите Claude переписать.', 'Notes made by a local AI model ({m}) — may contain mistakes. Ask Claude to rewrite for better quality.'],
+  draft: ['Чернетка конспекту ({m}) — можливі неточності. Щоб покращити, перепишіть конспект.', 'Черновик конспекта ({m}) — возможны неточности. Чтобы улучшить, перепишите конспект.', 'Draft notes ({m}) — may contain mistakes. Rewrite the notes for better quality.'],
   version: ['версія', 'версия', 'version'],
 
   'stage.published': ['публікується', 'публикуется', 'publishing'],
@@ -17,7 +17,7 @@ const K = {
   'isl.nologin': ['Ви не увійшли: посилання не дійдуть до ноутбука', 'Вы не вошли: ссылки не дойдут до ноутбука', 'Not signed in: links won’t reach the laptop'],
   'sync.nologin': ['Ви не увійшли — дані лише на цьому пристрої', 'Вы не вошли — данные только на этом устройстве', 'Not signed in — data stays on this device'],
   return: ['Повернутися на сторінку', 'Вернуться на страницу', 'Back to the page'],
-  'pend.text': ['Субтитри й кадри вже завантажено. Коли Claude напише конспект, тут з’являться головне, інструкції та терміни.', 'Субтитры и кадры уже загружены. Когда Claude напишет конспект, здесь появятся главное, инструкции и термины.', 'Subtitles and frames are downloaded. Once Claude writes the notes, the summary, guides and terms will appear here.'],
+  'pend.text': ['Субтитри й кадри вже завантажено. Коли конспект буде готовий, тут з’являться головне, інструкції та терміни.', 'Субтитры и кадры уже загружены. Когда конспект будет готов, здесь появятся главное, инструкции и термины.', 'Subtitles and frames are downloaded. Once the notes are ready, the summary, guides and terms will appear here.'],
   'pend.title': ['Конспект ще готується', 'Конспект ещё готовится', 'Notes are on the way'],
   'topics.best': ['Найкраще за цією темою', 'Лучшее по этой теме', 'Best on this topic'],
   'topics.auto': ['Відео за цією темою.', 'Видео по этой теме.', 'Videos on this topic.'],
@@ -142,7 +142,7 @@ const K = {
   cut: ['Що вирізано', 'Что вырезано', 'What was cut'],
   advanced: ['Просунуте', 'Продвинутое', 'Advanced'],
   skipped: ['Пропущено', 'Пропущено', 'Skipped'],
-  claudeNote: ['Коментар Claude', 'Комментарий Claude', 'Claude’s note'],
+  noteLabel: ['Коментар', 'Комментарий', 'Note'],
   goal: ['Мета', 'Цель', 'Goal'],
   alreadyDone: ['Уже зроблено', 'Уже сделано', 'Done'],
   checkStep: ['Позначити крок', 'Отметить шаг', 'Mark step'],
@@ -267,6 +267,8 @@ const K = {
   'notFound.d': ['Можливо, його видалили з сайту.', 'Возможно, его удалили с сайта.', 'It may have been removed from the site.'],
   'notFound.go': ['До списку відео', 'К списку видео', 'Back to videos'],
   loading: ['Завантаження…', 'Загрузка…', 'Loading…'],
+  'q.limitGuest': ['Гість може додати 1 відео на день. Увійдіть, щоб додавати більше', 'Гость может добавить 1 видео в день. Войдите, чтобы добавлять больше', 'Guests can add 1 video per day. Sign in to add more'], 'q.limit': ['Денний ліміт відео вичерпано. Спробуйте завтра', 'Дневной лимит видео исчерпан. Попробуйте завтра', 'Daily video limit reached. Try again tomorrow'],
+  'err.title': ['Щось пішло не так', 'Что-то пошло не так', 'Something went wrong'], 'err.text': ['Сторінка не змогла відобразитися. Спробуйте оновити її.', 'Страница не смогла отобразиться. Попробуйте обновить её.', 'The page could not be displayed. Try reloading it.'], 'err.reload': ['Оновити', 'Обновить', 'Reload'],
   empty: ['Тут поки порожньо', 'Здесь пока пусто', 'Nothing here yet'],
   processing: ['в обробці', 'в обработке', 'processing'],
 }

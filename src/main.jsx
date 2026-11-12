@@ -2,6 +2,7 @@ import React from 'react'
 import { createRoot } from 'react-dom/client'
 import { HashRouter } from 'react-router-dom'
 import App from './App'
+import ErrorBoundary from './components/ErrorBoundary'
 import './styles/tokens.css'
 import './styles/design.css'
 import './app.css'
@@ -22,7 +23,7 @@ try {
 
 document.documentElement.classList.add('no-anim')
 requestAnimationFrame(() => requestAnimationFrame(() => document.documentElement.classList.remove('no-anim')))
-createRoot(document.getElementById('root')).render(<HashRouter><App /></HashRouter>)
+createRoot(document.getElementById('root')).render(<ErrorBoundary><HashRouter><App /></HashRouter></ErrorBoundary>)
 
 // PWA (добавлено на экран «Домой») часто не перезагружается полностью, а просто
 // «просыпается» из памяти, поэтому проверка обновления при обычной загрузке страницы

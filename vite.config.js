@@ -19,7 +19,7 @@ export default defineConfig({
       includeAssets: ['icons/apple-touch-icon.png'],
       manifest: {
         name: 'Конспекти', short_name: 'Конспекти', lang: 'uk',
-        description: 'Конспекти відео про Claude Code',
+        description: 'Конспекти відео',
         start_url: base, scope: base, display: 'standalone',
         background_color: '#000000', theme_color: '#000000',
         icons: [

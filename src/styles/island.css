@@ -51,10 +51,10 @@
 
 /* телефон лёжа: мало высоты — пилюля чуть больше закрытой, открытая не во весь экран */
 @media (max-height: 520px) and (min-width: 561px) {
-  .dyn { --w: 236px; --pane-max: min(46dvh, calc(var(--vvh, 100dvh) - 186px)); }
+  .dyn { --w: 236px; --pane-max: min(56dvh, calc(var(--vvh, 100dvh) - 170px)); }
   .dyn.wide { --w: 330px; }
   .dyn.open { --w: min(420px, var(--cw)); }
-  .dyn.open.wide { --w: min(580px, var(--cw)); --pane-max: min(46dvh, calc(var(--vvh, 100dvh) - 186px)); }
+  .dyn.open.wide { --w: min(580px, var(--cw)); --pane-max: min(56dvh, calc(var(--vvh, 100dvh) - 170px)); }
 }
 /* планшет / узкое окно */
 @media (min-width: 561px) and (min-height: 521px) {
@@ -239,7 +239,7 @@ html[data-motion="max"] { --dyn-spring: cubic-bezier(.3, 1.6, .5, 1); }
   .dyn .ph .ph-send { width: auto; min-width: 150px; padding: 0 18px; }
 }
 
-/* миниатюра фото в очереди и плавная смена названия (когда нейросеть дала имя вместо «Фото 11.11.2026») */
+/* миниатюра фото в очереди и плавная смена названия (когда пришло автоназвание вместо «Фото 11.11.2026») */
 .dyn .isl-q img.qthumb { aspect-ratio: 1; width: 44px; height: 44px; object-fit: cover; }
 @keyframes qtitle-in { from { opacity: 0; transform: translateY(6px); filter: blur(4px); } }
 .dyn .qtitle { animation: qtitle-in calc(420ms * var(--mo)) var(--dyn-ease) both; }
@@ -253,7 +253,7 @@ html[data-motion="max"] { --dyn-spring: cubic-bezier(.3, 1.6, .5, 1); }
 /* Safari иногда «не дорисовывает» анимацию масштаба у элементов с размытием фона — меню оставалось уменьшенным: выносим их на отдельный слой */
 .menu, .modal, .dyn { will-change: transform, opacity; }
 
-/* очередь: «нужно ваше решение» — причина от нейросети и две кнопки, появляется плавно под строкой */
+/* очередь: «нужно ваше решение» — причина и две кнопки, появляется плавно под строкой */
 .q-ask { margin: 2px 8px 8px; padding: 10px 12px; border-radius: var(--rin); background: color-mix(in srgb, hsl(38 100% 55%) 16%, transparent); font-size: 12.5px; line-height: 1.4; }
 .q-ask p { margin: 0 0 8px; color: var(--island-text); }
 .q-ask-b { display: flex; gap: 6px; justify-content: flex-end; }
@@ -261,27 +261,36 @@ html[data-motion="max"] { --dyn-spring: cubic-bezier(.3, 1.6, .5, 1); }
 .q-ask-b button.go { background: var(--accent); color: #fff; }
 
 
-/* состояние «Де лежить конспект»: две чёрные зоны, по центру значок, название и подпись; карточка — компактная миниатюра */
+/* состояние «Де лежить конспект»: две стеклянные зоны (как кнопки пилюли), пустая — с пунктиром; карточка-миниатюра перетаскивается; «Готово» — главная кнопка */
 .mv-head { display: flex; flex-direction: column; gap: 2px; padding: 2px 4px 10px; }
 .mv-head b { font-size: 14px; font-weight: 600; display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
 .mv-head small { font-size: 12px; color: color-mix(in srgb, var(--island-text) 55%, transparent); transition: color calc(200ms * var(--mo)) var(--dyn-ease); }
-.mv-head small.ok { color: #30d158; }
+.mv-head small.ok { color: var(--success); }
 .mv-zones { display: grid; grid-template-columns: 1fr 1fr; gap: var(--g); }
-.mv-zone { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 2px; min-height: 168px; padding: 14px 10px 10px; border-radius: var(--rin); text-align: center;
-  background: #08080a; box-shadow: inset 0 0 0 1px rgba(255,255,255,.07);
-  transition: box-shadow calc(240ms * var(--mo)) var(--dyn-ease), transform calc(320ms * var(--mo)) var(--dyn-spring), background-color calc(240ms * var(--mo)) var(--dyn-ease); }
-.mv-zone.here { box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 55%, transparent); }
-.mv-zone.over { box-shadow: inset 0 0 0 2px var(--accent); background: color-mix(in srgb, var(--accent) 14%, #08080a); transform: scale(1.02); }
+.mv-zone { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 2px; min-height: 136px; padding: 12px 8px 8px; border-radius: var(--rin); text-align: center;
+  background: var(--island-key); border: 1.5px dashed color-mix(in srgb, var(--island-text) 24%, transparent);
+  transition: border-color calc(240ms * var(--mo)) var(--dyn-ease), transform calc(320ms * var(--mo)) var(--dyn-spring), background-color calc(240ms * var(--mo)) var(--dyn-ease); }
+.mv-zone.here { border-style: solid; border-color: color-mix(in srgb, var(--accent) 70%, transparent); background: color-mix(in srgb, var(--accent) 16%, var(--island-key)); }
+.mv-zone.over { border-style: solid; border-color: var(--accent); background: color-mix(in srgb, var(--accent) 26%, var(--island-key)); transform: scale(1.02); }
 .mv-zone i { font-style: normal; font-size: 22px; line-height: 1; margin-bottom: 4px; }
 .mv-zone b { font-size: 14px; font-weight: 600; }
 .mv-zone small { font-size: 11.5px; color: color-mix(in srgb, var(--island-text) 50%, transparent); }
-.mv-card { position: relative; z-index: 2; display: block; width: 78%; margin-top: auto; padding: 4px; border-radius: calc(var(--rin) - 2px); background: #1c1c1e;
-  box-shadow: 0 8px 20px rgba(0,0,0,.55), inset 0 0 0 1px rgba(255,255,255,.1); cursor: grab; touch-action: none; user-select: none; -webkit-user-select: none; }
+.mv-card { position: relative; z-index: 2; display: block; width: 88%; margin-top: auto; padding: 3px; border-radius: calc(var(--rin) - 2px); background: color-mix(in srgb, var(--island-text) 18%, transparent);
+  box-shadow: var(--shadow-island); cursor: grab; touch-action: none; user-select: none; -webkit-user-select: none; }
 .mv-card.lock { cursor: not-allowed; opacity: .7; }
-.mv-card.dragging { cursor: grabbing; box-shadow: 0 18px 38px rgba(0,0,0,.6), inset 0 0 0 1px rgba(255,255,255,.18); }
-.mv-card img, .mv-noimg { display: grid; place-items: center; width: 100%; aspect-ratio: 16/9; object-fit: cover; border-radius: calc(var(--rin) - 6px); background: rgba(255,255,255,.08); font-size: 20px; pointer-events: none; }
-.mv-ok { position: absolute; right: -6px; top: -6px; width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; background: #30d158; color: #fff; opacity: 0; transform: scale(.4);
+.mv-card.dragging { cursor: grabbing; box-shadow: var(--shadow-island), 0 14px 30px rgba(0,0,0,.35); }
+.mv-card img, .mv-noimg { display: grid; place-items: center; width: 100%; aspect-ratio: 16/9; object-fit: cover; border-radius: calc(var(--rin) - 5px); background: var(--island-key); font-size: 20px; pointer-events: none; }
+.mv-ok { position: absolute; right: -6px; top: -6px; width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; background: var(--success); color: #fff; opacity: 0; transform: scale(.4);
   transition: opacity calc(240ms * var(--mo)) var(--dyn-ease), transform calc(420ms * var(--mo)) var(--dyn-spring); }
 .mv-ok.on { opacity: 1; transform: none; }
 .mv-ok svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
-.mv-done { display: block; width: 100%; text-align: center; height: var(--ctl); margin-top: var(--g); border-radius: var(--rin); background: var(--island-key); color: var(--island-text); font-weight: 600; }
+.mv-done { display: block; width: 100%; text-align: center; height: var(--ctl); margin-top: var(--g); border-radius: var(--rin); background: var(--accent); color: #fff; font-weight: 600; }
+
+/* панель «Де лежить конспект» на телефоне лёжа: зоны пониже, чтобы кнопка «Готово» была видна (стоит в конце файла — иначе проиграет основным правилам) */
+@media (max-height: 520px) and (min-width: 561px) {
+  .mv-zone { min-height: 92px; padding-top: 8px; }
+  .mv-zone i { font-size: 18px; margin-bottom: 0; }
+  .mv-card { width: 50%; }
+  .mv-zone small { display: none; }
+  .mv-head { padding-bottom: 6px; }
+}

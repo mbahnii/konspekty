@@ -107,3 +107,10 @@ test('Md: незакритий ``` не з’їдає решту тексту б
   const h = M('до\n\n```bash\necho 1\n\nпісля')
   assert.match(textOf(h), /echo 1/); assert.match(textOf(h), /після/)
 })
+
+test('знак «=» всередині виділення не ламає його', () => {
+  const html = H('Ось ==Одна сесія = одне вікно = одне завдання==.')
+  assert.match(html, /<mark[^>]*>Одна сесія = одне вікно = одне завдання<\/mark>/)
+  assert.equal(textOf(html), 'Ось Одна сесія = одне вікно = одне завдання.')
+  assert.match(H('==g:лише його=='), /<mark[^>]*>лише його<\/mark>/)
+})

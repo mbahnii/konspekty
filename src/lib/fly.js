@@ -61,7 +61,7 @@ export async function flyToList(vid, srcEl) {
   // В полёте кольцо растворяется, а обложка проявляется — кольцо как будто превращается в видео.
   const img = document.createElement('span'), ring = document.createElement('span')
   img.className = 'fly-img'; ring.className = 'fly-ring'
-  img.style.backgroundImage = `url("https://i.ytimg.com/vi/${vid}/mqdefault.jpg")`
+  if (!String(vid).startsWith('ph-')) img.style.backgroundImage = `url("https://i.ytimg.com/vi/${vid}/mqdefault.jpg")`   // у фото-конспекта картинки YouTube нет
   ring.innerHTML = '<svg viewBox="0 0 36 36" aria-hidden="true"><circle cx="18" cy="18" r="14.5"/><path d="M12.6 18.3l3.7 3.7 7.2-7.4"/></svg>'
   orb.append(img, ring)
   Object.assign(orbX.style, { left: `${sx - S / 2}px`, top: `${sy - S / 2}px` })
