@@ -174,10 +174,11 @@ const K = {
   'kind.review': ['🔎 Огляд', '🔎 Обзор', '🔎 Review'], 'kind.news': ['📰 Новини', '📰 Новости', '📰 News'], 'kind.podcast': ['🎙 Подкаст', '🎙 Подкаст', '🎙 Podcast'],
   'kind.music': ['🎵 Музика', '🎵 Музыка', '🎵 Music'], 'kind.entertainment': ['🎬 Розваги', '🎬 Развлечения', '🎬 Entertainment'], 'kind.story': ['📖 Історія', '📖 История', '📖 Story'],
   'kind.vlog': ['📹 Влог', '📹 Влог', '📹 Vlog'], 'kind.other': ['✦ Інше', '✦ Другое', '✦ Other'],
-  'mv.menu': ['Змінити розташування', 'Изменить расположение', 'Change where it lives'], 'mv.title': ['Де лежить конспект', 'Где лежит конспект', 'Where this note lives'],
+  'mv.done': ['Готово', 'Готово', 'Done'], 'mv.notMine': ['Переносити можна лише свої конспекти', 'Переносить можно только свои конспекты', 'You can only move your own notes'],
+  'mv.menu': ['Змінити розташування', 'Изменить расположение', 'Change where it lives'],
   'mv.hint': ['Перетягніть картку або торкніться місця', 'Перетащите карточку или нажмите на место', 'Drag the card or tap a place'], 'mv.saved': ['Збережено', 'Сохранено', 'Saved'],
   'mv.mine': ['Мої', 'Мои', 'Mine'], 'mv.mineSub': ['бачите лише ви', 'видите только вы', 'only you see it'], 'mv.pub': ['Загальні', 'Общие', 'Shared'], 'mv.pubSub': ['бачать усі', 'видят все', 'everyone sees it'],
-  'mv.donePub': ['Конспект тепер у «Загальних»', 'Конспект теперь в «Общих»', 'The note is now shared'], 'mv.doneMine': ['Конспект тепер у «Моїх»', 'Конспект теперь в «Моих»', 'The note is now private'],
+
   'pf.title': ['Профіль', 'Профиль', 'Profile'], 'pf.sub': ['Як вас бачать у «Конспектах»', 'Как вас видно в «Конспектах»', 'How you appear in Konspekty'],
   'pf.profile': ['Профіль', 'Профиль', 'Profile'], 'pf.account': ['Акаунт', 'Аккаунт', 'Account'], 'pf.name': ['Імʼя', 'Имя', 'Name'], 'pf.nick': ['Нікнейм', 'Никнейм', 'Nickname'], 'pf.nickHint': ['3–24 символи: латиниця, цифри, _ . -', '3–24 символа: латиница, цифры, _ . -', '3–24 characters: Latin letters, digits, _ . -'],
   'pf.email': ['Пошта', 'Почта', 'Email'], 'pf.via': ['Вхід через', 'Вход через', 'Signed in with'], 'pf.save': ['Зберегти', 'Сохранить', 'Save'], 'pf.saved': ['Збережено', 'Сохранено', 'Saved'],

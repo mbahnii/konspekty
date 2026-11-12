@@ -13,7 +13,7 @@ export function MenuProvider({ children }) {
   const close = useCallback(() => setSt((s) => { s.anchor?.classList.remove('open'); return s.phase === 'closed' ? s : { ...s, phase: 'closed', anchor: null } }), [])
   const open = useCallback((anchor, items, opts = {}) => {
     if (live.current?.anchor === anchor && live.current.phase !== 'closed') { close(); return }   // второй клик по той же кнопке — закрыть
-    items = items.filter((it, i, a) => it !== '-' || (i > 0 && a[i - 1] !== '-' && i < a.length - 1))
+    items = items.filter(Boolean).filter((it, i, a) => it !== '-' || (i > 0 && a[i - 1] !== '-' && i < a.length - 1))   // пустые значения (false/null) — не пункты: раньше рисовались пустой синей кнопкой
     setSt((s) => { s.anchor?.classList.remove('open'); return { items, opts, anchor, phase: 'measure', pos: s.pos } })
   }, [close])
 
